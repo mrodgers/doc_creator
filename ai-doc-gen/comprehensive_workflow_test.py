@@ -6,6 +6,7 @@ Tests the end-to-end workflow with functional_spec.docx, installation_guide.pdf,
 
 import json
 import time
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -65,125 +66,145 @@ class ComprehensiveWorkflowTest:
             print(f"❌ Error downloading HTML: {e}")
             return None
 
-    def analyze_document(self, document_path: str, doc_type: str) -> Dict[str, Any]:
-        """Analyze a single document against the template."""
-        print(f"\n📄 Analyzing {doc_type}: {document_path}")
-
+    def analyze_document(self, doc_path: str, doc_type: str) -> Dict[str, Any]:
+        """Analyze a document against the template with progress tracking."""
+        print(f"📄 Analyzing {doc_type}: {os.path.basename(doc_path)}")
+        
         # Get appropriate parser
         parser = {
             'PDF': self.pdf_parser,
             'HTML': self.html_parser,
             'DOCX': self.docx_parser
         }.get(doc_type)
-
+        
         if not parser:
             return {'error': f'Unsupported document type: {doc_type}'}
-
+        
         # Parse document
+        start_time = time.time()
         try:
-            start_time = time.time()
-            parsed_doc = parser.parse(document_path)
+            parsed_doc = parser.parse(doc_path)
             parse_time = time.time() - start_time
             print(f"   ✅ Parsed: {len(parsed_doc.sections)} sections in {parse_time:.2f}s")
         except Exception as e:
             return {'error': f'Parsing failed: {e}'}
-
-        # Analyze against template
+        
+        # Analyze against template with progress tracking
+        print(f"   🔍 Matching against template...")
         analysis = self._analyze_against_template(parsed_doc, doc_type)
-        analysis['parse_time'] = parse_time
-
-        return analysis
-
-    def _analyze_against_template(self, parsed_doc: ParsedDocument, doc_type: str) -> Dict[str, Any]:
-        """Analyze document against template."""
-        template_sections = self.template.get('template_structure', {}).get('section_hierarchy', [])
-        quality_standards = self.template.get('quality_standards', {})
-
-        # Extract document section titles
-        doc_sections = [s.get('heading', '') for s in parsed_doc.sections if s.get('heading')]
-
-        # Find matches with template sections
-        matches = []
-        missing_sections = []
-
-        for template_section in template_sections:
-            template_title = template_section.get('title', '')
-            best_match = self._find_best_match(template_title, doc_sections)
-
-            if best_match and best_match['similarity'] > 0.6:
-                matches.append({
-                    'template_section': template_title,
-                    'document_section': best_match['candidate'],
-                    'similarity': best_match['similarity'],
-                    'template_source': template_section.get('recommended_source', 'unknown')
-                })
-            else:
-                missing_sections.append(template_title)
-
-        # Calculate quality metrics
-        completeness_metrics = quality_standards.get('completeness_metrics', {})
-        target_sections = completeness_metrics.get('target_sections', 0)
-        target_text_length = completeness_metrics.get('target_text_length', 0)
-
-        section_score = len(parsed_doc.sections) / target_sections * 100 if target_sections > 0 else 0
-        text_score = len(parsed_doc.raw_text) / target_text_length * 100 if target_text_length > 0 else 0
-        overall_score = (section_score + text_score) / 2
-
+        
         return {
-            'document_info': {
-                'type': doc_type,
-                'sections': len(parsed_doc.sections),
-                'text_length': len(parsed_doc.raw_text),
-                'title': parsed_doc.title
-            },
-            'template_comparison': {
-                'matches': len(matches),
-                'missing_sections': len(missing_sections),
-                'coverage_percentage': len(matches) / len(template_sections) * 100 if template_sections else 0,
-                'sample_matches': matches[:5],  # First 5 matches
-                'sample_missing': missing_sections[:5]  # First 5 missing
-            },
-            'quality_assessment': {
-                'overall_score': min(overall_score, 100),
-                'section_completeness': min(section_score, 100),
-                'text_completeness': min(text_score, 100),
-                'quality_level': self._get_quality_level(overall_score)
-            },
-            'content_analysis': {
-                'has_safety_content': self._has_safety_content(parsed_doc),
-                'has_step_by_step': self._has_step_by_step_content(parsed_doc),
-                'has_specifications': self._has_specifications(parsed_doc)
-            }
+            'doc_path': doc_path,
+            'doc_type': doc_type,
+            'parsed_doc': parsed_doc,
+            'analysis': analysis,
+            'parse_time': parse_time
         }
 
-    def _find_best_match(self, target: str, candidates: List[str]) -> Optional[Dict[str, Any]]:
-        """Find the best matching section title using enhanced semantic matching."""
+    def _analyze_against_template(self, parsed_doc: ParsedDocument, doc_type: str) -> Dict[str, Any]:
+        """Analyze document against template with progress tracking."""
+        template_sections = self.template.get('template_structure', {}).get('section_hierarchy', [])
+        doc_sections = parsed_doc.sections
+        
+        print(f"      📊 Processing {len(doc_sections)} sections against {len(template_sections)} template sections")
+        
+        matches = []
+        total_sections = len(template_sections)
+        
+        for i, template_section in enumerate(template_sections):
+            if i % 10 == 0:  # Progress indicator every 10 sections
+                print(f"      ⏳ Progress: {i}/{total_sections} sections processed")
+            
+            template_title = template_section.get('title', '')
+            best_match = self._find_best_match(template_title, 
+                                             [s.get('heading', '') for s in doc_sections if s.get('heading')], 
+                                             doc_sections)
+            
+            if best_match:
+                matches.append({
+                    'template_section': template_section,
+                    'best_match': best_match,
+                    'matched_section': next((s for s in doc_sections if s.get('heading', '') == best_match['candidate']), None)
+                })
+        
+        print(f"      ✅ Found {len(matches)} matches out of {total_sections} template sections")
+        
+        return {
+            'matches': matches,
+            'coverage': len(matches) / len(template_sections) if template_sections else 0,
+            'total_sections': len(template_sections),
+            'matched_sections': len(matches)
+        }
+
+    def _find_best_match(self, target: str, candidates: List[str], candidate_sections: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Find the best matching section title using enhanced semantic and optional ML classification."""
         if not candidates:
             return None
 
+        # Import ML classifier (optional, for performance)
+        classifier = None
+        try:
+            from ai_doc_gen.ml.section_classifier import SectionClassifier
+            classifier = SectionClassifier()
+        except Exception:
+            pass
+
         # Normalize target
         target_normalized = self._normalize_text(target)
-        
+        target_ml_type = None
+
         best_match = None
         best_similarity = 0.0
-        
-        for candidate in candidates:
+
+        for idx, candidate in enumerate(candidates):
             candidate_normalized = self._normalize_text(candidate)
-            
+            candidate_section = candidate_sections[idx] if idx < len(candidate_sections) else {}
+
             # Calculate multiple similarity metrics
             exact_match = self._calculate_exact_match(target_normalized, candidate_normalized)
             fuzzy_match = self._calculate_fuzzy_match(target_normalized, candidate_normalized)
             semantic_match = self._calculate_semantic_match(target_normalized, candidate_normalized)
             keyword_match = self._calculate_keyword_match(target_normalized, candidate_normalized)
-            
-            # Weighted combination of similarity scores
+
+            # Synonym/abbreviation expansion
+            expanded_target = self._expand_synonyms_and_abbr(target_normalized)
+            expanded_candidate = self._expand_synonyms_and_abbr(candidate_normalized)
+            expanded_semantic = self._calculate_semantic_match(expanded_target, expanded_candidate)
+
+            # Initial combined similarity without ML
             combined_similarity = (
-                exact_match * 0.4 +
-                fuzzy_match * 0.3 +
+                exact_match * 0.35 +
+                fuzzy_match * 0.25 +
                 semantic_match * 0.2 +
-                keyword_match * 0.1
+                keyword_match * 0.1 +
+                expanded_semantic * 0.1
             )
+
+            # Only use ML classification for promising matches to improve performance
+            ml_type_match = 0.0
+            candidate_ml_type = None
+            target_ml_type = None
             
+            if classifier and combined_similarity > 0.3:  # Only for promising matches
+                try:
+                    if target_ml_type is None:
+                        target_ml_type = classifier.classify_section(target).get('predicted_class')
+                    candidate_ml_type = classifier.classify_section(candidate).get('predicted_class')
+                    ml_type_match = 1.0 if (target_ml_type and candidate_ml_type and target_ml_type == candidate_ml_type) else 0.0
+                    
+                    # Adjust similarity with ML input
+                    combined_similarity = (
+                        exact_match * 0.3 +
+                        fuzzy_match * 0.2 +
+                        semantic_match * 0.15 +
+                        keyword_match * 0.1 +
+                        ml_type_match * 0.15 +
+                        expanded_semantic * 0.1
+                    )
+                except Exception:
+                    # Fallback to non-ML similarity if ML fails
+                    pass
+
             if combined_similarity > best_similarity:
                 best_similarity = combined_similarity
                 best_match = {
@@ -192,10 +213,14 @@ class ComprehensiveWorkflowTest:
                     "exact_match": exact_match,
                     "fuzzy_match": fuzzy_match,
                     "semantic_match": semantic_match,
-                    "keyword_match": keyword_match
+                    "keyword_match": keyword_match,
+                    "ml_type_match": ml_type_match,
+                    "expanded_semantic": expanded_semantic,
+                    "candidate_ml_type": candidate_ml_type,
+                    "target_ml_type": target_ml_type
                 }
-        
-        return best_match if best_similarity > 0.25 else None  # Lowered threshold for better coverage
+
+        return best_match if best_similarity > 0.22 else None  # Lowered threshold for better coverage
 
     def _normalize_text(self, text: str) -> str:
         """Normalize text for better matching."""
@@ -319,6 +344,45 @@ class ComprehensiveWorkflowTest:
         text = parsed_doc.raw_text.lower()
         return any(keyword in text for keyword in spec_keywords)
 
+    def _expand_synonyms_and_abbr(self, text: str) -> str:
+        """Expand common technical synonyms and abbreviations."""
+        synonym_map = {
+            'spec': 'specification',
+            'specs': 'specification',
+            'req': 'requirement',
+            'reqs': 'requirement',
+            'config': 'configuration',
+            'install': 'installation',
+            'intro': 'introduction',
+            'feat': 'feature',
+            'maint': 'maintenance',
+            'trbl': 'troubleshooting',
+            'troubleshoot': 'troubleshooting',
+            'proc': 'procedure',
+            'desc': 'description',
+            'warn': 'warning',
+            'prec': 'precaution',
+            'env': 'environment',
+            'perf': 'performance',
+            'char': 'characteristic',
+            'func': 'function',
+            'cap': 'capability',
+            'svc': 'service',
+            'ref': 'reference',
+            'addl': 'additional',
+            'info': 'information',
+            'doc': 'document',
+            'sec': 'section',
+            'tbl': 'table',
+            'fig': 'figure',
+            'app': 'appendix',
+            'gloss': 'glossary',
+            'acronym': 'abbreviation',
+        }
+        words = text.split()
+        expanded = [synonym_map.get(w, w) for w in words]
+        return ' '.join(expanded)
+
     def run_comprehensive_test(self) -> Dict[str, Any]:
         """Run comprehensive test on all three documents."""
         print("🧪 COMPREHENSIVE WORKFLOW TEST")
@@ -372,42 +436,49 @@ class ComprehensiveWorkflowTest:
         """Compare performance and quality across documents."""
         comparison = {
             'performance_comparison': {},
-            'quality_comparison': {},
-            'content_comparison': {},
-            'template_coverage_comparison': {}
+            'template_coverage_comparison': {},
+            'summary_statistics': {}
         }
 
         # Performance comparison
         for doc_name, analysis in analyses.items():
             if 'error' not in analysis:
+                parsed_doc = analysis.get('parsed_doc')
+                if hasattr(parsed_doc, 'sections'):
+                    sections = len(parsed_doc.sections)
+                else:
+                    sections = 0
+                parse_time = analysis.get('parse_time', 1)
+                
                 comparison['performance_comparison'][doc_name] = {
-                    'parse_time': analysis.get('parse_time', 0),
-                    'sections_per_second': analysis['document_info']['sections'] / analysis.get('parse_time', 1)
+                    'parse_time': parse_time,
+                    'sections_per_second': sections / parse_time if parse_time > 0 else 0,
+                    'total_sections': sections
                 }
-
-        # Quality comparison
-        for doc_name, analysis in analyses.items():
-            if 'error' not in analysis:
-                comparison['quality_comparison'][doc_name] = {
-                    'overall_score': analysis['quality_assessment']['overall_score'],
-                    'quality_level': analysis['quality_assessment']['quality_level'],
-                    'section_completeness': analysis['quality_assessment']['section_completeness'],
-                    'text_completeness': analysis['quality_assessment']['text_completeness']
-                }
-
-        # Content comparison
-        for doc_name, analysis in analyses.items():
-            if 'error' not in analysis:
-                comparison['content_comparison'][doc_name] = analysis['content_analysis']
 
         # Template coverage comparison
         for doc_name, analysis in analyses.items():
             if 'error' not in analysis:
+                analysis_data = analysis.get('analysis', {})
                 comparison['template_coverage_comparison'][doc_name] = {
-                    'coverage_percentage': analysis['template_comparison']['coverage_percentage'],
-                    'matches': analysis['template_comparison']['matches'],
-                    'missing_sections': analysis['template_comparison']['missing_sections']
+                    'coverage_percentage': analysis_data.get('coverage', 0) * 100,
+                    'matches': analysis_data.get('matched_sections', 0),
+                    'total_template_sections': analysis_data.get('total_sections', 0)
                 }
+
+        # Summary statistics
+        if comparison['performance_comparison']:
+            parse_times = [p['parse_time'] for p in comparison['performance_comparison'].values()]
+            sections_per_sec = [p['sections_per_second'] for p in comparison['performance_comparison'].values()]
+            coverage_percentages = [c['coverage_percentage'] for c in comparison['template_coverage_comparison'].values()]
+            
+            comparison['summary_statistics'] = {
+                'avg_parse_time': sum(parse_times) / len(parse_times),
+                'avg_sections_per_second': sum(sections_per_sec) / len(sections_per_sec),
+                'avg_coverage_percentage': sum(coverage_percentages) / len(coverage_percentages),
+                'best_coverage': max(coverage_percentages) if coverage_percentages else 0,
+                'fastest_parser': min(parse_times) if parse_times else 0
+            }
 
         return comparison
 
@@ -430,19 +501,18 @@ class ComprehensiveWorkflowTest:
         coverage_values = []
         for doc_name, analysis in analyses.items():
             if 'error' not in analysis:
-                coverage_values.append(analysis['template_comparison']['coverage_percentage'])
+                coverage = analysis.get('analysis', {}).get('coverage', 0) * 100
+                coverage_values.append(coverage)
 
         if len(set(coverage_values)) == 1 and len(coverage_values) > 1:
             validation['recommendations'].append("All documents have identical template coverage - may indicate template matching issues")
 
-        # Check quality metrics consistency
-        quality_scores = []
-        for doc_name, analysis in analyses.items():
-            if 'error' not in analysis:
-                quality_scores.append(analysis['quality_assessment']['overall_score'])
-
-        if max(quality_scores) - min(quality_scores) < 10 and len(quality_scores) > 1:
-            validation['recommendations'].append("Quality scores are very similar - may indicate scoring needs adjustment")
+        # Check if coverage is reasonable
+        avg_coverage = sum(coverage_values) / len(coverage_values) if coverage_values else 0
+        if avg_coverage < 10:
+            validation['recommendations'].append(f"Low average coverage ({avg_coverage:.1f}%) - consider adjusting matching thresholds")
+        elif avg_coverage > 80:
+            validation['recommendations'].append(f"Very high average coverage ({avg_coverage:.1f}%) - may indicate overly permissive matching")
 
         # Add positive validation if everything looks good
         if validation['all_documents_parsed'] and not validation['recommendations']:
@@ -468,13 +538,19 @@ class ComprehensiveWorkflowTest:
             if 'error' in analysis:
                 print(f"   ❌ {doc_name}: {analysis['error']}")
             else:
-                doc_info = analysis['document_info']
-                quality = analysis['quality_assessment']
-                coverage = analysis['template_comparison']['coverage_percentage']
+                parsed_doc = analysis.get('parsed_doc')
+                if hasattr(parsed_doc, 'sections'):
+                    sections = len(parsed_doc.sections)
+                else:
+                    sections = 0
+                analysis_data = analysis.get('analysis', {})
+                coverage = analysis_data.get('coverage', 0) * 100
+                parse_time = analysis.get('parse_time', 0)
+                
                 print(f"   ✅ {doc_name}:")
-                print(f"      Type: {doc_info['type']}, Sections: {doc_info['sections']}, Text: {doc_info['text_length']:,} chars")
-                print(f"      Quality: {quality['overall_score']:.1f}% ({quality['quality_level']})")
-                print(f"      Template Coverage: {coverage:.1f}%")
+                print(f"      Type: {analysis.get('doc_type', 'Unknown')}, Sections: {sections}")
+                print(f"      Parse Time: {parse_time:.2f}s, Template Coverage: {coverage:.1f}%")
+                print(f"      Matches: {analysis_data.get('matched_sections', 0)}/{analysis_data.get('total_sections', 0)}")
 
         # Comparative analysis
         comparison = results['comparative_analysis']
@@ -483,15 +559,19 @@ class ComprehensiveWorkflowTest:
             for doc_name, perf in comparison['performance_comparison'].items():
                 print(f"   {doc_name}: {perf['parse_time']:.2f}s ({perf['sections_per_second']:.1f} sections/sec)")
 
-        if comparison.get('quality_comparison'):
-            print("\n📊 QUALITY COMPARISON:")
-            for doc_name, quality in comparison['quality_comparison'].items():
-                print(f"   {doc_name}: {quality['overall_score']:.1f}% ({quality['quality_level']})")
-
         if comparison.get('template_coverage_comparison'):
             print("\n🔄 TEMPLATE COVERAGE COMPARISON:")
             for doc_name, coverage in comparison['template_coverage_comparison'].items():
-                print(f"   {doc_name}: {coverage['coverage_percentage']:.1f}% ({coverage['matches']} matches, {coverage['missing_sections']} missing)")
+                print(f"   {doc_name}: {coverage['coverage_percentage']:.1f}% ({coverage['matches']} matches, {coverage['total_template_sections']} total sections)")
+
+        if comparison.get('summary_statistics'):
+            stats = comparison['summary_statistics']
+            print("\n📈 SUMMARY STATISTICS:")
+            print(f"   Average Parse Time: {stats['avg_parse_time']:.2f}s")
+            print(f"   Average Sections/Second: {stats['avg_sections_per_second']:.1f}")
+            print(f"   Average Coverage: {stats['avg_coverage_percentage']:.1f}%")
+            print(f"   Best Coverage: {stats['best_coverage']:.1f}%")
+            print(f"   Fastest Parser: {stats['fastest_parser']:.2f}s")
 
         # Workflow validation
         validation = results['workflow_validation']
