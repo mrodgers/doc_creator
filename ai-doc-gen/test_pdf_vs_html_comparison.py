@@ -3,47 +3,48 @@
 Comprehensive comparison between PDF and HTML extraction capabilities.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import time
-from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from ai_doc_gen.input_processing.document_parser import DocumentParserFactory
 
+
 class ExtractionComparison:
     """Compare extraction capabilities between PDF and HTML formats."""
-    
+
     def __init__(self):
         self.factory = DocumentParserFactory()
         self.results = {}
-    
+
     def extract_from_pdf(self, pdf_file: str) -> Dict[str, Any]:
         """Extract content from PDF file."""
         print(f"📄 Extracting from PDF: {pdf_file}")
-        
+
         if not os.path.exists(pdf_file):
             print(f"❌ PDF file not found: {pdf_file}")
             return {}
-        
+
         start_time = time.time()
-        
+
         try:
             parser = self.factory.get_parser(pdf_file)
             if not parser:
                 print(f"❌ No parser available for PDF: {pdf_file}")
                 return {}
-            
+
             parsed_doc = parser.parse(pdf_file)
-            
+
             extraction_time = time.time() - start_time
-            
+
             # Analyze content
             sections_with_content = [s for s in parsed_doc.sections if len(s['content']) > 0]
             table_sections = [s for s in parsed_doc.sections if any('Table' in str(c) for c in s['content'])]
-            
+
             result = {
                 "file_type": "pdf",
                 "filename": os.path.basename(pdf_file),
@@ -75,43 +76,43 @@ class ExtractionComparison:
                     for s in table_sections[:5]
                 ]
             }
-            
+
             print(f"✅ PDF extraction completed in {extraction_time:.2f}s")
             print(f"   - Sections: {result['total_sections']}")
             print(f"   - Content items: {result['total_content_items']}")
             print(f"   - Table sections: {result['table_sections']}")
-            
+
             return result
-            
+
         except Exception as e:
             print(f"❌ Error extracting from PDF: {e}")
             return {}
-    
+
     def extract_from_html(self, html_file: str) -> Dict[str, Any]:
         """Extract content from HTML file."""
         print(f"🌐 Extracting from HTML: {html_file}")
-        
+
         if not os.path.exists(html_file):
             print(f"❌ HTML file not found: {html_file}")
             return {}
-        
+
         start_time = time.time()
-        
+
         try:
             parser = self.factory.get_parser(html_file)
             if not parser:
                 print(f"❌ No parser available for HTML: {html_file}")
                 return {}
-            
+
             parsed_doc = parser.parse(html_file)
-            
+
             extraction_time = time.time() - start_time
-            
+
             # Analyze content
             sections_with_content = [s for s in parsed_doc.sections if len(s['content']) > 0]
             table_sections = [s for s in parsed_doc.sections if any('Table' in str(c) for c in s['content'])]
             enhanced_sections = [s for s in parsed_doc.sections if s.get('source') == 'html_enhanced']
-            
+
             result = {
                 "file_type": "html",
                 "filename": os.path.basename(html_file),
@@ -145,25 +146,25 @@ class ExtractionComparison:
                     for s in table_sections[:5]
                 ]
             }
-            
+
             print(f"✅ HTML extraction completed in {extraction_time:.2f}s")
             print(f"   - Sections: {result['total_sections']}")
             print(f"   - Content items: {result['total_content_items']}")
             print(f"   - Table sections: {result['table_sections']}")
             print(f"   - Enhanced source: {result['enhanced_source_sections']}")
-            
+
             return result
-            
+
         except Exception as e:
             print(f"❌ Error extracting from HTML: {e}")
             return {}
-    
+
     def compare_extractions(self, pdf_result: Dict[str, Any], html_result: Dict[str, Any]) -> Dict[str, Any]:
         """Compare the results of PDF and HTML extractions."""
-        
+
         print("\n📊 Comparing PDF vs HTML Extraction Results")
         print("=" * 60)
-        
+
         comparison = {
             "summary": {
                 "pdf_file": pdf_result.get("filename", "N/A"),
@@ -174,9 +175,9 @@ class ExtractionComparison:
                 "extraction_time": {
                     "pdf_seconds": pdf_result.get("extraction_time_seconds", 0),
                     "html_seconds": html_result.get("extraction_time_seconds", 0),
-                    "difference_seconds": (html_result.get("extraction_time_seconds", 0) - 
+                    "difference_seconds": (html_result.get("extraction_time_seconds", 0) -
                                          pdf_result.get("extraction_time_seconds", 0)),
-                    "faster_format": "PDF" if pdf_result.get("extraction_time_seconds", 0) < 
+                    "faster_format": "PDF" if pdf_result.get("extraction_time_seconds", 0) <
                                     html_result.get("extraction_time_seconds", 0) else "HTML"
                 },
                 "file_size": {
@@ -215,7 +216,7 @@ class ExtractionComparison:
                 "parsing_errors": {
                     "pdf_errors": pdf_result.get("parsing_errors", 0),
                     "html_errors": html_result.get("parsing_errors", 0),
-                    "more_reliable": "PDF" if pdf_result.get("parsing_errors", 0) < 
+                    "more_reliable": "PDF" if pdf_result.get("parsing_errors", 0) <
                                     html_result.get("parsing_errors", 0) else "HTML"
                 },
                 "structure_detection": {
@@ -239,130 +240,130 @@ class ExtractionComparison:
                 }
             }
         }
-        
+
         # Print comparison summary
-        print(f"\n📈 Performance Comparison:")
+        print("\n📈 Performance Comparison:")
         print(f"   PDF extraction time: {comparison['performance_comparison']['extraction_time']['pdf_seconds']:.2f}s")
         print(f"   HTML extraction time: {comparison['performance_comparison']['extraction_time']['html_seconds']:.2f}s")
         print(f"   Faster format: {comparison['performance_comparison']['extraction_time']['faster_format']}")
-        
-        print(f"\n📊 Content Comparison:")
+
+        print("\n📊 Content Comparison:")
         print(f"   PDF sections: {comparison['content_comparison']['sections']['pdf_total']}")
         print(f"   HTML sections: {comparison['content_comparison']['sections']['html_total']}")
         print(f"   PDF content items: {comparison['content_comparison']['content_items']['pdf_total']}")
         print(f"   HTML content items: {comparison['content_comparison']['content_items']['html_total']}")
         print(f"   PDF table sections: {comparison['content_comparison']['table_sections']['pdf_total']}")
         print(f"   HTML table sections: {comparison['content_comparison']['table_sections']['html_total']}")
-        
-        print(f"\n🎯 Quality Comparison:")
+
+        print("\n🎯 Quality Comparison:")
         print(f"   PDF parsing errors: {comparison['quality_comparison']['parsing_errors']['pdf_errors']}")
         print(f"   HTML parsing errors: {comparison['quality_comparison']['parsing_errors']['html_errors']}")
         print(f"   More reliable: {comparison['quality_comparison']['parsing_errors']['more_reliable']}")
-        
+
         return comparison
-    
+
     def generate_recommendations(self, comparison: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on comparison results."""
-        
+
         recommendations = []
-        
+
         # Performance recommendations
         if comparison['performance_comparison']['extraction_time']['difference_seconds'] > 2:
             faster_format = comparison['performance_comparison']['extraction_time']['faster_format']
             recommendations.append(f"Use {faster_format} format for faster processing")
-        
+
         # Content recommendations
         if comparison['content_comparison']['sections']['ratio'] > 2:
             recommendations.append("HTML provides significantly more sections - prefer for comprehensive extraction")
-        
+
         if comparison['content_comparison']['table_sections']['ratio'] > 1.5:
             recommendations.append("HTML provides better table extraction - prefer for technical documentation")
-        
+
         if comparison['content_comparison']['content_items']['ratio'] > 2:
             recommendations.append("HTML provides significantly more content items - prefer for detailed analysis")
-        
+
         # Quality recommendations
         if comparison['quality_comparison']['parsing_errors']['pdf_errors'] == 0 and comparison['quality_comparison']['parsing_errors']['html_errors'] > 0:
             recommendations.append("PDF provides more reliable parsing - prefer for critical documents")
-        
+
         # Feature recommendations
         if comparison['format_specific_features']['html_features']['enhanced_source'] > 0:
             recommendations.append("HTML enhanced parser provides advanced features - prefer for complex documents")
-        
+
         if comparison['format_specific_features']['html_features']['table_extraction']:
             recommendations.append("HTML provides structured table extraction - prefer for technical specifications")
-        
+
         return recommendations
 
 def main():
     """Main comparison function."""
-    
+
     print("🔍 PDF vs HTML Extraction Comparison")
     print("=" * 60)
-    
+
     # Check for available files
     pdf_file = "installation_guide.pdf"
     html_file = "webpage.html"
-    
+
     if not os.path.exists(pdf_file):
         print(f"❌ PDF file not found: {pdf_file}")
         print("   Please ensure installation_guide.pdf is available")
         return
-    
+
     if not os.path.exists(html_file):
         print(f"❌ HTML file not found: {html_file}")
         print("   Please ensure webpage.html is available")
         return
-    
+
     # Create comparison object
     comparison_tool = ExtractionComparison()
-    
+
     # Extract from both formats
     print("\n📄 Step 1: PDF Extraction")
     print("-" * 40)
     pdf_result = comparison_tool.extract_from_pdf(pdf_file)
-    
+
     print("\n🌐 Step 2: HTML Extraction")
     print("-" * 40)
     html_result = comparison_tool.extract_from_html(html_file)
-    
+
     if not pdf_result or not html_result:
         print("❌ Extraction failed for one or both formats")
         return
-    
+
     # Compare results
     print("\n📊 Step 3: Comparison Analysis")
     print("-" * 40)
     comparison = comparison_tool.compare_extractions(pdf_result, html_result)
-    
+
     # Generate recommendations
     print("\n💡 Step 4: Recommendations")
     print("-" * 40)
     recommendations = comparison_tool.generate_recommendations(comparison)
-    
+
     if recommendations:
         for i, rec in enumerate(recommendations, 1):
             print(f"   {i}. {rec}")
     else:
         print("   Both formats perform similarly - choose based on source availability")
-    
+
     # Save detailed results
     print("\n💾 Step 5: Saving Results")
     print("-" * 40)
-    
+
     detailed_results = {
         "comparison": comparison,
         "pdf_result": pdf_result,
         "html_result": html_result,
         "recommendations": recommendations
     }
-    
+
     output_file = "pdf_vs_html_comparison_results.json"
     with open(output_file, 'w') as f:
         json.dump(detailed_results, f, indent=2, default=str)
-    
+
     print(f"✅ Detailed comparison saved to: {output_file}")
-    
+
     # Print final summary
     print("\n🎯 Final Summary")
     print("=" * 60)
@@ -372,11 +373,11 @@ def main():
     print(f"📊 HTML Content: {comparison['content_comparison']['content_items']['html_total']} items")
     print(f"📋 PDF Tables: {comparison['content_comparison']['table_sections']['pdf_total']} sections")
     print(f"📋 HTML Tables: {comparison['content_comparison']['table_sections']['html_total']} sections")
-    
+
     winner = "HTML" if comparison['content_comparison']['content_items']['html_total'] > comparison['content_comparison']['content_items']['pdf_total'] else "PDF"
     print(f"\n🏆 Overall Winner: {winner} (based on content extraction)")
-    
-    print(f"\n✅ Comparison completed successfully!")
+
+    print("\n✅ Comparison completed successfully!")
 
 if __name__ == "__main__":
-    main() 
+    main()

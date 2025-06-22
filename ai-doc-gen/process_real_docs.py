@@ -1,5 +1,11 @@
 import json
-from ai_doc_gen.input_processing import validate_document, parse_document, extract_structured_content
+
+from ai_doc_gen.input_processing import (
+    extract_structured_content,
+    parse_document,
+    validate_document,
+)
+
 
 def to_serializable(obj):
     if hasattr(obj, 'model_dump'):
@@ -30,4 +36,4 @@ def process_document(doc_path, output_json):
 
 if __name__ == "__main__":
     process_document("functional_spec.docx", "functional_spec_extracted.json")
-    process_document("installation_guide.pdf", "installation_guide_extracted.json") 
+    process_document("installation_guide.pdf", "installation_guide_extracted.json")

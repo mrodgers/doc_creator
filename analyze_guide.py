@@ -24,7 +24,6 @@ import argparse
 import json
 import os
 import sys
-from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from enum import Enum
@@ -36,7 +35,6 @@ from ai_doc_gen.input_processing.document_parser import parse_document
 from ai_doc_gen.input_processing.structured_extractor import StructuredExtractor, ExtractedContent
 from ai_doc_gen.agents.managing_agent import ManagingAgent
 from ai_doc_gen.agents.review_agent import ReviewAgent
-from ai_doc_gen.core.pipeline_orchestrator import PipelineOrchestrator
 from ai_doc_gen.core.confidence_scoring import ConfidenceScorer
 from ai_doc_gen.core.gap_analyzer import GapAnalyzer
 
@@ -471,7 +469,7 @@ def main():
         print(f"🏗️  Sections: {results['document_info']['total_sections']}")
         
         if results['recommendations']:
-            print(f"\n💡 Top Recommendations:")
+            print("\n💡 Top Recommendations:")
             for rec in results['recommendations'][:3]:
                 print(f"   • {rec}")
         

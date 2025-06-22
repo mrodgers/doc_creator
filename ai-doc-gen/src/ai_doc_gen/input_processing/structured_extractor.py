@@ -6,11 +6,11 @@ for hardware documentation with focus on technical specifications, procedures,
 and requirements.
 """
 
-import re
 import logging
-from typing import Dict, List, Any, Optional, Set
-from dataclasses import dataclass
+import re
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -40,12 +40,12 @@ class ExtractedContent(BaseModel):
 
 class StructuredExtractor:
     """Extracts structured content from parsed documents."""
-    
+
     def __init__(self):
         """Initialize the extractor with patterns and rules."""
         self._init_patterns()
         self._init_keywords()
-    
+
     def _init_patterns(self):
         """Initialize regex patterns for content identification."""
         self.patterns = {
@@ -98,7 +98,7 @@ class StructuredExtractor:
                 r'(?i)(solution|fix|resolve|correct)',
             ]
         }
-    
+
     def _init_keywords(self):
         """Initialize keyword mappings for content classification."""
         self.keywords = {
@@ -119,67 +119,67 @@ class StructuredExtractor:
                 'physical': ['space', 'clearance', 'access'],
             }
         }
-    
+
     def extract_structured_content(self, parsed_document) -> List[ExtractedContent]:
         """Extract structured content from a parsed document."""
         extracted_content = []
-        
+
         # Process each section
         for section in parsed_document.sections:
             section_content = self._extract_from_section(section, parsed_document)
             extracted_content.extend(section_content)
-        
+
         # Process raw text for additional content
         raw_content = self._extract_from_raw_text(parsed_document.raw_text)
         extracted_content.extend(raw_content)
-        
+
         # Remove duplicates and sort by confidence
         unique_content = self._deduplicate_content(extracted_content)
         unique_content.sort(key=lambda x: x.confidence, reverse=True)
-        
+
         return unique_content
-    
-    def _extract_from_section(self, section: Dict[str, Any], 
+
+    def _extract_from_section(self, section: Dict[str, Any],
                             parsed_document) -> List[ExtractedContent]:
         """Extract content from a specific section."""
         extracted = []
         heading = section.get('heading', '')
         content_lines = section.get('content', [])
-        
+
         # Analyze heading for content type
         heading_content = self._classify_content(heading, heading)
         if heading_content:
             heading_content.source_section = heading
             extracted.append(heading_content)
-        
+
         # Analyze content lines
         content_text = '\n'.join(content_lines)
         if content_text.strip():
             content_items = self._extract_content_items(content_text, heading)
             extracted.extend(content_items)
-        
+
         return extracted
-    
+
     def _extract_from_raw_text(self, raw_text: str) -> List[ExtractedContent]:
         """Extract content from raw text when section structure is unclear."""
         extracted = []
-        
+
         # Split into paragraphs
         paragraphs = [p.strip() for p in raw_text.split('\n\n') if p.strip()]
-        
+
         for paragraph in paragraphs:
             if len(paragraph) > 50:  # Only process substantial paragraphs
                 content_item = self._classify_content(paragraph, "Raw Text")
                 if content_item:
                     extracted.append(content_item)
-        
+
         return extracted
-    
+
     def _classify_content(self, text: str, context: str) -> Optional[ExtractedContent]:
         """Classify and extract content from text."""
         if not text.strip():
             return None
-        
+
         # Prioritize warning patterns
         for pattern in self.patterns[ContentType.WARNING]:
             if re.search(pattern, text, re.IGNORECASE):
@@ -191,7 +191,7 @@ class StructuredExtractor:
                     source_section=context,
                     tags=self._extract_tags(text, ContentType.WARNING)
                 )
-        
+
         # Score each content type
         scores = {}
         for content_type, patterns in self.patterns.items():
@@ -201,13 +201,13 @@ class StructuredExtractor:
             for pattern in patterns:
                 matches = re.findall(pattern, text, re.IGNORECASE)
                 score += len(matches) * 0.1
-            
+
             # Additional scoring based on keywords
             keyword_score = self._calculate_keyword_score(text, content_type)
             score += keyword_score
-            
+
             scores[content_type] = score
-        
+
         # Find the best match
         if scores:
             best_type = max(scores.items(), key=lambda x: x[1])
@@ -220,53 +220,53 @@ class StructuredExtractor:
                     source_section=context,
                     tags=self._extract_tags(text, best_type[0])
                 )
-        
+
         return None
-    
+
     def _calculate_keyword_score(self, text: str, content_type: ContentType) -> float:
         """Calculate score based on keyword presence."""
         if content_type not in self.keywords:
             return 0.0
-        
+
         score = 0.0
         text_lower = text.lower()
-        
+
         for category, keywords in self.keywords[content_type].items():
             for keyword in keywords:
                 if keyword in text_lower:
                     score += 0.05
-        
+
         return score
-    
+
     def _extract_title(self, text: str) -> str:
         """Extract a title from text."""
         lines = text.split('\n')
         first_line = lines[0].strip()
-        
+
         # If first line is short and looks like a title
         if len(first_line) < 100 and first_line.endswith(('.', ':', ';')):
             return first_line
-        
+
         # Otherwise, create a title from the first few words
         words = text.split()[:5]
         return ' '.join(words) + ('...' if len(text.split()) > 5 else '')
-    
+
     def _extract_tags(self, text: str, content_type: ContentType) -> List[str]:
         """Extract relevant tags from text."""
         tags = []
         text_lower = text.lower()
-        
+
         # Extract technical terms
         technical_terms = [
             'cisco', 'router', 'switch', 'firewall', 'server',
             'ethernet', 'fiber', 'copper', 'wireless', 'bluetooth',
             'usb', 'hdmi', 'vga', 'serial', 'parallel'
         ]
-        
+
         for term in technical_terms:
             if term in text_lower:
                 tags.append(term)
-        
+
         # Extract full measurements (e.g., 100V, 1GB)
         measurement_patterns = [
             r'\b\d+(?:\.\d+)?\s*(mm|cm|m|inch|ft)\b',  # Length
@@ -276,19 +276,19 @@ class StructuredExtractor:
             r'\b\d+(?:\.\d+)?\s*V\b',                  # e.g., 100V
             r'\b\d+(?:\.\d+)?\s*GB\b',                 # e.g., 1GB
         ]
-        
+
         for pattern in measurement_patterns:
             matches = re.findall(pattern, text, re.IGNORECASE)
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 tags.append(match.group(0).strip())
-        
+
         return list(set(tags))  # Remove duplicates
-    
-    def _extract_content_items(self, content_text: str, 
+
+    def _extract_content_items(self, content_text: str,
                              section_heading: str) -> List[ExtractedContent]:
         """Extract multiple content items from a larger text block."""
         items = []
-        
+
         # Split by common separators
         separators = ['\n\n', '•', '·', '- ', '* ']
         for separator in separators:
@@ -301,7 +301,7 @@ class StructuredExtractor:
                         if content_item:
                             items.append(content_item)
                 break
-        
+
         # If no separators found, try to split by sentences
         if not items:
             sentences = re.split(r'[.!?]+', content_text)
@@ -311,24 +311,24 @@ class StructuredExtractor:
                     content_item = self._classify_content(sentence, section_heading)
                     if content_item:
                         items.append(content_item)
-        
+
         return items
-    
+
     def _deduplicate_content(self, content_list: List[ExtractedContent]) -> List[ExtractedContent]:
         """Remove duplicate content items."""
         seen = set()
         unique_content = []
-        
+
         for item in content_list:
             # Create a hash of the content for deduplication
             content_hash = hash(item.content.lower().strip())
-            
+
             if content_hash not in seen:
                 seen.add(content_hash)
                 unique_content.append(item)
-        
+
         return unique_content
-    
+
     def get_content_summary(self, extracted_content: List[ExtractedContent]) -> Dict[str, Any]:
         """Generate a summary of extracted content."""
         summary = {
@@ -342,12 +342,12 @@ class StructuredExtractor:
             'top_tags': {},
             'sections_covered': set()
         }
-        
+
         for item in extracted_content:
             # Count content types
             content_type = item.content_type.value
             summary['content_types'][content_type] = summary['content_types'].get(content_type, 0) + 1
-            
+
             # Count confidence levels
             if item.confidence >= 0.8:
                 summary['confidence_distribution']['high'] += 1
@@ -355,27 +355,27 @@ class StructuredExtractor:
                 summary['confidence_distribution']['medium'] += 1
             else:
                 summary['confidence_distribution']['low'] += 1
-            
+
             # Count tags
             for tag in item.tags:
                 summary['top_tags'][tag] = summary['top_tags'].get(tag, 0) + 1
-            
+
             # Track sections
             summary['sections_covered'].add(item.source_section)
-        
+
         # Convert set to list for JSON serialization
         summary['sections_covered'] = list(summary['sections_covered'])
-        
+
         # Sort tags by frequency
         summary['top_tags'] = dict(
-            sorted(summary['top_tags'].items(), 
+            sorted(summary['top_tags'].items(),
                   key=lambda x: x[1], reverse=True)[:10]
         )
-        
+
         return summary
 
 # Convenience function
 def extract_structured_content(parsed_document) -> List[ExtractedContent]:
     """Extract structured content from a parsed document."""
     extractor = StructuredExtractor()
-    return extractor.extract_structured_content(parsed_document) 
+    return extractor.extract_structured_content(parsed_document)

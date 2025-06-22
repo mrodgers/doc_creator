@@ -6,20 +6,19 @@ A minimal Flask-based web interface for the AI-assisted documentation
 generation system with confidence visualization and interactive gap reports.
 """
 
-import os
-import json
 import asyncio
-from pathlib import Path
+import json
+import os
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
-from werkzeug.utils import secure_filename
-import tempfile
-import shutil
 from enum import Enum
+from pathlib import Path
+
+from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
+from werkzeug.utils import secure_filename
 
 # Import our AI pipeline components
 from ai_doc_gen.core.pipeline_orchestrator import PipelineOrchestrator
-from ai_doc_gen.input_processing import validate_document, parse_document, extract_structured_content
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder to handle enum serialization."""
@@ -68,26 +67,26 @@ def upload_document():
     if request.method == 'POST':
         if 'document' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
-        
+
         file = request.files['document']
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
-        
+
         if file:
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             safe_filename = f"{timestamp}_{filename}"
             filepath = Path(app.config['UPLOAD_FOLDER']) / safe_filename
-            
+
             file.save(str(filepath))
-            
+
             # Process the document
             try:
                 result = process_document(str(filepath))
                 return jsonify(result)
             except Exception as e:
                 return jsonify({'error': str(e)}), 500
-    
+
     return render_template('upload.html')
 
 @app.route('/process/<filename>')
@@ -96,7 +95,7 @@ def process_document_route(filename):
     filepath = Path(app.config['UPLOAD_FOLDER']) / filename
     if not filepath.exists():
         return jsonify({'error': 'File not found'}), 404
-    
+
     try:
         result = process_document(str(filepath))
         return jsonify(result)
@@ -115,7 +114,7 @@ def visualize_results(job_id):
     """Visualization page for pipeline results."""
     if job_id not in pipeline_results:
         return redirect(url_for('index'))
-    
+
     return render_template('visualize.html', job_id=job_id, results=serialize_pipeline_results(pipeline_results[job_id]))
 
 @app.route('/export/<job_id>/<format>')
@@ -123,9 +122,9 @@ def export_results(job_id, format):
     """Export results in specified format (json, markdown, pdf)."""
     if job_id not in pipeline_results:
         return jsonify({'error': 'Job not found'}), 404
-    
+
     results = pipeline_results[job_id]
-    
+
     if format == 'json':
         return jsonify(serialize_pipeline_results(results))
     elif format == 'markdown':
@@ -156,11 +155,11 @@ def process_document(filepath: str) -> dict:
     """Process a document through the AI pipeline."""
     # Generate unique job ID
     job_id = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]
-    
+
     # Create output directory
     output_dir = Path(app.config['OUTPUT_FOLDER']) / f"job_{job_id}"
     output_dir.mkdir(exist_ok=True)
-    
+
     try:
         # Initialize pipeline
         config = {
@@ -168,20 +167,20 @@ def process_document(filepath: str) -> dict:
             "confidence_threshold": 85.0,
             "gap_threshold": 70.0
         }
-        
+
         orchestrator = PipelineOrchestrator(config=config)
-        
+
         # Run pipeline asynchronously
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         pipeline_result = loop.run_until_complete(
             orchestrator.run_pipeline(
                 input_files=[filepath],
                 output_dir=str(output_dir)
             )
         )
-        
+
         # Store results
         result = {
             'job_id': job_id,
@@ -191,10 +190,10 @@ def process_document(filepath: str) -> dict:
             'timestamp': datetime.now().isoformat(),
             'pipeline_results': serialize_pipeline_results(pipeline_result)
         }
-        
+
         pipeline_results[job_id] = result
         return result
-        
+
     except Exception as e:
         # Store error results
         error_result = {
@@ -209,4 +208,4 @@ def process_document(filepath: str) -> dict:
         raise
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5432) 
+    app.run(debug=True, host='0.0.0.0', port=5432)

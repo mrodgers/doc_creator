@@ -6,29 +6,29 @@ Demonstrates the input processing functionality including document parsing,
 structured extraction, and validation.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 from pathlib import Path
 
 # Add the src directory to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from ai_doc_gen.input_processing import (
-    parse_document,
     extract_structured_content,
-    validate_document
+    parse_document,
+    validate_document,
 )
 from ai_doc_gen.input_processing.document_parser import DocumentParserFactory
-from ai_doc_gen.input_processing.structured_extractor import StructuredExtractor
 from ai_doc_gen.input_processing.input_validator import InputValidator
+from ai_doc_gen.input_processing.structured_extractor import StructuredExtractor
 
 
 def create_sample_documents():
     """Create sample documents for testing."""
     samples_dir = Path("samples")
     samples_dir.mkdir(exist_ok=True)
-    
+
     # Create a sample text file
     sample_text = """
 # Cisco Router Installation Guide
@@ -86,13 +86,13 @@ Note: Keep the original packaging for warranty purposes.
 - "Boot failed": Contact technical support
 - "Memory error": Check memory module installation
 """
-    
+
     # Write sample text file
     with open(samples_dir / "sample_installation_guide.txt", "w") as f:
         f.write(sample_text)
-    
+
     print(f"Created sample document: {samples_dir / 'sample_installation_guide.txt'}")
-    
+
     return samples_dir
 
 
@@ -101,20 +101,20 @@ def demonstrate_parser_factory():
     print("\n" + "="*60)
     print("DOCUMENT PARSER FACTORY DEMONSTRATION")
     print("="*60)
-    
+
     factory = DocumentParserFactory()
     supported_formats = factory.get_supported_formats()
-    
+
     print(f"Supported document formats: {', '.join(supported_formats)}")
-    
+
     # Test with different file types
     test_files = [
         "document.pdf",
-        "document.docx", 
+        "document.docx",
         "document.xml",
         "document.txt"
     ]
-    
+
     for test_file in test_files:
         parser = factory.get_parser(test_file)
         if parser:
@@ -128,31 +128,31 @@ def demonstrate_validation():
     print("\n" + "="*60)
     print("INPUT VALIDATION DEMONSTRATION")
     print("="*60)
-    
+
     validator = InputValidator()
-    
+
     # Test validation with sample file
     sample_file = "samples/sample_installation_guide.txt"
-    
+
     if os.path.exists(sample_file):
         print(f"Validating: {sample_file}")
         result = validator.validate_document(sample_file)
-        
+
         print(f"Valid: {result.is_valid}")
         print(f"Score: {result.score:.2f}")
-        
+
         if result.issues:
             print("\nIssues found:")
             for issue in result.issues:
                 print(f"  [{issue.level.value.upper()}] {issue.message}")
                 if issue.suggestion:
                     print(f"    Suggestion: {issue.suggestion}")
-        
+
         if result.warnings:
             print("\nWarnings:")
             for warning in result.warnings:
                 print(f"  - {warning}")
-        
+
         if result.recommendations:
             print("\nRecommendations:")
             for rec in result.recommendations:
@@ -166,13 +166,13 @@ def demonstrate_structured_extraction():
     print("\n" + "="*60)
     print("STRUCTURED CONTENT EXTRACTION DEMONSTRATION")
     print("="*60)
-    
+
     sample_file = "samples/sample_installation_guide.txt"
-    
+
     if not os.path.exists(sample_file):
         print(f"Sample file not found: {sample_file}")
         return
-    
+
     # Parse the document
     try:
         parsed_doc = parse_document(sample_file)
@@ -181,13 +181,13 @@ def demonstrate_structured_extraction():
         print(f"Title: {parsed_doc.title}")
         print(f"Sections: {len(parsed_doc.sections)}")
         print(f"Text length: {len(parsed_doc.raw_text)} characters")
-        
+
         # Extract structured content
         extractor = StructuredExtractor()
         extracted_content = extractor.extract_structured_content(parsed_doc)
-        
+
         print(f"\nExtracted {len(extracted_content)} content items:")
-        
+
         for i, item in enumerate(extracted_content[:5], 1):  # Show first 5 items
             print(f"\n{i}. {item.title}")
             print(f"   Type: {item.content_type.value}")
@@ -195,15 +195,15 @@ def demonstrate_structured_extraction():
             print(f"   Source: {item.source_section}")
             print(f"   Tags: {', '.join(item.tags) if item.tags else 'None'}")
             print(f"   Content: {item.content[:100]}{'...' if len(item.content) > 100 else ''}")
-        
+
         # Generate summary
         summary = extractor.get_content_summary(extracted_content)
-        print(f"\nContent Summary:")
+        print("\nContent Summary:")
         print(f"  Total items: {summary['total_items']}")
         print(f"  Content types: {summary['content_types']}")
         print(f"  Confidence distribution: {summary['confidence_distribution']}")
         print(f"  Top tags: {dict(list(summary['top_tags'].items())[:5])}")
-        
+
     except Exception as e:
         print(f"Error processing document: {e}")
 
@@ -213,39 +213,39 @@ def demonstrate_end_to_end_processing():
     print("\n" + "="*60)
     print("END-TO-END PROCESSING DEMONSTRATION")
     print("="*60)
-    
+
     sample_file = "samples/sample_installation_guide.txt"
-    
+
     if not os.path.exists(sample_file):
         print(f"Sample file not found: {sample_file}")
         return
-    
+
     try:
         # Step 1: Validate the document
         print("Step 1: Validating document...")
         validation_result = validate_document(sample_file)
-        
+
         if not validation_result.is_valid:
             print("Document validation failed!")
             for warning in validation_result.warnings:
                 print(f"  Warning: {warning}")
             return
-        
+
         print(f"✓ Document validated (score: {validation_result.score:.2f})")
-        
+
         # Step 2: Parse the document
         print("\nStep 2: Parsing document...")
         parsed_doc = parse_document(sample_file)
         print(f"✓ Document parsed ({len(parsed_doc.sections)} sections)")
-        
+
         # Step 3: Extract structured content
         print("\nStep 3: Extracting structured content...")
         extracted_content = extract_structured_content(parsed_doc)
         print(f"✓ Content extracted ({len(extracted_content)} items)")
-        
+
         # Step 4: Generate report
         print("\nStep 4: Generating processing report...")
-        
+
         report = {
             "document_info": {
                 "filename": parsed_doc.filename,
@@ -265,25 +265,25 @@ def demonstrate_end_to_end_processing():
                 "high_confidence_items": 0
             }
         }
-        
+
         # Count content types
         for item in extracted_content:
             content_type = item.content_type.value
             report["extraction"]["content_types"][content_type] = \
                 report["extraction"]["content_types"].get(content_type, 0) + 1
-            
+
             if item.confidence >= 0.8:
                 report["extraction"]["high_confidence_items"] += 1
-        
+
         print("✓ Processing report generated:")
         print(json.dumps(report, indent=2))
-        
+
         # Save report to file
         report_file = "processing_report.json"
         with open(report_file, "w") as f:
             json.dump(report, f, indent=2)
         print(f"\nReport saved to: {report_file}")
-        
+
     except Exception as e:
         print(f"Error in end-to-end processing: {e}")
 
@@ -292,17 +292,17 @@ def main():
     """Main demonstration function."""
     print("AI DOCUMENTATION GENERATION - INPUT PROCESSING DEMONSTRATION")
     print("="*80)
-    
+
     # Create sample documents
     print("Creating sample documents...")
     create_sample_documents()
-    
+
     # Run demonstrations
     demonstrate_parser_factory()
     demonstrate_validation()
     demonstrate_structured_extraction()
     demonstrate_end_to_end_processing()
-    
+
     print("\n" + "="*80)
     print("DEMONSTRATION COMPLETE")
     print("="*80)
@@ -314,4 +314,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

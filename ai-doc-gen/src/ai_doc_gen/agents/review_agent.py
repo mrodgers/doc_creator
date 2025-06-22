@@ -3,9 +3,12 @@ Review Agent for provenance and confidence audit.
 """
 
 from typing import Any, Dict, List, Optional
-from ai_doc_gen.input_processing.structured_extractor import ExtractedContent
+
 from ai_doc_gen.core.confidence_scoring import ConfidenceScorer
+from ai_doc_gen.input_processing.structured_extractor import ExtractedContent
+
 from .base import AgentBase
+
 
 class ReviewAgent(AgentBase):
     """Agent for auditing provenance and confidence in documentation."""
@@ -48,4 +51,4 @@ class ReviewAgent(AgentBase):
 
     def report(self) -> Dict[str, Any]:
         """Return a summary of the last audit."""
-        return self.last_audit or {"message": "No audit has been performed yet."} 
+        return self.last_audit or {"message": "No audit has been performed yet."}

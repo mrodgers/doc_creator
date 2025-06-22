@@ -13,15 +13,16 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime
-from typing import Dict, List, Any, Optional, Callable
-from pathlib import Path
 from dataclasses import dataclass
-from pydantic import BaseModel, Field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
-from .llm_integration import LLMClient
+from pydantic import BaseModel
+
 from .confidence_scoring import ConfidenceScorer
 from .gap_analyzer import GapAnalyzer
+from .llm_integration import LLMClient
 from .provenance_tracker import ProvenanceTracker
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class PipelineMetrics(BaseModel):
 
 class PipelineOrchestrator:
     """Enhanced pipeline orchestrator for multi-agent documentation generation."""
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize pipeline orchestrator with configuration."""
         self.config = config or {}
@@ -63,7 +64,7 @@ class PipelineOrchestrator:
             agent_metrics={},
             file_outputs={}
         )
-        
+
         # Initialize core components
         self.llm_client = LLMClient(
             provider=self.config.get("llm_provider", "openai")
@@ -75,15 +76,15 @@ class PipelineOrchestrator:
             confidence_threshold=self.config.get("gap_threshold", 70.0)
         )
         self.provenance_tracker = ProvenanceTracker()
-        
+
         # Pipeline state
         self.current_step = 0
         self.pipeline_state: Dict[str, Any] = {}
         self.error_log: List[Dict[str, Any]] = []
-        
+
         # Register default steps
         self._register_default_steps()
-    
+
     def _register_default_steps(self) -> None:
         """Register default pipeline steps."""
         self.add_step(
@@ -95,7 +96,7 @@ class PipelineOrchestrator:
                 timeout=600
             )
         )
-        
+
         self.add_step(
             PipelineStep(
                 name="managing_agent_analysis",
@@ -105,7 +106,7 @@ class PipelineOrchestrator:
                 timeout=900
             )
         )
-        
+
         self.add_step(
             PipelineStep(
                 name="gap_analysis",
@@ -115,7 +116,7 @@ class PipelineOrchestrator:
                 timeout=300
             )
         )
-        
+
         self.add_step(
             PipelineStep(
                 name="review_agent_validation",
@@ -125,7 +126,7 @@ class PipelineOrchestrator:
                 timeout=600
             )
         )
-        
+
         self.add_step(
             PipelineStep(
                 name="draft_generation",
@@ -135,23 +136,23 @@ class PipelineOrchestrator:
                 timeout=1200
             )
         )
-    
+
     def add_step(self, step: PipelineStep) -> None:
         """Add a custom pipeline step."""
         self.steps.append(step)
         logger.info(f"Added pipeline step: {step.name}")
-    
+
     async def run_pipeline(
-        self, 
-        input_files: List[str], 
+        self,
+        input_files: List[str],
         output_dir: str,
         ground_truth: Optional[str] = None
     ) -> Dict[str, Any]:
         """Run the complete documentation generation pipeline."""
-        
+
         start_time = time.time()
         logger.info("Starting AI-Assisted Documentation Generation Pipeline")
-        
+
         # Initialize pipeline state
         self.pipeline_state = {
             "input_files": input_files,
@@ -159,44 +160,44 @@ class PipelineOrchestrator:
             "ground_truth": ground_truth,
             "start_time": start_time
         }
-        
+
         # Create output directory
         Path(output_dir).mkdir(parents=True, exist_ok=True)
-        
+
         try:
             # Execute pipeline steps
             for i, step in enumerate(self.steps):
                 self.current_step = i
                 logger.info(f"Executing step {i+1}/{len(self.steps)}: {step.name}")
-                
+
                 # Check required inputs
                 missing_inputs = self._check_required_inputs(step)
                 if missing_inputs:
                     raise ValueError(f"Missing required inputs for {step.name}: {missing_inputs}")
-                
+
                 # Execute step with retry logic
                 step_result = await self._execute_step_with_retry(step)
-                
+
                 # Update pipeline state with outputs
                 for output_key in step.outputs:
                     if output_key in step_result:
                         self.pipeline_state[output_key] = step_result[output_key]
-                
+
                 logger.info(f"✅ Step {step.name} completed successfully")
-            
+
             # Generate final metrics
             await self._generate_final_metrics(start_time)
-            
+
             # Save pipeline results
             await self._save_pipeline_results()
-            
+
             logger.info("🎉 Pipeline completed successfully!")
             return {
                 "status": "success",
                 "outputs": self.pipeline_state,
                 "metrics": self.metrics.dict()
             }
-            
+
         except Exception as e:
             logger.error(f"❌ Pipeline failed at step {self.current_step}: {e}")
             await self._handle_pipeline_failure(e)
@@ -206,7 +207,7 @@ class PipelineOrchestrator:
                 "failed_step": self.current_step,
                 "error_log": self.error_log
             }
-    
+
     def _check_required_inputs(self, step: PipelineStep) -> List[str]:
         """Check if required inputs are available for a step."""
         missing = []
@@ -214,11 +215,11 @@ class PipelineOrchestrator:
             if input_key not in self.pipeline_state:
                 missing.append(input_key)
         return missing
-    
+
     async def _execute_step_with_retry(self, step: PipelineStep) -> Dict[str, Any]:
         """Execute a pipeline step with retry logic."""
         last_error = None
-        
+
         for attempt in range(step.retry_count):
             try:
                 # Execute step with timeout
@@ -227,40 +228,43 @@ class PipelineOrchestrator:
                     timeout=step.timeout
                 )
                 return result
-                
+
             except asyncio.TimeoutError:
                 error_msg = f"Step {step.name} timed out after {step.timeout} seconds"
                 logger.error(error_msg)
                 last_error = TimeoutError(error_msg)
-                
+
             except Exception as e:
                 error_msg = f"Step {step.name} failed (attempt {attempt + 1}/{step.retry_count}): {e}"
                 logger.error(error_msg)
                 last_error = e
-                
+
                 if step.critical:
                     break
-                
+
                 # Wait before retry
                 if attempt < step.retry_count - 1:
                     await asyncio.sleep(2 ** attempt)  # Exponential backoff
-        
+
         # Log error and raise
         self.error_log.append({
             "step": step.name,
             "error": str(last_error),
             "timestamp": datetime.now().isoformat()
         })
-        
+
         if step.critical:
             raise last_error
         else:
             logger.warning(f"Non-critical step {step.name} failed, continuing...")
             return {}
-    
+
     async def _process_inputs(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Process input files and extract structured content using the real input processing module."""
-        from ai_doc_gen.input_processing import parse_document, extract_structured_content
+        from ai_doc_gen.input_processing import (
+            extract_structured_content,
+            parse_document,
+        )
         input_files = state.get("input_files", [])
         all_content = []
         for file_path in input_files:
@@ -269,11 +273,14 @@ class PipelineOrchestrator:
             # Convert to dicts for serialization and downstream use
             all_content.extend([c.model_dump() if hasattr(c, 'model_dump') else c.dict() for c in content])
         return {"structured_content": all_content}
-    
+
     async def _run_managing_agent(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Run the managing agent for initial analysis on structured content."""
         from ai_doc_gen.agents.managing_agent import ManagingAgent
-        from ai_doc_gen.input_processing.structured_extractor import ExtractedContent, ContentType
+        from ai_doc_gen.input_processing.structured_extractor import (
+            ContentType,
+            ExtractedContent,
+        )
         content = state["structured_content"]
         # Rehydrate dicts to ExtractedContent objects
         hydrated_content = []
@@ -318,7 +325,7 @@ class PipelineOrchestrator:
             "initial_analysis": content_dicts,
             "confidence_scores": managing_results["confidence_scores"]
         }
-    
+
     async def _run_gap_analysis(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Run gap analysis on the initial analysis."""
         content = state["initial_analysis"]
@@ -338,11 +345,14 @@ class PipelineOrchestrator:
             "gap_report": gap_report.dict(),
             "sme_questions": sme_questions
         }
-    
+
     async def _run_review_agent(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Run the review agent for validation and provenance checking."""
         from ai_doc_gen.agents.review_agent import ReviewAgent
-        from ai_doc_gen.input_processing.structured_extractor import ExtractedContent, ContentType
+        from ai_doc_gen.input_processing.structured_extractor import (
+            ContentType,
+            ExtractedContent,
+        )
         initial_analysis = state["initial_analysis"]
         content = state["structured_content"]
         # Rehydrate dicts to ExtractedContent objects
@@ -381,7 +391,7 @@ class PipelineOrchestrator:
             "validated_analysis": validated_items,
             "provenance_report": provenance_report
         }
-    
+
     async def _generate_draft(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Generate final draft document in both JSON and Markdown formats."""
         validated_analysis = state["validated_analysis"]
@@ -478,12 +488,12 @@ class PipelineOrchestrator:
             "draft_markdown_file": str(md_file),
             "final_metrics": self.metrics.dict()
         }
-    
+
     async def _generate_final_metrics(self, start_time: float) -> None:
         """Generate comprehensive final metrics."""
         end_time = time.time()
         duration = end_time - start_time
-        
+
         self.metrics.pipeline_run = {
             "timestamp": datetime.now().isoformat(),
             "duration_seconds": round(duration, 2),
@@ -491,7 +501,7 @@ class PipelineOrchestrator:
             "successful_steps": len(self.steps) - len(self.error_log),
             "failed_steps": len(self.error_log)
         }
-        
+
         # Calculate confidence metrics
         if "confidence_scores" in self.pipeline_state:
             scores = list(self.pipeline_state["confidence_scores"].values())
@@ -501,7 +511,7 @@ class PipelineOrchestrator:
                 "max_confidence": max(scores) if scores else 0,
                 "total_items": len(scores)
             }
-        
+
         # Calculate gap analysis metrics
         if "gap_report" in self.pipeline_state:
             gap_report = self.pipeline_state["gap_report"]
@@ -511,28 +521,28 @@ class PipelineOrchestrator:
                 "high_priority_gaps": gap_report.get("high_priority_gaps", 0),
                 "estimated_resolution_time": gap_report.get("estimated_resolution_time", "N/A")
             }
-    
+
     async def _save_pipeline_results(self) -> None:
         """Save pipeline results to output directory."""
         output_dir = Path(self.pipeline_state["output_dir"])
-        
+
         # Save metrics
         metrics_file = output_dir / "pipeline_metrics.json"
         with open(metrics_file, 'w') as f:
             json.dump(self.metrics.dict(), f, indent=2)
-        
+
         # Save provenance data
         provenance_file = output_dir / "provenance_data.json"
         self.provenance_tracker.export_provenance_data(str(provenance_file))
-        
+
         # Save gap report
         if "gap_report" in self.pipeline_state:
             gap_file = output_dir / "gap_report.json"
             with open(gap_file, 'w') as f:
                 json.dump(self.pipeline_state["gap_report"], f, indent=2)
-        
+
         logger.info(f"Pipeline results saved to {output_dir}")
-    
+
     async def _handle_pipeline_failure(self, error: Exception) -> None:
         """Handle pipeline failure and save error state with enum-safe serialization."""
         import json
@@ -549,7 +559,7 @@ class PipelineOrchestrator:
         with open("pipeline_error_state.json", "w") as f:
             json.dump(error_state, f, indent=2)
         logger.error(f"Pipeline failed: {error}")
-    
+
     def get_pipeline_status(self) -> Dict[str, Any]:
         """Get current pipeline status."""
         return {
@@ -558,4 +568,4 @@ class PipelineOrchestrator:
             "pipeline_state": self.pipeline_state,
             "error_log": self.error_log,
             "metrics": self.metrics.dict()
-        } 
+        }

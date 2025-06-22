@@ -6,12 +6,10 @@ structured content for AI processing. Based on patterns from the original
 codebase but enhanced for multi-format support.
 """
 
-import os
 import logging
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 from abc import ABC, abstractmethod
-import json
 from pydantic import BaseModel
 
 # PDF processing

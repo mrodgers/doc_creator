@@ -19,7 +19,6 @@ Output:
 
 import json
 import openai
-import os
 import re
 
 def load_json(path):

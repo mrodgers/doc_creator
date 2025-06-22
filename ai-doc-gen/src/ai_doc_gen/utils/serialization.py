@@ -3,13 +3,14 @@ Serialization utilities for AI documentation generation.
 """
 
 import json
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Union
-from datetime import datetime
+
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     """Enhanced JSON encoder that handles enums, dates, and other special types."""
-    
+
     def default(self, obj: Any) -> Any:
         """Handle special object types for JSON serialization."""
         if isinstance(obj, Enum):
@@ -46,4 +47,4 @@ def safe_json_dumps(obj: Any, **kwargs) -> str:
 
 def safe_json_loads(s: str) -> Any:
     """Safely deserialize a JSON string."""
-    return json.loads(s) 
+    return json.loads(s)

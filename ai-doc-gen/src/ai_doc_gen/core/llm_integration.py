@@ -8,14 +8,15 @@ Based on the original spec_extractor.py but enhanced for:
 - Better error handling and retry logic
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
-from typing import Dict, List, Optional, Any, Union
+import os
 from abc import ABC, abstractmethod
-from openai import OpenAI
+from typing import Any, Dict, List, Optional
+
 import anthropic
+from openai import OpenAI
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -30,12 +31,12 @@ class LLMResponse(BaseModel):
 
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
-    
+
     @abstractmethod
     async def call_llm(
-        self, 
-        system_prompt: str, 
-        user_prompt: str, 
+        self,
+        system_prompt: str,
+        user_prompt: str,
         model: str,
         temperature: float = 0.0,
         max_tokens: int = 4000
@@ -45,14 +46,14 @@ class LLMProvider(ABC):
 
 class OpenAIProvider(LLMProvider):
     """OpenAI API provider implementation using the new SDK."""
-    
+
     def __init__(self, api_key: Optional[str] = None):
         self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
-    
+
     async def call_llm(
-        self, 
-        system_prompt: str, 
-        user_prompt: str, 
+        self,
+        system_prompt: str,
+        user_prompt: str,
         model: str = "gpt-4o",
         temperature: float = 0.0,
         max_tokens: int = 4000
@@ -63,7 +64,7 @@ class OpenAIProvider(LLMProvider):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ]
-            
+
             # Run the synchronous OpenAI call in an async context
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
@@ -72,28 +73,28 @@ class OpenAIProvider(LLMProvider):
                 temperature=temperature,
                 max_tokens=max_tokens
             )
-            
+
             return LLMResponse(
                 content=response.choices[0].message.content,
                 confidence=95.0,  # OpenAI doesn't provide confidence scores
                 model_used=model,
                 tokens_used=response.usage.total_tokens if response.usage else None
             )
-            
+
         except Exception as e:
             logger.error(f"OpenAI API call failed: {e}")
             raise
 
 class AnthropicProvider(LLMProvider):
     """Anthropic Claude API provider implementation."""
-    
+
     def __init__(self, api_key: Optional[str] = None):
         self.client = anthropic.AsyncAnthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
-    
+
     async def call_llm(
-        self, 
-        system_prompt: str, 
-        user_prompt: str, 
+        self,
+        system_prompt: str,
+        user_prompt: str,
         model: str = "claude-3-haiku-20240307",
         temperature: float = 0.0,
         max_tokens: int = 4000
@@ -107,32 +108,32 @@ class AnthropicProvider(LLMProvider):
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}]
             )
-            
+
             return LLMResponse(
                 content=response.content[0].text,
                 confidence=95.0,  # Anthropic doesn't provide confidence scores
                 model_used=model,
                 tokens_used=response.usage.input_tokens + response.usage.output_tokens if response.usage else None
             )
-            
+
         except Exception as e:
             logger.error(f"Anthropic API call failed: {e}")
             raise
 
 class LLMClient:
     """Enhanced LLM client supporting multiple providers and agents."""
-    
+
     def __init__(self, provider: str = "openai", api_key: Optional[str] = None):
         """Initialize LLM client with specified provider."""
         self.provider_name = provider.lower()
-        
+
         if self.provider_name == "openai":
             self.provider = OpenAIProvider(api_key)
         elif self.provider_name == "anthropic":
             self.provider = AnthropicProvider(api_key)
         else:
             raise ValueError(f"Unsupported provider: {provider}")
-    
+
     async def call_llm_with_confidence(
         self,
         system_prompt: str,
@@ -144,7 +145,7 @@ class LLMClient:
         """Call LLM with confidence scoring and structured response."""
         if model is None:
             model = "gpt-4o" if self.provider_name == "openai" else "claude-3-haiku-20240307"
-        
+
         return await self.provider.call_llm(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
@@ -152,7 +153,7 @@ class LLMClient:
             temperature=temperature,
             max_tokens=max_tokens
         )
-    
+
     async def extract_structured_data(
         self,
         content: str,
@@ -160,8 +161,8 @@ class LLMClient:
         confidence_threshold: float = 85.0
     ) -> Dict[str, Any]:
         """Extract structured data from content with confidence scoring."""
-        
-        system_prompt = f"""You are a technical document parser specialized in extracting structured data.
+
+        system_prompt = """You are a technical document parser specialized in extracting structured data.
 You must extract data according to the provided schema and return results with confidence scores.
 Always return valid JSON with the exact structure specified."""
 
@@ -178,7 +179,7 @@ Return the extracted data in JSON format with confidence scores (0-100) for each
             system_prompt=system_prompt,
             user_prompt=user_prompt
         )
-        
+
         def clean_json_response(text):
             text = text.strip()
             if text.startswith('```'):
@@ -189,7 +190,7 @@ Return the extracted data in JSON format with confidence scores (0-100) for each
             if text.endswith('```'):
                 text = text.rstrip('`').strip()
             return text
-        
+
         try:
             cleaned = clean_json_response(response.content)
             extracted_data = json.loads(cleaned)
@@ -203,14 +204,14 @@ Return the extracted data in JSON format with confidence scores (0-100) for each
             logger.error(f"Failed to parse LLM response as JSON: {e}")
             logger.error(f"Raw response: {response.content}")
             raise
-    
+
     async def generate_sme_questions(
         self,
         gap_analysis: Dict[str, Any],
         context: str
     ) -> List[Dict[str, str]]:
         """Generate SME questions based on gap analysis."""
-        
+
         system_prompt = """You are an expert technical writer who generates clear, prioritized questions for Subject Matter Experts (SMEs).
 Your questions should be specific, actionable, and help resolve documentation gaps."""
 
@@ -230,7 +231,7 @@ Return the questions as a JSON array with objects containing:
             system_prompt=system_prompt,
             user_prompt=user_prompt
         )
-        
+
         def clean_json_response(text):
             text = text.strip()
             if text.startswith('```'):
@@ -241,7 +242,7 @@ Return the questions as a JSON array with objects containing:
             if text.endswith('```'):
                 text = text.rstrip('`').strip()
             return text
-        
+
         try:
             cleaned = clean_json_response(response.content)
             questions = json.loads(cleaned)
@@ -268,4 +269,4 @@ async def call_llm_with_confidence(
         model=model,
         temperature=temperature,
         max_tokens=max_tokens
-    ) 
+    )

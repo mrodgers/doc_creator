@@ -214,7 +214,7 @@ def generate_unit_rules(units: List[str]) -> List[Dict]:
         
         rule = {
             'pattern': pattern,
-            'placeholder': f'{{{{<spec_key>}}}}',  # Will be replaced with actual spec name
+            'placeholder': '{{<spec_key>}}',  # Will be replaced with actual spec name
             'priority': len(pattern),  # Longer patterns get higher priority
             'description': f'Auto-generated rule for {unit} measurements'
         }
@@ -253,7 +253,7 @@ def main():
     with open('units.yaml', 'w') as f:
         yaml.dump(units_data, f, default_flow_style=False, indent=2)
     
-    print(f"Saved units inventory to units.yaml")
+    print("Saved units inventory to units.yaml")
     
     # Save unit rules
     rules_data = {

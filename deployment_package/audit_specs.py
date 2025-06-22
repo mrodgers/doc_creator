@@ -19,7 +19,6 @@ Output:
 
 import json
 import openai
-import os
 import re
 
 def load_json(path):
@@ -380,7 +379,7 @@ def main():
     with open("corrected_specs.json", "w") as f:
         json.dump(corrected_specs, f, indent=2)
     
-    print(f"✅ Corrected specs saved to corrected_specs.json")
+    print("✅ Corrected specs saved to corrected_specs.json")
     print(f"Total specs: {len(corrected_specs)}")
     print(f"Specs audited: {len(specs_to_audit)}")
     

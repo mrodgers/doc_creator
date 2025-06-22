@@ -11,10 +11,9 @@ This module implements a step-by-step approach where:
 
 import json
 import os
-import time
 import re
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 import openai
 from dataclasses import dataclass, asdict
@@ -431,7 +430,7 @@ Analyze each document section and provide matches with detailed reasoning."""
             
             # Validate prompt
             if not SafetyValidator.is_valid_string(prompt):
-                print(f"   ❌ Invalid prompt generated")
+                print("   ❌ Invalid prompt generated")
                 return []
             
             response = self.client.chat.completions.create(
@@ -568,7 +567,7 @@ Provide your evaluation as JSON with these fields:
             
             # Validate evaluation prompt
             if not SafetyValidator.is_valid_string(evaluation_prompt):
-                print(f"   ❌ Invalid evaluation prompt")
+                print("   ❌ Invalid evaluation prompt")
                 return self._create_default_evaluation()
             
             response = self.client.chat.completions.create(
@@ -585,7 +584,7 @@ Provide your evaluation as JSON with these fields:
             
             # Validate evaluation response
             if not SafetyValidator.validate_llm_response(evaluation_text):
-                print(f"   ❌ Invalid evaluation response")
+                print("   ❌ Invalid evaluation response")
                 return self._create_default_evaluation()
             
             evaluation_data = self._parse_evaluation_response(evaluation_text)
@@ -663,7 +662,7 @@ Provide your suggestions as JSON with these fields:
             
             # Validate improvement prompt
             if not SafetyValidator.is_valid_string(improvement_prompt):
-                print(f"   ❌ Invalid improvement prompt")
+                print("   ❌ Invalid improvement prompt")
                 return self._create_default_improvements()
             
             response = self.client.chat.completions.create(
@@ -680,7 +679,7 @@ Provide your suggestions as JSON with these fields:
             
             # Validate improvement response
             if not SafetyValidator.validate_llm_response(improvement_text):
-                print(f"   ❌ Invalid improvement response")
+                print("   ❌ Invalid improvement response")
                 return self._create_default_improvements()
             
             improvement_data = self._parse_improvement_response(improvement_text)
@@ -748,7 +747,7 @@ Provide an improved version of the prompt that addresses the suggestions while m
             
             # Validate evolution prompt
             if not SafetyValidator.is_valid_string(evolution_prompt):
-                print(f"   ❌ Invalid evolution prompt")
+                print("   ❌ Invalid evolution prompt")
                 return
             
             response = self.client.chat.completions.create(
@@ -765,7 +764,7 @@ Provide an improved version of the prompt that addresses the suggestions while m
             
             # Validate evolved prompt
             if not SafetyValidator.is_valid_string(evolved_prompt):
-                print(f"   ❌ Invalid evolved prompt generated")
+                print("   ❌ Invalid evolved prompt generated")
                 return
             
             # Update prompt
@@ -885,20 +884,20 @@ Provide an improved version of the prompt that addresses the suggestions while m
         
         # Document info
         doc_info = results['document_info']
-        print(f"\n📄 DOCUMENT ANALYSIS:")
+        print("\n📄 DOCUMENT ANALYSIS:")
         print(f"   File: {doc_info['path']}")
         print(f"   Sections: {doc_info['sections_count']}")
         print(f"   Content Length: {doc_info['total_content_length']:,} characters")
         
         # Matching results
         matching = results['matching_results']
-        print(f"\n🎯 MATCHING PERFORMANCE:")
+        print("\n🎯 MATCHING PERFORMANCE:")
         print(f"   Coverage: {matching['coverage_percentage']:.1f}%")
         print(f"   Matches: {matching['matches_count']}/{matching['template_sections_count']}")
         
         # Evaluation
         evaluation = results['evaluation']
-        print(f"\n📊 SELF-EVALUATION:")
+        print("\n📊 SELF-EVALUATION:")
         print(f"   Overall Score: {evaluation['overall_score']:.1f}/100")
         
         if evaluation['confidence_issues']:
@@ -911,21 +910,21 @@ Provide an improved version of the prompt that addresses the suggestions while m
         # Improvements
         improvements = results['improvements']
         if improvements.get('should_evolve'):
-            print(f"\n🚀 PROMPT EVOLUTION:")
+            print("\n🚀 PROMPT EVOLUTION:")
             print(f"   Priority: {improvements.get('priority', 'unknown')}")
             print(f"   Expected Impact: {improvements.get('expected_impact', 'unknown')}")
             print(f"   Suggestions: {len(improvements.get('suggestions', []))}")
         
         # Prompt evolution
         evolution = results['prompt_evolution']
-        print(f"\n📈 PROMPT VERSION:")
+        print("\n📈 PROMPT VERSION:")
         print(f"   Current: {evolution['current_version']}")
         print(f"   Evolved This Run: {evolution['evolved_this_run']}")
         print(f"   Total Evolutions: {evolution['total_evolutions']}")
         
         # Cost tracking
         cost_tracking = results.get('cost_tracking', {})
-        print(f"\n💰 COST TRACKING:")
+        print("\n💰 COST TRACKING:")
         print(f"   Total Cost: ${cost_tracking.get('total_cost_usd', 0):.4f}")
         print(f"   Total Tokens: {cost_tracking.get('total_tokens', 0):,}")
         print(f"   API Calls: {cost_tracking.get('api_calls', 0)}")
@@ -974,9 +973,9 @@ def main():
     output_path = "adaptive_llm_matching_results.json"
     matcher.save_adaptive_results(results, output_path)
     
-    print(f"\n🎯 Adaptive LLM matching complete!")
+    print("\n🎯 Adaptive LLM matching complete!")
     print(f"   Results: {output_path}")
-    print(f"   Prompt History: adaptive_prompt_history.json")
+    print("   Prompt History: adaptive_prompt_history.json")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,6 @@ Tests that measurement units are correctly templated.
 import pytest
 import re
 import yaml
-import json
 from typing import List, Dict
 
 def load_unit_rules() -> List[Dict]:

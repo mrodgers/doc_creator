@@ -4,8 +4,6 @@ Unit tests for confidence scoring functionality.
 Tests parsing, validation, and threshold-based triage.
 """
 
-import pytest
-import json
 import tempfile
 import os
 from spec_extractor import save_extracted_specs

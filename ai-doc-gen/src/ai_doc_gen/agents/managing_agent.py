@@ -2,10 +2,13 @@
 Managing Agent for documentation workflow orchestration.
 """
 
-from typing import Any, Dict, List, Optional
-from ai_doc_gen.input_processing.structured_extractor import ExtractedContent
+from typing import Any, Dict, List
+
 from ai_doc_gen.core.confidence_scoring import ConfidenceScorer, GapAnalysis
+from ai_doc_gen.input_processing.structured_extractor import ExtractedContent
+
 from .base import AgentBase
+
 
 class ManagingAgent(AgentBase):
     """Agent for managing documentation workflow, gap detection, and SME queries."""
@@ -18,14 +21,14 @@ class ManagingAgent(AgentBase):
         """Orchestrate workflow: detect gaps, generate SME questions, prepare for draft generation."""
         # Step 1: Score confidence for each content item
         confidence_scores = {item.title: item.confidence * 100 for item in extracted_content}
-        
+
         # Step 2: Analyze gaps
         content_dict = {item.title: item.content for item in extracted_content}
         gaps = self.confidence_scorer.analyze_gaps(content_dict, confidence_scores)
-        
+
         # Step 3: Generate SME questions for low-confidence gaps
         sme_questions = self._generate_sme_questions(gaps)
-        
+
         # Step 4: Prepare results
         results = {
             "confidence_scores": confidence_scores,
@@ -53,4 +56,4 @@ class ManagingAgent(AgentBase):
 
     def report(self) -> Dict[str, Any]:
         """Return a summary of the last run."""
-        return self.last_run_results or {"message": "No run has been performed yet."} 
+        return self.last_run_results or {"message": "No run has been performed yet."}

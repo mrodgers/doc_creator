@@ -1,5 +1,3 @@
-import pytest
-import json
 from markdown_renderer import render_markdown
 
 # Sample minimal template JSON

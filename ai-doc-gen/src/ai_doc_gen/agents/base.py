@@ -3,7 +3,8 @@ Base classes and interfaces for AI agents.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
+
 
 class AgentBase(ABC):
     """Abstract base class for all agents."""
@@ -18,4 +19,4 @@ class AgentBase(ABC):
     @abstractmethod
     def report(self) -> Dict[str, Any]:
         """Return a summary or report of the agent's actions/results."""
-        pass 
+        pass

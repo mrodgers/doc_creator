@@ -183,14 +183,14 @@ def save_extracted_specs(output_str, output_path, threshold=90):
         json.dump(triage_results, f, indent=2)
     
     # Print summary
-    print(f"\n=== Confidence Triage Summary ===")
+    print("\n=== Confidence Triage Summary ===")
     print(f"Threshold: {threshold}%")
     print(f"Total specs: {len(specs)}")
     print(f"Auto-approved: {len(auto_approved)} ({len(auto_approved)/len(specs)*100:.1f}%)")
     print(f"Review needed: {len(review_needed)} ({len(review_needed)/len(specs)*100:.1f}%)")
     
     if review_needed:
-        print(f"\nSpecs requiring review:")
+        print("\nSpecs requiring review:")
         for spec in review_needed:
             print(f"  - {spec['spec_item']}: {spec['value']} (confidence: {spec['confidence']}%)")
     
