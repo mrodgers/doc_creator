@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Integrate Nexus-specific data into the adaptive matcher system.
+Simplified approach for MVP - merge Nexus acronyms into existing file.
 """
 
 import json
@@ -29,20 +30,33 @@ def load_nexus_data() -> Dict[str, Any]:
         return {}
 
 
-def enhance_acronym_expander(nexus_data: Dict[str, Any]) -> AcronymExpander:
-    """Enhance the acronym expander with Nexus-specific acronyms."""
-    print("🔧 Enhancing acronym expander with Nexus data...")
+def merge_nexus_acronyms(nexus_data: Dict[str, Any]) -> None:
+    """Merge Nexus acronyms into the existing acronym file."""
+    print("🔧 Merging Nexus acronyms into existing acronym file...")
     
     # Load existing acronyms
-    expander = AcronymExpander()
+    existing_file = "cisco_acronyms_comprehensive.json"
+    try:
+        with open(existing_file, 'r') as f:
+            existing_acronyms = json.load(f)
+    except FileNotFoundError:
+        print(f"❌ {existing_file} not found. Creating new file.")
+        existing_acronyms = {}
     
-    # Add Nexus acronyms
+    # Get Nexus acronyms
     nexus_acronyms = nexus_data.get('acronyms', {})
-    for acronym, data in nexus_acronyms.items():
-        expander.add_acronym(acronym, data['definition'])
     
-    print(f"✅ Added {len(nexus_acronyms)} Nexus acronyms to expander")
-    return expander
+    # Merge acronyms (Nexus takes precedence for duplicates)
+    merged_acronyms = existing_acronyms.copy()
+    for acronym, data in nexus_acronyms.items():
+        merged_acronyms[acronym] = data
+    
+    # Save merged acronyms
+    with open(existing_file, 'w') as f:
+        json.dump(merged_acronyms, f, indent=2)
+    
+    print(f"✅ Merged {len(nexus_acronyms)} Nexus acronyms into {existing_file}")
+    print(f"   Total acronyms: {len(merged_acronyms)}")
 
 
 def generate_nexus_synonyms(nexus_data: Dict[str, Any], llm_utility: LLMUtility) -> Dict[str, List[str]]:
@@ -51,12 +65,12 @@ def generate_nexus_synonyms(nexus_data: Dict[str, Any], llm_utility: LLMUtility)
     
     # Get Nexus features for context
     features = nexus_data.get('features', [])
-    feature_texts = [f['text'] for f in features[:10]]  # Use first 10 features
+    feature_texts = [f['text'] for f in features[:5]]  # Use first 5 features
     
     # Create Nexus-specific template sections
     nexus_sections = [
         "Nexus Hardware Installation",
-        "NX-OS Configuration",
+        "NX-OS Configuration", 
         "ACI Mode Setup",
         "Standalone Mode Configuration",
         "Fabric Extender (FEX) Installation",
@@ -64,12 +78,7 @@ def generate_nexus_synonyms(nexus_data: Dict[str, Any], llm_utility: LLMUtility)
         "VLAN Configuration",
         "VRF Setup",
         "Routing Protocol Configuration",
-        "Quality of Service (QoS) Setup",
-        "Security Configuration",
-        "Management and Monitoring",
-        "Troubleshooting Procedures",
-        "Upgrade and Migration",
-        "Performance Optimization"
+        "Quality of Service (QoS) Setup"
     ]
     
     synonyms = {}
@@ -79,7 +88,7 @@ def generate_nexus_synonyms(nexus_data: Dict[str, Any], llm_utility: LLMUtility)
         
         # Create enhanced prompt with Nexus context
         prompt = f"""
-Generate 10-15 synonyms, abbreviations, and related terms for this Nexus hardware installation guide section:
+Generate 8-12 synonyms, abbreviations, and related terms for this Nexus hardware installation guide section:
 
 Section: {section}
 
@@ -91,7 +100,7 @@ Consider:
 - Configuration commands and parameters
 - Common abbreviations used in Nexus documentation
 
-Nexus Context: {', '.join(feature_texts[:3])}
+Nexus Context: {', '.join(feature_texts[:2])}
 
 Provide only the synonyms as a comma-separated list, no explanations.
 """
@@ -188,47 +197,11 @@ def create_nexus_template_sections() -> List[Dict[str, Any]]:
             "content": "QoS policies, CoS, and DSCP configuration",
             "category": "configuration",
             "priority": "medium"
-        },
-        {
-            "id": "security_setup",
-            "title": "Security Configuration",
-            "content": "Access control lists, authentication, and security policies",
-            "category": "security",
-            "priority": "high"
-        },
-        {
-            "id": "management_monitoring",
-            "title": "Management and Monitoring",
-            "content": "SNMP, Syslog, and monitoring configuration",
-            "category": "management",
-            "priority": "medium"
-        },
-        {
-            "id": "troubleshooting",
-            "title": "Troubleshooting Procedures",
-            "content": "Common issues, diagnostic commands, and resolution steps",
-            "category": "troubleshooting",
-            "priority": "high"
-        },
-        {
-            "id": "upgrade_migration",
-            "title": "Upgrade and Migration",
-            "content": "NX-OS upgrade procedures and migration strategies",
-            "category": "maintenance",
-            "priority": "medium"
-        },
-        {
-            "id": "performance_optimization",
-            "title": "Performance Optimization",
-            "content": "Performance tuning, optimization, and best practices",
-            "category": "optimization",
-            "priority": "low"
         }
     ]
 
 
-def test_nexus_integration(nexus_data: Dict[str, Any], enhanced_expander: AcronymExpander, 
-                          nexus_synonyms: Dict[str, List[str]], llm_utility: LLMUtility) -> Dict[str, Any]:
+def test_nexus_integration(nexus_data: Dict[str, Any], nexus_synonyms: Dict[str, List[str]], llm_utility: LLMUtility) -> Dict[str, Any]:
     """Test the Nexus integration with sample content."""
     print("🧪 Testing Nexus integration...")
     
@@ -269,10 +242,13 @@ def test_nexus_integration(nexus_data: Dict[str, Any], enhanced_expander: Acrony
     # Create Nexus template sections
     nexus_templates = create_nexus_template_sections()
     
+    # Initialize acronym expander (will now include Nexus acronyms)
+    acronym_expander = AcronymExpander()
+    
     # Test acronym expansion
     print("   Testing acronym expansion...")
     test_text = "Configure NX-OS with ACI mode, setup vPC, configure VLAN and VRF, enable BGP and OSPF routing protocols"
-    expanded_text = enhanced_expander.expand_text(test_text)
+    expanded_text = acronym_expander.expand_acronyms_in_text(test_text)
     print(f"     Original: {test_text}")
     print(f"     Expanded: {expanded_text}")
     
@@ -281,7 +257,7 @@ def test_nexus_integration(nexus_data: Dict[str, Any], enhanced_expander: Acrony
     matcher = AdaptiveLLMMatcher(
         templates=nexus_templates,
         llm_utility=llm_utility,
-        acronym_expander=enhanced_expander
+        acronym_expander=acronym_expander
     )
     
     # Add Nexus synonyms to matcher
@@ -346,14 +322,14 @@ def main():
     # Initialize LLM utility
     llm_utility = LLMUtility()
     
-    # Enhance acronym expander
-    enhanced_expander = enhance_acronym_expander(nexus_data)
+    # Merge Nexus acronyms into existing file
+    merge_nexus_acronyms(nexus_data)
     
     # Generate Nexus synonyms
     nexus_synonyms = generate_nexus_synonyms(nexus_data, llm_utility)
     
     # Test integration
-    test_results = test_nexus_integration(nexus_data, enhanced_expander, nexus_synonyms, llm_utility)
+    test_results = test_nexus_integration(nexus_data, nexus_synonyms, llm_utility)
     
     # Save results
     save_integration_results(nexus_synonyms, test_results)
@@ -361,7 +337,7 @@ def main():
     # Print summary
     print("\n📊 Integration Summary:")
     print("=" * 40)
-    print(f"✅ Enhanced acronym expander with {len(nexus_data.get('acronyms', {}))} Nexus acronyms")
+    print(f"✅ Merged {len(nexus_data.get('acronyms', {}))} Nexus acronyms")
     print(f"✅ Generated synonyms for {len(nexus_synonyms)} Nexus sections")
     print(f"✅ Created {len(create_nexus_template_sections())} Nexus template sections")
     print(f"✅ Tested with {test_results['test_candidates']} candidates")
@@ -376,11 +352,10 @@ def main():
     print("1. Review generated synonyms in nexus_synonyms.json")
     print("2. Test with real Nexus documentation")
     print("3. Fine-tune matching parameters")
-    print("4. Integrate into production system")
+    print("4. Validate efficacy improvements")
     
     return {
         'nexus_data': nexus_data,
-        'enhanced_expander': enhanced_expander,
         'nexus_synonyms': nexus_synonyms,
         'test_results': test_results
     }
