@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Inputs
+    participant InputProcessor
+    participant ManagingAgent
+    participant ReviewAgent
+    participant UI
+    participant Writer
+
+    Inputs ->> InputProcessor: Provide structured inputs
+    InputProcessor ->> ManagingAgent: Extracted structured data
+    ManagingAgent ->> DraftGeneration: Initiate draft generation
+    DraftGeneration ->> ReviewAgent: Generated draft & gaps
+    ReviewAgent ->> ManagingAgent: Audit results
+    ManagingAgent ->> UI: Draft, gaps, and confidence scores
+    UI ->> Writer: Present interactive visualization
+    Writer ->> ManagingAgent: Clarifications & SME queries
+    ManagingAgent ->> Writer: Refined draft & updated gaps

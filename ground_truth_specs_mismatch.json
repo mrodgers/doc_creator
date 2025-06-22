@@ -1,0 +1,126 @@
+[
+  {
+    "spec_item": "Product name",
+    "value": "Cisco Nexus 9364C-H1 switch"
+  },
+  {
+    "spec_item": "Model number",
+    "value": "N9K-C9364C-H1"
+  },
+  {
+    "spec_item": "Rack units",
+    "value": "2 RU"
+  },
+  {
+    "spec_item": "Traffic processing capability",
+    "value": "3.2T"
+  },
+  {
+    "spec_item": "QSFP port count",
+    "value": "32"
+  },
+  {
+    "spec_item": "Management ports",
+    "value": "2 (1 RJ-45 port and 1 SFP port)"
+  },
+  {
+    "spec_item": "Console port",
+    "value": "1"
+  },
+  {
+    "spec_item": "USB port",
+    "value": "1"
+  },
+  {
+    "spec_item": "Fan modules",
+    "value": "4 (3 for operations and 1 for redundancy)"
+  },
+  {
+    "spec_item": "Port-side exhaust fan module part number",
+    "value": "NXAS-FAN-160CFM2-PE"
+  },
+  {
+    "spec_item": "Port-side intake fan module part number",
+    "value": "NXAS-FAN-160CFM2-PI"
+  },
+  {
+    "spec_item": "Power supply modules",
+    "value": "2 (1 for operations and 1 for redundancy)"
+  },
+  {
+    "spec_item": "1400-W AC power supply part number",
+    "value": "NXA-PAC-1400W-PE"
+  },
+  {
+    "spec_item": "1400-W AC power supply part number (intake)",
+    "value": "NXA-PAC-1400W-PI"
+  },
+  {
+    "spec_item": "2000-W HVAC/HVDC power supply part number",
+    "value": "NXA-PHV-2KW-PI"
+  },
+  {
+    "spec_item": "2000-W DC power supply part number",
+    "value": "NXA-PDC-2KW-PE"
+  },
+  {
+    "spec_item": "2000-W DC power supply part number (intake)",
+    "value": "NXA-PDC-2KW-PI"
+  },
+  {
+    "spec_item": "Chassis width",
+    "value": "17.41 inches (44.23 cm)"
+  },
+  {
+    "spec_item": "Chassis depth",
+    "value": "22.27 inches (56.58 cm)"
+  },
+  {
+    "spec_item": "Chassis height",
+    "value": "3.4 inches (8.6 cm)"
+  },
+  {
+    "spec_item": "Chassis weight",
+    "value": "44 lb (20 kg)"
+  },
+  {
+    "spec_item": "Fan module weight",
+    "value": "1.3 lb (0.59 kg)"
+  },
+  {
+    "spec_item": "Power supply module weight",
+    "value": "2.64 lb (1.2 kg)"
+  },
+  {
+    "spec_item": "Power input requirements",
+    "value": "605W typical, 1100W maximum"
+  },
+  {
+    "spec_item": "Heat dissipation",
+    "value": "4248.116 BTUs per hour"
+  },
+  {
+    "spec_item": "Operating temperature",
+    "value": "32 to 104 degrees Fahrenheit (0 to 40 degrees Celsius)"
+  },
+  {
+    "spec_item": "Non-operating temperature",
+    "value": "-40 to 158 degrees Fahrenheit (-40 to 70 degrees Celsius)"
+  },
+  {
+    "spec_item": "Altitude rating",
+    "value": "10,000 ft (3048 m)"
+  },
+  {
+    "spec_item": "Humidity requirements",
+    "value": "Climate-controlled buildings"
+  },
+  {
+    "spec_item": "Power supply redundancy",
+    "value": "1+1"
+  },
+  {
+    "spec_item": "Regulatory compliance",
+    "value": "NEBS"
+  }
+] 

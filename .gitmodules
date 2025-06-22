@@ -1,0 +1,3 @@
+[submodule "adaptive-llm-matcher"]
+	path = adaptive-llm-matcher
+	url = https://github.com/mrodgers/doc_creator.git

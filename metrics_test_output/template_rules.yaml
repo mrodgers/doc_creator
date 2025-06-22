@@ -1,0 +1,136 @@
+# template_rules.yaml (save this in the same directory)
+# ----------------------------------------
+# Defines config-driven patterns for spec templating
+# ----------------------------------------
+rules:
+  - name: rack_units
+    pattern: '\b(?P<value>\d+)[ -]?rackunit[s]?\b'
+    placeholder: '{{Rack units}}'
+    context_keywords: ['rack', 'dimension']
+
+  - name: qsfp_ports
+    pattern: '\b(?P<value>\d+)\s+100[- ]Gigabit\s+QSFP\s+ports\b'
+    placeholder: '{{QSFP port count}}'
+    context_keywords: ['port', 'gigabit']
+
+  # Product name and model number (compressed text format)
+  - name: product_name
+    pattern: 'CiscoNexus9364C-H1switch'
+    placeholder: '{{Product name}}'
+    context_keywords: ['cisco', 'nexus', 'switch']
+
+  - name: model_number
+    pattern: 'N9K-C9364C-H1'
+    placeholder: '{{Model number}}'
+    context_keywords: ['model', 'part', 'number']
+
+  # Traffic processing capability (compressed text format)
+  - name: traffic_capability
+    pattern: '6\.4Ttraffic-processingcapability'
+    placeholder: '{{Traffic processing capability}} traffic-processing capability'
+    context_keywords: ['traffic', 'processing', 'capability']
+
+  # Management ports (compressed text format)
+  - name: management_ports
+    pattern: 'Twomanagementports\(oneRJ-45portandoneSFPport\)'
+    placeholder: '{{Management ports}}'
+    context_keywords: ['management', 'port', 'rj-45', 'sfp']
+
+  # Console and USB ports (compressed text format)
+  - name: console_port
+    pattern: 'OneConsoleport'
+    placeholder: '{{Console port}} Console port'
+    context_keywords: ['console', 'port']
+
+  - name: usb_port
+    pattern: 'OneUSBport'
+    placeholder: '{{USB port}} USB port'
+    context_keywords: ['usb', 'port']
+
+  # Fan modules description (compressed text format)
+  - name: fan_modules_desc
+    pattern: 'Fanmodules\(four—threeforoperationsandoneforredundancy\[n\+1\]\)'
+    placeholder: '{{Fan modules}}'
+    context_keywords: ['fan', 'module', 'redundancy']
+
+  # Power supply modules description (compressed text format)
+  - name: power_supply_desc
+    pattern: 'Powersupplymodules\(two—oneforoperationsandoneforredundancy\[1\+1\]\)'
+    placeholder: '{{Power supply modules}}'
+    context_keywords: ['power', 'supply', 'redundancy']
+
+  # Complete fan module part numbers
+  - name: fan_exhaust_part
+    pattern: 'NXAS-FAN-160CFM2-PE'
+    placeholder: '{{Port-side exhaust fan module part number}}'
+    context_keywords: ['fan', 'exhaust', 'part']
+
+  - name: fan_intake_part
+    pattern: 'NXAS-FAN-160CFM2-PI'
+    placeholder: '{{Port-side intake fan module part number}}'
+    context_keywords: ['fan', 'intake', 'part']
+
+  # Complete power supply part numbers
+  - name: ac_power_1400w_pe
+    pattern: 'NXA-PAC-1400W-PE'
+    placeholder: '{{1400-W AC power supply part number}}'
+    context_keywords: ['power', 'ac', '1400w']
+
+  - name: ac_power_1400w_pi
+    pattern: 'NXA-PAC-1400W-PI'
+    placeholder: '{{1400-W AC power supply part number (intake)}}'
+    context_keywords: ['power', 'ac', '1400w', 'intake']
+
+  - name: hvac_power_2kw_pi
+    pattern: 'NXA-PHV-2KW-PI'
+    placeholder: '{{2000-W HVAC/HVDC power supply part number}}'
+    context_keywords: ['power', 'hvac', '2kw']
+
+  - name: dc_power_2kw_pe
+    pattern: 'NXA-PDC-2KW-PE'
+    placeholder: '{{2000-W DC power supply part number}}'
+    context_keywords: ['power', 'dc', '2kw']
+
+  - name: dc_power_2kw_pi
+    pattern: 'NXA-PDC-2KW-PI'
+    placeholder: '{{2000-W DC power supply part number (intake)}}'
+    context_keywords: ['power', 'dc', '2kw', 'intake']
+
+  # Environmental specifications (compressed text format)
+  - name: operating_temp
+    pattern: '32to104degreesFahrenheit\(0to40degreesCelsius\)'
+    placeholder: '{{Operating temperature}}'
+    context_keywords: ['temperature', 'operating', 'fahrenheit', 'celsius']
+
+  - name: non_operating_temp
+    pattern: '-40to158degreesFahrenheit\(-40to70degreesCelsius\)'
+    placeholder: '{{Non-operating temperature}}'
+    context_keywords: ['temperature', 'non-operating', 'fahrenheit', 'celsius']
+
+  - name: altitude_rating
+    pattern: '10,000ft\(3048m\)'
+    placeholder: '{{Altitude rating}}'
+    context_keywords: ['altitude', 'ft', 'meter']
+
+  - name: humidity_req
+    pattern: 'Climate-controlledbuldings'
+    placeholder: '{{Humidity requirements}}'
+    context_keywords: ['humidity', 'climate', 'controlled']
+
+  # Regulatory compliance
+  - name: regulatory_compliance
+    pattern: 'NEBS'
+    placeholder: '{{Regulatory compliance}}'
+    context_keywords: ['regulatory', 'compliance', 'nebs']
+
+  # Power input requirements (compressed text format)
+  - name: power_input_req
+    pattern: '605Wtypical,1100Wmaximum'
+    placeholder: '{{Power input requirements}}'
+    context_keywords: ['power', 'input', 'watt', 'typical', 'maximum']
+
+  # Heat dissipation (compressed text format)
+  - name: heat_dissipation
+    pattern: '4248\.116BTUsperhour'
+    placeholder: '{{Heat dissipation}}'
+    context_keywords: ['heat', 'dissipation', 'btu', 'hour']

@@ -1,0 +1,93 @@
+{
+  "pipeline_run": {
+    "timestamp": "2025-06-19T16:07:32.608091",
+    "duration_seconds": 19.37,
+    "pdf_source": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+    "ground_truth_source": "ground_truth_specs.json",
+    "output_directory": "/Users/matthewrodgers/Git/hw_guide_with_o3_mini/metrics_test_output"
+  },
+  "extraction_metrics": {
+    "total_specs_extracted": 31,
+    "specs_with_values": 30,
+    "empty_specs": 1
+  },
+  "confidence_metrics": {
+    "threshold": 90,
+    "total_specs": 31,
+    "auto_approved": 30,
+    "review_needed": 1,
+    "auto_approval_rate": 96.77,
+    "review_rate": 3.23,
+    "average_confidence": 90.97,
+    "min_confidence": 85,
+    "max_confidence": 100,
+    "confidence_distribution": {
+      "90-100": 30,
+      "70-89": 1,
+      "50-69": 0,
+      "30-49": 0,
+      "0-29": 0
+    }
+  },
+  "audit_metrics": {
+    "specs_audited": 4,
+    "audit_rate": 12.9,
+    "audited_spec_items": [
+      "Product name",
+      "QSFP port count",
+      "Console port",
+      "USB port"
+    ]
+  },
+  "template_metrics": {
+    "template_placeholders": 37,
+    "template_size_bytes": 93807
+  },
+  "quality_metrics": {
+    "ground_truth_specs": 31,
+    "extracted_specs": 31,
+    "matched_specs": 31,
+    "coverage_percent": 100.0,
+    "accuracy_percent": 90.32
+  },
+  "file_outputs": {
+    "total_files": 7,
+    "files": [
+      {
+        "filename": "chapter1.md",
+        "size_bytes": 88885,
+        "modified": "2025-06-19T16:07:32.576404"
+      },
+      {
+        "filename": "template_rules.yaml",
+        "size_bytes": 4974,
+        "modified": "2025-06-19T09:49:45.686436"
+      },
+      {
+        "filename": "chapter1_template.json",
+        "size_bytes": 107837,
+        "modified": "2025-06-19T16:07:32.541133"
+      },
+      {
+        "filename": "extracted_specs_triage.json",
+        "size_bytes": 3867,
+        "modified": "2025-06-19T16:07:30.146502"
+      },
+      {
+        "filename": "extracted_specs.json",
+        "size_bytes": 3434,
+        "modified": "2025-06-19T16:07:30.146153"
+      },
+      {
+        "filename": "chapter1_overview.json",
+        "size_bytes": 107347,
+        "modified": "2025-06-19T16:07:15.953982"
+      },
+      {
+        "filename": "corrected_specs.json",
+        "size_bytes": 3434,
+        "modified": "2025-06-19T16:07:32.420235"
+      }
+    ]
+  }
+}

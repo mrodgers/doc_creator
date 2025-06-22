@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Results Visualization - AI Documentation Generation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-chart-line me-2"></i>Results Visualization
+            </h1>
+            <div>
+                <a href="/export/{{ job_id }}/json" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-download me-1"></i>Export JSON
+                </a>
+                <a href="/export/{{ job_id }}/markdown" class="btn btn-outline-success me-2">
+                    <i class="fas fa-file-alt me-1"></i>Export Markdown
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Info -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Job Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Job ID:</strong><br>
+                        <code>{{ job_id }}</code>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Filename:</strong><br>
+                        {{ results.filename }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Status:</strong><br>
+                        <span class="badge bg-success">{{ results.status }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Processed:</strong><br>
+                        {{ results.timestamp }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confidence Analysis -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Confidence Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="confidenceChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Content Types
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="contentTypesChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gap Analysis -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Gap Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-danger" id="total-gaps">0</h3>
+                            <p class="text-muted">Total Gaps</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-warning" id="critical-gaps">0</h3>
+                            <p class="text-muted">Critical</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-info" id="high-gaps">0</h3>
+                            <p class="text-muted">High Priority</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-success" id="medium-gaps">0</h3>
+                            <p class="text-muted">Medium Priority</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="gap-details" class="mt-4">
+                    <!-- Gap details will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SME Questions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>SME Questions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="sme-questions">
+                    <!-- SME questions will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generated Draft Preview -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Generated Draft Preview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="draft-preview">
+                    <!-- Draft preview will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Parse the results data passed from Flask
+const results = {{ results | tojson | safe }};
+const jobId = '{{ job_id }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    populateGapAnalysis();
+    populateSMEQuestions();
+    populateDraftPreview();
+});
+
+function initializeCharts() {
+    // Confidence Distribution Chart
+    const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+    const confidenceData = extractConfidenceData();
+    
+    new Chart(confidenceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['High (80-100%)', 'Medium (60-79%)', 'Low (0-59%)'],
+            datasets: [{
+                data: confidenceData,
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Content Types Chart
+    const contentCtx = document.getElementById('contentTypesChart').getContext('2d');
+    const contentData = extractContentTypeData();
+    
+    new Chart(contentCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(contentData),
+            datasets: [{
+                label: 'Content Items',
+                data: Object.values(contentData),
+                backgroundColor: '#0d6efd',
+                borderColor: '#0b5ed7',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function extractConfidenceData() {
+    // Extract confidence data from pipeline results
+    const pipelineResults = results.pipeline_results;
+    if (!pipelineResults || !pipelineResults.outputs) return [0, 0, 0];
+    
+    const confidenceScores = pipelineResults.outputs.confidence_scores || {};
+    const scores = Object.values(confidenceScores);
+    
+    let high = 0, medium = 0, low = 0;
+    scores.forEach(score => {
+        if (score >= 80) high++;
+        else if (score >= 60) medium++;
+        else low++;
+    });
+    
+    return [high, medium, low];
+}
+
+function extractContentTypeData() {
+    // Extract content type data from pipeline results
+    const pipelineResults = results.pipeline_results;
+    if (!pipelineResults || !pipelineResults.outputs) return {};
+    
+    const structuredContent = pipelineResults.outputs.structured_content || [];
+    const contentTypes = {};
+    
+    structuredContent.forEach(item => {
+        const type = item.content_type || 'unknown';
+        contentTypes[type] = (contentTypes[type] || 0) + 1;
+    });
+    
+    return contentTypes;
+}
+
+function populateGapAnalysis() {
+    const pipelineResults = results.pipeline_results;
+    if (!pipelineResults || !pipelineResults.outputs) return;
+    
+    const gapReport = pipelineResults.outputs.gap_report || {};
+    
+    // Update summary numbers
+    document.getElementById('total-gaps').textContent = gapReport.total_gaps || 0;
+    document.getElementById('critical-gaps').textContent = gapReport.critical_gaps || 0;
+    document.getElementById('high-gaps').textContent = gapReport.high_priority_gaps || 0;
+    document.getElementById('medium-gaps').textContent = gapReport.medium_priority_gaps || 0;
+    
+    // Populate gap details
+    const gapDetails = document.getElementById('gap-details');
+    const gapsBySection = gapReport.gaps_by_section || {};
+    
+    if (Object.keys(gapsBySection).length === 0) {
+        gapDetails.innerHTML = '<p class="text-success">No gaps detected!</p>';
+        return;
+    }
+    
+    let gapHtml = '<h6>Gaps by Section:</h6>';
+    Object.entries(gapsBySection).forEach(([section, gaps]) => {
+        gapHtml += `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6 class="card-title">${section}</h6>
+                    <ul class="list-unstyled mb-0">
+                        ${gaps.map(gap => `<li><i class="fas fa-exclamation-triangle text-warning me-1"></i>${gap}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    });
+    
+    gapDetails.innerHTML = gapHtml;
+}
+
+function populateSMEQuestions() {
+    const pipelineResults = results.pipeline_results;
+    if (!pipelineResults || !pipelineResults.outputs) return;
+    
+    const gapReport = pipelineResults.outputs.gap_report || {};
+    const smeQuestions = gapReport.sme_questions || [];
+    
+    const smeContainer = document.getElementById('sme-questions');
+    
+    if (smeQuestions.length === 0) {
+        smeContainer.innerHTML = '<p class="text-success">No SME questions generated!</p>';
+        return;
+    }
+    
+    let smeHtml = '';
+    smeQuestions.forEach((question, index) => {
+        const priorityClass = question.priority === 'High' ? 'danger' : 
+                            question.priority === 'Medium' ? 'warning' : 'info';
+        
+        smeHtml += `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title">Question ${index + 1}</h6>
+                            <p class="card-text">${question.question || question}</p>
+                            ${question.category ? `<small class="text-muted">Category: ${question.category}</small><br>` : ''}
+                            ${question.rationale ? `<small class="text-muted">Rationale: ${question.rationale}</small>` : ''}
+                        </div>
+                        <span class="badge bg-${priorityClass}">${question.priority || 'Medium'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    smeContainer.innerHTML = smeHtml;
+}
+
+function populateDraftPreview() {
+    const pipelineResults = results.pipeline_results;
+    if (!pipelineResults || !pipelineResults.outputs) return;
+    
+    const draftDocument = pipelineResults.outputs.draft_document;
+    const draftContainer = document.getElementById('draft-preview');
+    
+    if (!draftDocument) {
+        draftContainer.innerHTML = '<p class="text-muted">No draft document generated.</p>';
+        return;
+    }
+    
+    let draftHtml = `<h4>${draftDocument.title || 'Generated Documentation'}</h4>`;
+    
+    draftDocument.sections.forEach(section => {
+        draftHtml += `<h5>${section.heading}</h5>`;
+        if (Array.isArray(section.content)) {
+            section.content.forEach(item => {
+                if (typeof item === 'object' && item.spec_item) {
+                    draftHtml += `<p><strong>${item.spec_item}:</strong> ${item.value || 'N/A'} (${item.confidence || 0}% confidence)</p>`;
+                } else {
+                    draftHtml += `<p>${item}</p>`;
+                }
+            });
+        } else {
+            draftHtml += `<p>${section.content}</p>`;
+        }
+    });
+    
+    draftContainer.innerHTML = draftHtml;
+}
+</script>
+{% endblock %} 

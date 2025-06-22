@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Documentation Generation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Overview Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-file-upload fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">Upload Document</h5>
+                <p class="card-text">Process new documents through the AI pipeline</p>
+                <a href="{{ url_for('upload_document') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Upload
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                <h5 class="card-title">View Analytics</h5>
+                <p class="card-text">Analyze confidence scores and gap reports</p>
+                <button class="btn btn-success" onclick="showAnalytics()">
+                    <i class="fas fa-chart-bar me-1"></i>Analytics
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-download fa-2x text-info mb-2"></i>
+                <h5 class="card-title">Export Results</h5>
+                <p class="card-text">Download generated documentation</p>
+                <button class="btn btn-info" onclick="showExports()">
+                    <i class="fas fa-file-download me-1"></i>Export
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-cog fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">Settings</h5>
+                <p class="card-text">Configure pipeline parameters</p>
+                <button class="btn btn-warning" onclick="showSettings()">
+                    <i class="fas fa-sliders-h me-1"></i>Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Jobs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Processing Jobs
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-jobs">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <p>Loading recent jobs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Upload Area -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-upload me-2"></i>Quick Upload
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="upload-area" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <h5>Drag and drop your document here</h5>
+                    <p class="text-muted">or click to browse</p>
+                    <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt" style="display: none;">
+                    <button class="btn btn-outline-primary" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-folder-open me-1"></i>Browse Files
+                    </button>
+                </div>
+                
+                <div class="progress-container mt-3" id="progress-container">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Processing document...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load recent jobs on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentJobs();
+    setupFileUpload();
+});
+
+function loadRecentJobs() {
+    // This would typically fetch from an API endpoint
+    // For now, we'll show a placeholder
+    setTimeout(() => {
+        document.getElementById('recent-jobs').innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <p>No recent jobs found</p>
+                <small>Upload a document to get started</small>
+            </div>
+        `;
+    }, 1000);
+}
+
+function setupFileUpload() {
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const progressContainer = document.getElementById('progress-container');
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileUpload(files[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
+}
+
+function handleFileUpload(file) {
+    const formData = new FormData();
+    formData.append('document', file);
+    
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        progressBar.style.width = '100%';
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            // Redirect to results page
+            window.location.href = `/visualize/${data.job_id}`;
+        }, 1000);
+    })
+    .catch(error => {
+        progressContainer.style.display = 'none';
+        alert('Error: ' + error.message);
+    });
+}
+
+function showAnalytics() {
+    alert('Analytics feature coming soon!');
+}
+
+function showExports() {
+    alert('Export feature coming soon!');
+}
+
+function showSettings() {
+    alert('Settings feature coming soon!');
+}
+</script>
+{% endblock %} 

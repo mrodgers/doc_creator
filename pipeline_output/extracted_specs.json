@@ -1,0 +1,98 @@
+[
+  {
+    "spec_item": "Product name",
+    "value": "Cisco Nexus 9364C-H1"
+  },
+  {
+    "spec_item": "Model number",
+    "value": "N9K-C9364C-H1"
+  },
+  {
+    "spec_item": "Rack units",
+    "value": "2RU"
+  },
+  {
+    "spec_item": "Traffic processing capability",
+    "value": "6.4T"
+  },
+  {
+    "spec_item": "QSFP port count",
+    "value": "64"
+  },
+  {
+    "spec_item": "Management ports",
+    "value": "2 (1 RJ-45 port and 1 SFP port)"
+  },
+  {
+    "spec_item": "Console port",
+    "value": "1"
+  },
+  {
+    "spec_item": "USB port",
+    "value": "1"
+  },
+  {
+    "spec_item": "Fan modules",
+    "value": "4 (3 for operations and 1 for redundancy)"
+  },
+  {
+    "spec_item": "Power supply modules",
+    "value": "2 (1 for operations and 1 for redundancy)"
+  },
+  {
+    "spec_item": "Power supply specifications",
+    "value": "1400-W AC, 2000-W HVAC/HVDC, 2000-W DC"
+  },
+  {
+    "spec_item": "Operating temperature",
+    "value": "32 to 104 degrees Fahrenheit (0 to 40 degrees Celsius)"
+  },
+  {
+    "spec_item": "Non-operating temperature",
+    "value": "-40 to 158 degrees Fahrenheit (-40 to 70 degrees Celsius)"
+  },
+  {
+    "spec_item": "Altitude rating",
+    "value": "10,000 ft (3048 m)"
+  },
+  {
+    "spec_item": "Weight",
+    "value": "44 lb (20 kg)"
+  },
+  {
+    "spec_item": "Switch width",
+    "value": "17.41 inches (44.23 cm)"
+  },
+  {
+    "spec_item": "Switch depth",
+    "value": "22.27 inches (56.58 cm)"
+  },
+  {
+    "spec_item": "Switch height",
+    "value": "3.4 inches (8.6 cm)"
+  },
+  {
+    "spec_item": "Typical power consumption",
+    "value": "605W"
+  },
+  {
+    "spec_item": "Maximum power consumption",
+    "value": "1100W"
+  },
+  {
+    "spec_item": "Heat dissipation",
+    "value": "4248.116 BTUs per hour"
+  },
+  {
+    "spec_item": "Fan module part numbers",
+    "value": "NXASFAN-160CFM2-PE (port-side exhaust), NXASFAN-160CFM2-PI (port-side intake)"
+  },
+  {
+    "spec_item": "Power supply module part numbers",
+    "value": "NXA-PAC-1400W-PE (1400-W AC port-side exhaust), NXA-PAC-1400W-PI (1400-W AC port-side intake), NXA-PHV-2KW-PI (2000-W HVAC/HVDC), NXA-PDC-2KW-PE (2000-W DC port-side exhaust), NXA-PDC-2KW-PI (2000-W DC port-side intake)"
+  },
+  {
+    "spec_item": "Transceiver compatibility",
+    "value": "Refer to Cisco Transceiver Modules Compatibility Information document"
+  }
+]

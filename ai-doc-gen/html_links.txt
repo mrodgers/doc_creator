@@ -1,0 +1,2 @@
+https://www.cisco.com/c/en/us/td/docs/routers/cloud_edge/c8500/hardware-installation-guide/b_C8500_HIG/m_Installation.html
+https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/hw/9364c-h1/aci/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/b_c9364c_ACI_mode_hardware_install_guide_appendix_01010.html

@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  ai-doc-gen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: ai-doc-gen-dev
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-85.0}
+      - GAP_THRESHOLD=${GAP_THRESHOLD:-70.0}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-true}
+      - ENVIRONMENT=development
+    volumes:
+      - ./src:/app/src:ro
+      - ./examples:/app/examples:ro
+      - ./tests:/app/tests:ro
+      - ./output:/app/output
+      - ./data:/app/data
+    ports:
+      - "5432:5432"
+    working_dir: /app
+    command: ["uv", "run", "python", "launch_ui.py"]
+    networks:
+      - ai-doc-gen-network
+
+  # Future Neo4j service for graph database
+  neo4j:
+    image: neo4j:5.15
+    container_name: ai-doc-gen-neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    networks:
+      - ai-doc-gen-network
+
+  # Development tools
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: ai-doc-gen-tools
+    environment:
+      - PYTHONPATH=/app/src
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./output:/app/output
+    working_dir: /app
+    command: ["uv", "run", "pytest", "src/tests/", "-v", "--cov=src/ai_doc_gen"]
+    networks:
+      - ai-doc-gen-network
+    depends_on:
+      - ai-doc-gen
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+
+networks:
+  ai-doc-gen-network:
+    driver: bridge 

@@ -1,0 +1,61 @@
+total_units: 15
+unit_sources:
+  BTU:
+  - Heat dissipation
+  BTU/hr:
+  - Heat dissipation
+  CFM:
+  - Port-side exhaust fan module part number
+  - Port-side intake fan module part number
+  RU:
+  - Rack units
+  T:
+  - Traffic processing capability
+  W:
+  - Power input requirements
+  cm:
+  - Chassis width
+  - Chassis depth
+  - Chassis height
+  ft:
+  - Altitude rating
+  in:
+  - Chassis width
+  - Chassis depth
+  - Chassis height
+  kW:
+  - 2000-W HVAC/HVDC power supply part number
+  - 2000-W DC power supply part number
+  - 2000-W DC power supply part number (intake)
+  kg:
+  - Chassis weight
+  - Fan module weight
+  - Power supply module weight
+  lb:
+  - Chassis weight
+  - Fan module weight
+  - Power supply module weight
+  m:
+  - Altitude rating
+  "\xB0C":
+  - Operating temperature
+  - Non-operating temperature
+  "\xB0F":
+  - Operating temperature
+  - Non-operating temperature
+units:
+- BTU
+- BTU/hr
+- CFM
+- RU
+- T
+- W
+- cm
+- ft
+- in
+- kW
+- kg
+- lb
+- m
+- "\xB0C"
+- "\xB0F"

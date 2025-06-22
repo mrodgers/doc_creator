@@ -1,0 +1,52 @@
+# Hardware Specification Extraction Pipeline - Configuration
+# Copy this file and modify as needed for your environment
+
+# OpenAI Configuration
+openai:
+  model: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 4000
+  timeout: 60
+
+# Confidence Scoring
+confidence:
+  threshold: 90  # Default confidence threshold (0-100)
+  auto_approval_rate_target: 95  # Target auto-approval rate
+  review_rate_target: 5  # Target review rate
+
+# Quality Validation
+quality:
+  coverage_target: 100  # Target coverage percentage
+  accuracy_target: 90   # Target accuracy percentage
+  min_specs: 30         # Minimum expected specs
+
+# Template Generation
+template:
+  rules_file: "template_rules.yaml"
+  unit_rules_file: "unit_rules.yaml"
+  units_file: "units.yaml"
+
+# Pipeline Configuration
+pipeline:
+  output_format: "markdown"  # markdown, json, html
+  include_confidence: true
+  include_metrics: true
+  backup_outputs: true
+
+# Monitoring
+monitoring:
+  save_metrics: true
+  metrics_file: "metrics.json"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+# File Paths
+paths:
+  output_dir: "pipeline_output"
+  temp_dir: "temp"
+  logs_dir: "logs"
+
+# Performance
+performance:
+  batch_size: 10
+  max_retries: 3
+  retry_delay: 5 

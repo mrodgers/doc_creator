@@ -1,0 +1,27 @@
+GUIDE ANALYSIS SUMMARY
+==================================================
+
+Guide: functional_spec.docx
+Analysis Date: 2025-06-21T12:08:08.697993
+
+OVERALL SCORES:
+--------------------
+Structure Score: 0.64
+Style Score: 0.71
+Confidence Score: 0.23
+Completeness Score: 0.00
+
+RECOMMENDATIONS:
+--------------------
+• Consider improving content organization and structure
+• Review 161 low-confidence content items
+
+CONTENT TYPE DISTRIBUTION:
+------------------------------
+technical_specification: 117
+step_by_step: 22
+requirement: 5
+warning: 4
+installation_procedure: 15
+diagram_reference: 4
+note: 1

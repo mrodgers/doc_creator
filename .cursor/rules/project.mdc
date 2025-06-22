@@ -1,0 +1,105 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Developer Cursor Rules
+
+## **Project Description for Developers**
+
+This project aims to automate Cisco hardware installation guide generation using AI agents (LLM). The main goal is to significantly speed up the production of accurate documentation by extracting structured data from various inputs, performing automated gap analysis, maintaining data provenance, and generating initial drafts with high accuracy (≥85%).
+
+### **Key Objectives (MVP)**
+
+* Automate extraction of structured content from functional specs and existing documentation.
+* Automate draft generation, ensuring high initial accuracy.
+* Clearly identify gaps and provide interactive gap reporting.
+* Provide traceable data provenance.
+* Automate SME question management.
+
+### **Tech Stack and Environment**
+
+* **Backend**: Python
+* **AI Integration**: LLM APIs (reuse existing libraries or APIs)
+* **Frontend**: Minimal React or similar lightweight JS framework
+* **Containerization**: Podman (running on macOS)
+* **Package Management**: `uv`
+* **Code Quality**: `ruff`
+* **Graph DB (exploratory)**: Neo4j (optional for MVP)
+
+### **Reuse Encouraged**
+
+* Prioritize reuse of existing libraries, scripts, and code to minimize time to market.
+* Leverage existing parsers, extraction tools, and AI API wrappers.
+
+### **Immediate Development Tasks**
+
+* Set up local macOS environment, containerization (Podman), and integrate `uv` and `ruff`.
+* Develop input parsers for PDF/XML/DOCX.
+* Implement Managing and Review agents to handle workflow orchestration, gap detection, and provenance audits.
+* Develop initial minimal web UI for gap visualization.
+
+---
+
+## **Cursor Rules File** (`cursor-rules.yml`)
+
+```yaml
+version: 1
+
+linting:
+  enabled: true
+  rules:
+    - use-ruff:
+        config: pyproject.toml
+
+package_management:
+  manager: uv
+  requirements_file: requirements.txt
+
+containerization:
+  runtime: podman
+  os: macOS
+
+ai_agents:
+  managing_agent:
+    responsibilities:
+      - data ingestion
+      - gap identification
+      - SME query management
+      - provenance tracking
+  review_agent:
+    responsibilities:
+      - gap validation
+      - confidence scoring audits
+      - provenance audits
+
+frontend:
+  framework: react
+  minimal_ui: true
+
+documentation:
+  format: markdown
+  automated_exports:
+    - PDF
+    - Markdown
+
+graph_database:
+  exploratory: true
+  tool: neo4j
+  status: optional
+
+reuse_policy:
+  encouraged: true
+  preference:
+    - existing internal libraries
+    - open-source extraction tools
+    - existing AI API integrations
+
+phased_development:
+  phases:
+    - environment_setup
+    - agent_implementation
+    - gap_analysis
+    - ui_development
+
+```

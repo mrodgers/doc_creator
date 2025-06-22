@@ -1,0 +1,19 @@
+# Hardware Specification Extraction Pipeline - Requirements
+# Alternative to uv.lock for pip installation
+
+# Core dependencies
+openai>=1.0.0
+pdfplumber>=0.10.0
+pyyaml>=6.0
+jinja2>=3.1.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Optional: For enhanced PDF processing
+# pdf2image>=1.16.0
+# pytesseract>=0.3.10
+
+# Note: This system is designed to work with uv package manager
+# For best results, use: uv sync 

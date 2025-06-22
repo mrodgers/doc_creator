@@ -1,0 +1,3500 @@
+# Chapter 1: Overview
+
+# Overview
+
+1
+
+CH APTER
+
+Overview
+
+* Overview,onpage1
+
+Overview
+
+The {{Product name}}({{Model number}})isa2-rackunit(RU),fixed-portswitchdesignedfor
+
+spine-leaf-APICdeploymentindatacenters.
+
+Thesoftwareonthisswitchhas {{Traffic processing capability}} traffic-processing capability.
+
+Theswitchhastheseports:
+
+* 64100-GigabitQSFPports
+
+* {{Management ports}}
+
+* {{Console port}} Console port
+
+* {{USB port}} USB port
+
+Note Forports1through64,every4ports(1-4,5-8,9-12,andsoon,referredtoasa"quad").Thisswitchsupports
+
+mixedspeedsinquadform.Thatis,all4portscanoperateinamixof10G,40G,or100G.
+
+PortConsiderations
+
+Thesearetheportconsiderations:
+
+* Forthisswitch,a"quad"isdefinedasfourportsinacolumn,beginninginthetopleftrowandmoving
+
+straightdowntothebottomrow,inthatsamecolumn.Fourports=1quad.
+
+* 10GQSA+40G+100Gcanbemixedinaquad.
+
+* AccessBreakout4X10and4X25aresupportedonlyonthefirstportofeveryquad(1,5,9,13....).
+
+* Withbreakoutonthefirstport,theother3portsinaquadarehardware-disabled.
+
+* Thelast2ports(1/63-64)arereservedforthedefaultfabriclinks.Theseportswillbeusedmostlyfor
+
+discoveryconsiderations,documentedhere.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+1
+
+Overview
+
+Overview
+
+* Ports61-62canbeconvertedtodown-linkportsbutport61willnotsupportbreakout.Thatisbecause
+
+thebottom3ports(under61)willbehardwaredisabled.Thisdisruptsthediscoveryandconnectivityto
+
+thefabric.
+
+* TheMediaAccessControlSecurity(MACsec)featureissupportedonlyonthelast16ports,orports
+
+49-64.
+
+Forbreakoutinformation,seetheCiscoAPICLayer3NetworkingConfigurationGuide.
+
+Leaf/Spineroleconsiderations
+
+Herearetheleaf/spineroleconsiderations:
+
+* Thedefaultroleofthisswitchisasaleafswitch.
+
+* Thedefaultfabriclinks(1/49-64)mustbeusedforinitialswitchdiscoveryusinganotherswitch.
+
+* Tochangetheswitchfromthedefaultrole,dothis:thenodeappearsasadiscovereddeviceinthefabric
+
+inventoryview,settheroleoftheswitch(spineorleaf),andtheswitchautomaticallyrebootstocome
+
+upintheconfiguredrole.
+
+* Ifyouconnectadefaultspine(i.e.,adual-roleswitchthatbydefaultisaspineswitch,suchasNexus
+
+9316D-GX)directlytoanAPIC,thechangeoftheroletoleafswitchisperformedautomaticallyby
+
+APIC,aswellasthereboot.Afterthat,thenodeappearsin“Nodespendingregistration.”
+
+* Registerthenode.
+
+Note FromACIrelease6.1(2)andlater,youcanchangetheroleofanyundiscoveredswitchbeforetheswitchis
+
+discoveredusingthisCLIcommand:
+
+(none)# acidiag setrole <leaf/spine>
+
+This command will reboot the switch, Proceed? [y/N]
+
+Note Theacidiag setrole <leaf/spine>commandwillNOTworkiftheswitchhasbeendiscovered.Youwill
+
+seeanerrormessage.
+
+FormoreinformationaboutusingthisCLIcommand,seetheCiscoAPICGettingStartedGuide,Release
+
+6.1(x).
+
+Discoveryconsiderations
+
+Herearethediscoveryconsiderations:
+
+* LeafdiscoveryviaAPIC–Connectafully-fitAPICtooneofthedefaultdownlinkports(1-48).
+
+* Leafdiscoveryviaspine–Connectadiscoveredspinetooneofthedefaultfabriclinks(49-64).
+
+* Spinediscoveryvialeaf–Connectadiscoveredleaftooneofthedefaultfabriclinks(49-64)thenconvert
+
+theswitchtospine(rebootisrequired).
+
+* Subleafdiscoveryvialeaf–Connectadiscoveredleaftooneofthedefaultfabriclinks(49-64).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+2
+
+Overview
+
+Overview
+
+* Multi-PodfirstspinediscoveryviaIPN–ConnecttheIPNtooneofthedefaultfabriclinks(49-64).
+
+Ensurethespinehasatleastoneleafnodeconnectedtoit.
+
+Thisswitchincludestheseuser-replaceablecomponents:
+
+* {{Fan modules}} withtheseairflowchoices:
+
+* Port-sideexhaustfanmodulewithbluecoloring({{Port-side exhaust fan module part number}})
+
+* Port-sideintakefanmodulewithburgundycoloring({{Port-side intake fan module part number}})
+
+Note
+
+Table1:FanSpeedsforthisSwitch
+
+Port-SideIntake Port-SideExhaust
+
+FanSpeed% FanSpeed%
+
+Typical/Minimum 45% 45%
+
+Maximum 80% 80%
+
+Note •Whenmorethanonefanmodule(tworotors)fails,amajoralarmisraised
+
+andagracefulshutdownisperformedwithintwominutes,unlessthefan
+
+moduleisrestored.
+
+* Theswitchfunctionsnormallywhenonlyonefantrayfails.Ifmorethan
+
+onefantrayfails,theswitchissuesawarningandpowersdownwithintwo
+
+minutes.
+
+* {{Power supply modules}} withthesechoices:
+
+* 1400-Wport-sideexhaustACpowersupplywithbluecoloring(NXA-PAC-{{Power input requirements}}-PE)
+
+* 1400-Wport-sideintakeACpowersupplywithburgundycoloring(NXA-PAC-{{Power input requirements}}-PI)
+
+* 2000-W-HVAC/HVDCDCairflowpowerintakewithburgundycoloring({{2000-W HVAC/HVDC power supply part number}})
+
+* 2000-Wport-sideexhaustDCpowersupplywithbluecoloring({{2000-W DC power supply part number}})
+
+* 2000-Wport-sideintakeDCpowersupplywithburgundycoloring({{2000-W DC power supply part number (intake)}})
+
+Note •AmixofACandDCpowersuppliesinthesameswitcharesupportedforhotswappingpurposeswithin
+
+atimelimitof15minutes.
+
+* Allthefanmodulesandpowersuppliesmustusethesameairflowdirection.
+
+Thefigureshowstheswitchfeaturesontheportsideofthechassis.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+3
+
+Overview
+
+Overview
+
+Table2:
+
+1 Screwholesforfrontmounting 2 Groundingpad
+
+brackets(bothleftandrightsides)
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+4
+
+Overview
+
+Overview
+
+1 Beacon(BCN),Status 3 40-/100-GigabitQSFP28
+
+(STS),andEnvironment ports(ports1to48in4
+
+(ENV)LEDs rowsof12ports)
+
+2 1-/10-GigabitSFP+ports 4 Greencolored
+
+(2) 100-GigabitQSFP28
+
+portssupportingMACsec
+
+(whensoftwaresupportis
+
+available)(ports49to64
+
+in4rowsof4ports)
+
+Note TosecureQSFP-100G-SR1.2,QSFP-100G-SM-SRandQSFP-40/100-SRBDfunctionalityandreliability,
+
+thisswitchcanonlysupportthosetypeofopticson1/3/4rowatmaxambient35°CforPSEairflow.ForPSI
+
+airflow,thereisnoimpact.
+
+Todeterminewhichtransceivers,adapters,andcablessupportthisswitch,seetheCiscoTransceiverModules
+
+CompatibilityInformationdocument.
+
+Thefigureshowstheswitchfeaturesonthepowersupplysideofthechassis.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+5
+
+Overview
+
+Overview
+
+1 Fanmodules(4)withslots 5 Consoleport(1)
+
+numberedfrom1(left)to
+
+4(right)
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+6
+
+Overview
+
+Overview
+
+2 Managementport 6 Powersupplymodules(1
+
+(1—RJ-45copperport) or2)(ACpowersupplies
+
+shown)withslots
+
+numbered1(top)and2
+
+(bottom)
+
+3 Managementport 7 Notchonbothsidesofthe
+
+(1—SFPopticalport) chassisattheendforrack
+
+mountsupporting.
+
+4 USBport(1)
+
+Note TheaccesspanelforDIMMupgradeislocatedonthetopsideofthechassisandusesPhillipsflat-headscrews,
+
+M3x0.5x4mmL,CSwZNwPAT,121'.
+
+Dependingonwhetheryouplantopositiontheportsinahotorcoldaisle,youcanorderthefanandpower
+
+supplymoduleswithport-sideintakeorport-sideexhaustairflow.Forport-sideintakeairflow,thefanand
+
+ACpowersupplymoduleshaveburgundycoloring.Forport-sideexhaustairflow,thefanandACpower
+
+supplieshavebluecoloring.
+
+Thefanandpowersupplymodulesarefieldreplaceable.Youcanreplaceonefanmoduleoronepowersupply
+
+moduleduringoperations,aslongastheothermodulesareinstalledandoperating.Ifyouhaveonlyone
+
+powersupplyinstalled,installthereplacementpowersupplyintheopenslotbeforeremovingtheoriginal
+
+powersupply.
+
+Note Allfanandpowersupplymodulesmusthavethesamedirectionofairflow.Otherwise,theswitchcanoverheat
+
+andshutdown.
+
+Caution Iftheswitchhasport-sideintakeairflow(burgundycoloringforfanmodules),locatetheportsinthecold
+
+aisle.Iftheswitchhasport-sideexhaustairflow(bluecoloringforfanmodules),locatetheportsinthehot
+
+aisle.Ifyoulocatetheairintakeinahotaisle,theswitchcanoverheatandshutdown.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+7
+
+Overview
+
+Overview
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+8
+
+2
+
+CH APTER
+
+Preparing the Site
+
+* TemperatureRequirements,onpage9
+
+* HumidityRequirements,onpage9
+
+* AltitudeRequirements,onpage9
+
+* DustandParticulateRequirements,onpage10
+
+* MinimizingElectromagneticandRadioFrequencyInterference,onpage10
+
+* ShockandVibrationRequirements,onpage11
+
+* GroundingRequirements,onpage11
+
+* PlanningforPowerRequirements,onpage11
+
+* RackandCabinetRequirements,onpage12
+
+* ClearanceRequirements,onpage13
+
+* CautionsandRegulatoryComplianceStatementsfor {{Regulatory compliance}},onpage14
+
+Temperature Requirements
+
+Theoperatingtemperatureoftheswitchis {{Operating temperature}} atsealevel.
+
+Forevery {{<spec_key>}}({{<spec_key>}})abovesealevel,themaximumtemperatureisreducedby1degreeCelsius.
+
+Thenon-operatingtemperatureoftheswitchis {{Non-operating temperature}}.
+
+Humidity Requirements
+
+{{Humidity requirements}} usuallymaintainanacceptablelevelofhumidityfortheswitchequipment.Ifthe
+
+switchislocatedinanunusuallyhumidlocation,useadehumidifiertomaintainthehumiditywithinan
+
+acceptablerange.
+
+Altitude Requirements
+
+Altituderatingis10,{{<spec_key>}}({{<spec_key>}}).ForChina,itis6,{{<spec_key>}}({{<spec_key>}}).
+
+Forevery {{<spec_key>}}({{<spec_key>}})elevation,themaximumambienttemperatureisreducedbyonedegree
+
+Celsius.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+9
+
+PreparingtheSite
+
+DustandParticulateRequirements
+
+Dust and Particulate Requirements
+
+Exhaustfanscoolpowersupplies.Systemfanscoolswitchesbydrawinginairandexhaustingairoutthrough
+
+variousopeningsinthechassis.Fansalsointroducedustandotherparticles,causingcontaminantbuildupin
+
+theswitchandincreasedinternalchassistemperature.Dustandparticlescanactasinsulatorsandinterfere
+
+withthemechanicalcomponentsintheswitch.Keepacleanoperatingenvironmenttoreducethenegative
+
+effectsofdustandotherparticles.
+
+Inadditiontokeepingyourenvironmentfreeofdustandparticles,usetheseprecautionstoavoidcontamination
+
+ofyourswitch:
+
+* Donotsmokeneartheswitch.
+
+* Donoteatordrinkneartheswitch.
+
+Minimizing Electromagnetic and Radio Frequency Interference
+
+Electromagneticinterference(EMI)andradiofrequencyinterference(RFI)fromtheswitchcanadversely
+
+affectotherdevices,suchasradioandtelevision(TV)receivers.Radiofrequenciesthatemanatefromthe
+
+switchcanalsointerferewithcordlessandlow-powertelephones.Conversely,RFIfromhigh-powertelephones
+
+cancausespuriouscharacterstoappearontheswitchmonitor.
+
+RFIisdefinedasanyEMIwithafrequencyabove10kHz.Thistypeofinterferencecantravelfromtheswitch
+
+tootherdevicesthroughthepowercableandpowersourceorthroughtheairastransmittedradiowaves.The
+
+FederalCommunicationsCommission(FCC)publishesspecificregulationstolimittheamountofEMIand
+
+RFIthatareemittedbycomputingequipment.EachswitchmeetstheseFCCregulations.
+
+ToreducethepossibilityofEMIandRFI,usetheseguidelines:
+
+* Coverallopenexpansionslotswithablankfillerplate.
+
+* Alwaysuseshieldedcableswithmetalconnectorshellsforattachingperipheralstotheswitch.
+
+Whenwiresarerunforanysignificantdistanceinanelectromagneticfield,interferencecanoccurtothe
+
+signalsonthewireswiththeseimplications:
+
+* Badwiringcanresultinradiointerferenceemanatingfromtheplantwiring.
+
+* StrongEMI,especiallywhenitiscausedbylightningorradiotransmitters,candestroythesignaldrivers
+
+andreceiversinthechassisandevencreateanelectricalhazardbyconductingpowersurgesthrough
+
+linesintoequipment.
+
+Note TopredictandpreventstrongEMI,consultexpertsinradiofrequencyinterference(RFI).
+
+Thewiringisunlikelytoemitradiointerferenceifyouuseatwisted-paircablewithagooddistributionof
+
+groundingconductors.Coppercablesshouldnotbelongerthanmaximumdistancesforthemediatype.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+10
+
+PreparingtheSite
+
+ShockandVibrationRequirements
+
+Caution Ifthewiresexceedtherecommendeddistances,orifwirespassbetweenbuildings,givespecialconsideration
+
+totheeffectofalightningstrikeinyourvicinity.Theelectromagneticpulsethatiscausedbylightningor
+
+otherhigh-energyphenomenacaneasilycoupleenoughenergyintounshieldedconductorstodestroyelectronic
+
+switches.Consultexpertsinelectricalsurgesuppressionandshieldingifyouhavehadsimilarproblemsin
+
+thepast.
+
+Shock and Vibration Requirements
+
+Theswitchhasbeenshock-andvibration-testedforoperatingranges,handling,andearthquakestandards.
+
+Grounding Requirements
+
+Theswitchissensitivetovariationsinvoltagethatissuppliedbythepowersources.Overvoltage,undervoltage,
+
+andtransients(spikes)canerasedatafrommemoryorcausecomponentstofail.Toprotectagainstthesetypes
+
+ofproblems,ensurethatthereisanearth-groundconnectionfortheswitch.
+
+Connectthegroundingpadontheswitcheitherdirectlytotheearth-groundconnectionortoafullybonded
+
+andgroundedrack.
+
+Whenthechassisisproperlyinstalledinagroundedrack,theswitchisgroundedbecauseithasametal-to-metal
+
+(nopaint,stain,dirt,oranythingelseonit)connectiontotherack.
+
+Alternatively,groundthechassisbyusingacustomer-suppliedgroundingcablethatmeetsyourlocaland
+
+nationalinstallationrequirements.ForU.S.installations,werecommend6-AWGwire.Connectyourgrounding
+
+cabletothechassiswithagroundinglug(providedintheswitchaccessorykit)andtothefacilityground.
+
+Note Createanelectricalconductingpathbetweentheproductchassisandthemetalsurfaceoftheenclosure,or
+
+rackinwhichitismounted,ortoagroundingconductor.Provideelectricalcontinuitybyusingthread-forming
+
+typemountingscrewsthatremoveanypaintornon-conductivecoatingsandestablishametal-to-metalcontact.
+
+Removeanypaintorothernon-conductivecoatingsonthesurfacesbetweenthemountinghardwareandthe
+
+enclosureorrack.Cleanthesurfacesandapplyanantioxidantbeforeinstallation.
+
+Planning for Power Requirements
+
+Theswitchincludestwopowersupplies(1-to-1redundancywithcurrentsharing)inoneofthesecombinations:
+
+* Two1400-WACpowersupplies
+
+* Two2000-WDCpowersupplies
+
+* Two2000-WHVDCpowersupplies
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+11
+
+PreparingtheSite
+
+RackandCabinetRequirements
+
+Note For1+1redundancy,youmustusetwopowersourcesandconnecteachpowersupplytoaseparatepower
+
+source.
+
+Note Someofthepowersupplymoduleshaveratingcapabilitiesthatexceedtheswitchrequirements.When
+
+calculatingyourpowerrequirements,usetheswitchrequirementstodeterminetheamountofpowerthatis
+
+requiredforthepowersupplies.
+
+Tominimizethepossibilityofcircuitfailure,verifythateachpower-sourcecircuitthatisusedbytheswitch
+
+isdedicatedtotheswitch.
+
+Note ThisWarningappliestolow-voltageDCinputapplication.
+
+Warning Statement1005—CircuitBreakerwhenusingDCpowersupplies
+
+Thisproductreliesonthebuilding'sinstallationforshort-circuit(overcurrent)protection.
+
+* Ensurethattheprotectivedevicesareratednotgreaterthan70Awhentheswitchispoweredwithregular
+
+DCpowersupplies(rated48-60VDC).
+
+* Ensurethattheprotectivedevicesareratednotgreaterthan15AwhentheswitchispoweredwithHVDC
+
+powersupplies(rated240-380VDC).
+
+Note Statement1033—SafetyExtra-LowVoltage(SELV)—IEC60950/ES1–IEC62368DCPowerSupply
+
+Rack and Cabinet Requirements
+
+Installthesetypesofracksorcabinetsforyourswitch:
+
+* Standardperforatedcabinets
+
+* Solid-walledcabinetswitharooffantray(bottom-to-topcooling)
+
+* Standardopenfour-postTelcoracks
+
+WorkwithyourcabinetvendorstodeterminewhichoftheircabinetsmeettheserequirementsorseetheCisco
+
+TechnicalAssistanceCenter(TAC)forrecommendations:
+
+* Useastandard19-inch(48.3-cm),four-postElectronicIndustriesAlliance(EIA)cabinetorrackwith
+
+mountingrailsthatconformtoEnglishuniversalholespacingpersection1oftheANSI/EIA-310-D-1992
+
+standard.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+12
+
+PreparingtheSite
+
+ClearanceRequirements
+
+* Thedepthofafour-postrackmustbe24to {{<spec_key>}}(61.0to {{<spec_key>}})betweenthefrontandrear
+
+mountingrails(forpropermountingofthebottom-supportbracketsorothermountinghardware).
+
+Also,youmusthavepowerreceptaclesthatarelocatedwithinreachofthepowercordsthatareusedwiththe
+
+switch.
+
+Warning Statement1048—RackStabilization
+
+Therackstabilizingmechanismmustbeinplace,ortherackmustbeboltedtothefloorbeforeinstallation
+
+orservicing.Failuretostabilizetherackcancausebodilyinjury.
+
+Clearance Requirements
+
+Providethechassiswithadequateclearancebetweenthechassisandanyotherrack,device,orstructureso
+
+thatyoucanproperlyinstalltheswitch.Providethechassiswithadequateclearancetoroutecables,provide
+
+airflow,andmaintaintheswitch.Fortheclearancesrequiredforaninstallationofthischassisinafour-post
+
+rack,seethefigure.
+
+1 Chassis 5 Depthofthechassis
+
+2 Verticalrack-mountpostsandrails 6 Maximumextensionofthebottom-supportrails
+
+{{<spec_key>}}({{<spec_key>}})
+
+3 Chassiswidth 7 Depthofthefrontclearancearea(equaltothe
+
+depthofthechassis).
+
+{{<spec_key>}}({{<spec_key>}})
+
+4 Widthofthefrontclearancearea(equaltothe
+
+widthofthechassiswithtworack-mount
+
+bracketsthatareattachedtoit).
+
+{{<spec_key>}}({{<spec_key>}})
+
+Note Boththefrontandrearofthechassismustbeopentobothaislesforairflow.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+13
+
+PreparingtheSite
+
+CautionsandRegulatoryComplianceStatementsfor {{Regulatory compliance}}
+
+1 Chassis 5 Depthofthechassis
+
+{{<spec_key>}}({{<spec_key>}})
+
+2 Verticalrack-mountpostsandrails 6 Maximumextensionofthebottom-supportrails
+
+{{<spec_key>}}({{<spec_key>}})
+
+3 Chassiswidth 7 Depthofthefrontclearancearea(equaltothe
+
+depthofthechassis).
+
+{{<spec_key>}}({{<spec_key>}})
+
+{{<spec_key>}}({{<spec_key>}})
+
+4 Widthofthefrontclearancearea(equaltothe Chassisheight
+
+widthofthechassiswithtworack-mount
+
+{{<spec_key>}}({{<spec_key>}})
+
+bracketsthatareattachedtoit).
+
+{{<spec_key>}}({{<spec_key>}})
+
+Cautions and Regulatory Compliance Statements for {{Regulatory compliance}}
+
+TheregulatorycompliancestatementsandrequirementsfortheNetworkEquipmentBuildingSystem({{Regulatory compliance}})
+
+certificationarelistedhere.
+
+Note Statement7001—ESDMitigation
+
+ThisequipmentmaybeESDsensitive.AlwaysuseanESDankleorwriststrapbeforehandlingequipment.
+
+ConnecttheequipmentendoftheESDstraptoanunfinishedsurfaceoftheequipmentchassisortotheESD
+
+jackontheequipmentifprovided.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+14
+
+PreparingtheSite
+
+CautionsandRegulatoryComplianceStatementsfor {{Regulatory compliance}}
+
+Warning Statement7003—ShieldedCableRequirementsforIntrabuildingLightningSurge
+
+Theintrabuildingport(s)oftheequipmentorsubassemblymustuseshieldedintrabuildingcabling/wiringthat
+
+isgroundedatbothends.
+
+Thefollowingport(s)areconsideredintrabuildingportsonthisequipment:
+
+RJ-45ManagementEthernetPort
+
+Note Statement7004—SpecialAccessoriesRequiredtoComplywithGR-1089EmissionandImmunity
+
+Requirements
+
+TocomplywiththeemissionandimmunityrequirementsofGR-1089,shieldedcablesarerequiredforthe
+
+followingports:
+
+CopperRJ-45EthernetManagementport
+
+Warning Statement7005—IntrabuildingLightningSurgeandACPowerFault
+
+Theintrabuildingport(s)oftheequipmentorsubassemblyissuitableforconnectiontointrabuildingor
+
+unexposedwiringorcablingonly.Theintrabuildingport(s)oftheequipmentorsubassemblyMUSTNOT
+
+bemetallicallyconnectedtointerfacesthatconnecttotheOSPoritswiringformorethan {{<spec_key>}}
+
+(approximately {{<spec_key>}}).Theseinterfacesaredesignedforuseasintrabuildinginterfacesonly(Type2,4,or
+
+4aportsasdescribedinGR-1089)andrequireisolationfromtheexposedOSPcabling.Theadditionofprimary
+
+protectorsisnotsufficientprotectioninordertoconnecttheseinterfacesmetallicallytoanOSPwiringsystem.
+
+Thefollowingportsareconsideredintrabuildingportsontheequipment:
+
+RJ-45ManagementEthernetPort
+
+Warning Statement7012—EquipmentInterfacingwithACPowerPorts
+
+ConnectthisequipmenttoACmainsthatareprovidedwithasurgeprotectivedevice(SPD)attheservice
+
+equipmentthatcomplieswithNFPA70,theNationalElectricalCode(NEC).
+
+Note Statement7013—EquipmentGroundingSystems—CommonBondingNetwork(CBN)
+
+ThisequipmentissuitableforinstallationsusingtheCBN.
+
+Note Statement7018—SystemRecoverTime
+
+Theequipmentisdesignedtobootupinlessthan30minutesprovidedtheneighboringdevicesarefully
+
+operational.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+15
+
+PreparingtheSite
+
+CautionsandRegulatoryComplianceStatementsfor {{Regulatory compliance}}
+
+Note Statement8015—InstallationLocationNetworkTelecommunicationsFacilities
+
+Thisequipmentissuitableforinstallationinnetworktelecommunicationsfacilities.
+
+Note Statement8016—InstallationLocationWheretheNationalElectricCode(NEC)Applies
+
+ThisequipmentissuitableforinstallationinlocationswheretheNECapplies.
+
+Warning Statement1056—UnterminatedFiberCable
+
+Invisiblelaserradiationmaybeemittedfromtheendoftheunterminatedfibercableorconnector.Donot
+
+viewdirectlywithopticalinstruments.Viewingthelaseroutputwithcertainopticalinstruments,forexample,
+
+eyeloupes,magnifiers,andmicroscopes,withinadistanceof100mm,mayposeaneyehazard.
+
+Warning Statement1255—LaserComplianceStatement
+
+PluggableopticalmodulescomplywithIEC60825-1Ed.3and21CFR1040.10and1040.11withorwithout
+
+exceptionforconformancewithIEC60825-1Ed.3asdescribedinLaserNoticeNo.56,datedMay8,2019.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+16
+
+3
+
+CH APTER
+
+Installing the Chassis
+
+* InstallationOptionswithRack-MountKits,onpage17
+
+* InstallaRack,onpage17
+
+* UnpackingandInspectingaNewSwitch,onpage18
+
+* PlanningHowtoPositiontheChassisintheRack,onpage19
+
+* InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit,onpage20
+
+* GroundingtheChassis,onpage26
+
+* StartingtheSwitch,onpage28
+
+Installation Options with Rack-Mount Kits
+
+Therack-mountkitenablesyoutoinstalltheswitchintoracksofvaryingdepths.Positiontheswitchwith
+
+easyaccesstoeithertheportconnectionsorthefanandpowersupplymodules.
+
+Installtheswitchusingtheserack-mountoptions:
+
+* Rack-mountkit(N9K-C9300-RMK)whichyoucanorderfromCisco.
+
+Forfourpostracks.
+
+TherackorcabinetthatyouusemustmeettherequirementslistedtheinGeneralRequirementsforCabinets
+
+andRacks,onpage51section.
+
+Note Youareresponsibleforverifyingthatyourrackandrack-mounthardwarecomplywiththeguidelinesthat
+
+aredescribedinthisdocument.
+
+Install a Rack
+
+Beforeyouinstalltheswitch,youmustinstallastandardfour-post,19-inchEIAdatacenterrack(oracabinet
+
+thatcontainssucharack)thatmeetstherequirementslistedinOverviewofRacks,onpage51.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+17
+
+InstallingtheChassis
+
+UnpackingandInspectingaNewSwitch
+
+Procedure
+
+Step1 Bolttheracktotheconcretesubfloorbeforemovingthechassisontoit.
+
+Warning
+
+Statement1048—RackStabilization
+
+Therackstabilizingmechanismmustbeinplace,ortherackmustbeboltedtothefloorbeforeinstallationorservicing.
+
+Failuretostabilizetherackcancausebodilyinjury.
+
+Step2 Iftherackhasbondedconstruction,connectittotheearthground.Thisactionenablesyoutoeasilygroundtheswitch
+
+anditscomponentsandtogroundyourelectrostaticdischarge(ESD)wriststraptopreventdamagingdischargeswhen
+
+youhandleungroundedcomponentsbeforeinstallingthem.
+
+Step3 Includeoneortwopowersourcesattherack.ForACpower,provideapowerreceptacle.
+
+Step4 Includeoneortwopowersourcesattherack.ForDCpower,provideacircuitbreakerwithterminalsforconnecting
+
+powercables.
+
+Warning
+
+Statement1018—SupplyCircuit
+
+Toreduceriskofelectricshockandfire,takecarewhenconnectingunitstothesupplycircuitsothatwiringisnot
+
+overloaded.
+
+Note
+
+Ifyouarenotusingpowerredundancyorareusingn+1redundancy,youneedonlyonepowersource.Ifyouareusing
+
+n+nredundancy,youneedtwopowersources.
+
+Unpacking and Inspecting a New Switch
+
+Beforeyouinstallanewchassis,unpackandinspectittobesurethatyouhavealltheitemsthatyouordered.
+
+Verifythattheswitchwasnotdamagedduringshipment.Ifanythingisdamagedormissing,contactyour
+
+customerrepresentativeimmediately.
+
+Caution Whenyouhandlethechassisoritscomponents,followESDprotocolatalltimestopreventESDdamage.
+
+ThisprotocolincludesbutisnotlimitedtowearinganESDwriststrapthatyouconnecttotheearthground.
+
+Tip Donotdiscardtheshippingcontainerwhenyouunpacktheswitch.Flattentheshippingcartonsandstore
+
+them.Ifyouneedtomoveorshipthesysteminthefuture,youwillneedthiscontainer.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+18
+
+InstallingtheChassis
+
+PlanningHowtoPositiontheChassisintheRack
+
+Procedure
+
+Step1 Comparetheshipmenttotheequipmentlistthatisprovidedbyyourcustomerservicerepresentative.Verifythatyou
+
+havereceivedalloftheordereditems.
+
+Theshipmentshouldinclude:
+
+* Switchchassis,whichincludestheseinstalledcomponents:
+
+* Twopowersupplies(anycombinationofthese,withtheairflowdirectionbeingthesameasforthefanmodules):
+
+* 1400-WACpowersupply
+
+* Port-sideexhaustACpowersupplywithbluecoloring(NXA-PAC-{{Power input requirements}}-PE)
+
+* Port-sideintakeACpowersupplywithburgundycoloring(NXA-PAC-{{Power input requirements}}-PI)
+
+* 2000-WDCpowersupply
+
+* Port-sideexhaustDCpowersupplywithbluecoloring({{2000-W DC power supply part number}})
+
+* Port-sideintakeDCpowersupplywithburgundycoloring({{2000-W DC power supply part number (intake)}})
+
+* 2000-WHVAC/HVDCpowersupply
+
+* HVAC/HVDCDCairflowpowerintakewithburgundycoloring({{2000-W HVAC/HVDC power supply part number}})
+
+* Fourfanmodules(allfanandpowersupplymodulesmusthavethesameairflowdirection)
+
+* Port-sideexhaustairflowwithbluecoloring(NXASFAN-160CFM2PE)
+
+* Port-sideintakeairflowwithburgundycoloring(NXASFAN-160CFM2PI)
+
+* Switchaccessorykit
+
+Step2 Checkthecontentsoftheboxfordamage.
+
+Step3 Ifyounoticeanydiscrepanciesordamage,sendthisinformationtoyourcustomerservicerepresentativebyemail:
+
+* Invoicenumberoftheshipper(seethepackingslip)
+
+* Modelandserialnumberofthemissingordamagedunit
+
+* Descriptionoftheproblemandhowitaffectstheinstallation
+
+Planning How to Position the Chassis in the Rack
+
+Theswitchisdesignedsothatyoucanhavecoolantairflowthroughtheswitchinoneoftwodirections:
+
+Theswitchisdesignedsothatyoucanhavecoolantairflowthroughtheswitchinoneoftwodirections:
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+19
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+* Entertheportsideandexhaustoutthepowersupplyside(port-sideintakeairflow)
+
+* Enterthepowersupplysideandexhaustouttheportside(port-sideexhaustairflow)
+
+Forport-sideintakeairflow,theswitchmusthaveport-sideintakefanandACpowersupplymoduleswith
+
+oneormoreofthesecolorings:
+
+* RedcoloringonfanmodulesandACpowersupplies
+
+* Redcoloringon2000-WHVAC/HVDCpowersupplies(powersupplieswiththeirairflowdirectionset
+
+bythefanmodules)
+
+* RedcoloringonDCpowersupplyisalsousedforport-side-intakeairflow.
+
+Forport-sideexhaustairflow,theswitchmusthaveport-sideexhaustfanandACpowersupplymoduleswith
+
+oneormoreofthesecolorings:
+
+* BluecoloringonfanmodulesandACpowersupplies
+
+* BluecoloringonDCpowersupplies
+
+* Bluecoloringon2000-WHVAC/HVDCpowersupplies
+
+Planthepositioningoftheswitchsothatitsportsarelocatedclosetoportsonconnecteddevicesorsothat
+
+thefanandpowersupplymodulesareconvenientlylocatedinamaintenanceaisle.Orderthemodulesthat
+
+movecoolantairintheappropriatedirectionfromthecoldaisletothehotaisle.
+
+Note Allfanandpowersupplymodulesinthesameswitchmustoperatewiththesamedirectionofairflow.The
+
+airintakeportionoftheswitchmustbelocatedinacoldaisle.
+
+Installing the Switch using the NXK-ACC-RMK2-{{Rack units}}
+
+Rack-Mount Kit
+
+Toinstalltheswitch,attachmountingbracketstotherack,installsliderrailsontherearoftherack,slidethe
+
+switchontothesliderrails,installtheretainerbrackets,andsecuretheswitchtotherackwiththeretainer
+
+clips.Typically,thefrontoftherackisthesideeasiesttoaccessformaintenance.
+
+Note Yousupplytheeight10-32or12-24screwsrequiredtomountthesliderrailsandswitchtotherack.
+
+Beforeyoubegin
+
+* Inspecttheswitchshipmenttoensurethatyouhaveeverythingordered.
+
+* Verifythattheswitchrack-mountkitincludestheseparts:
+
+* Rack-mountbrackets(2)
+
+* Rack-mountfront-mountbrackets(2)
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+20
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+* Rack-mountsliderrails(2)
+
+* Rack-mountretainerclips(2)
+
+* Phillipscountersinkscrews(12)
+
+* FlatheadscrewsM4(6)
+
+* FlatheadscrewsM3(4)
+
+* Therackisinstalledandsecuredtoitslocation.
+
+Procedure
+
+Step1 Installtworack-mountbracketstotherack.
+
+a) Determinewhichendofthechassisgoesinthecoldaisle:
+
+* Iftheswitchhasport-sideintakemodules(fanmoduleswithburgundycoloring),positionthefront-mount
+
+bracketssothattheswitchportswillbeinthecoldaisle.
+
+* Iftheswitchhasport-sideexhaustmodules(fanmoduleswithbluecoloring),positionthefront-mountbrackets
+
+sothattheswitchfanandpowersupplymoduleswillbeinthecoldaisle.
+
+b) Positionafront-mountbracketsothatitalignstothedesiredpositionintherackandsecurethebracketwith12-24
+
+screwsor10-32screws,dependingontherackthreadtype(seethefigure).Tighten12-24screwsto {{<spec_key>}}-lb(3.39
+
+N·m)oftorque.Tighten10-32screwsto {{<spec_key>}}-lb(2.26N·m)oftorque.
+
+c) RepeatStep1fortheotherfrontrack-mountbracketontheothersideoftherackandbesuretopositionthatbracket
+
+horizontallytothesamelevelasthefirstbracket.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+21
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+Step2 Ifyouarenotinstallingthechassisintoagroundedrack,attachacustomer-suppliedgroundingwiretothechassisas
+
+explainedinGroundingtheChassis,onpage26.Ifyouareinstallingthechassisintoagroundedrack,skipthisstep.
+
+Step3 Installthesliderrailsontherackorcabinet.
+
+a) Determinewhichtwopostsoftherackorcabinetyoushoulduseforthesliderrails.Ofthefourverticalpostsinthe
+
+rackorcabinet,twowillbeusedforthefrontmountbracketsattachedtotheeasiestaccessedendofthechassis.The
+
+othertwopostswillhavethesliderrails.
+
+b) Positionasliderrailatthedesiredlevelonthebacksideoftherackandslideitintothefront-mountbracketalready
+
+installed.Securewith12-24screwsor10-32screws,dependingontherackthreadtype(seethefigure).Tighten
+
+12-24screwsto {{<spec_key>}}-lb(3.39N·m)oftorque.Tighten10-32screwsto {{<spec_key>}}-lb(2.26N·m)oftorque.
+
+c) RepeatStep3toattachtheothersliderrailtotheothersideoftherack.
+
+Makesurethatthesliderrailsareatthesamelevel.Usealeveltool,tapemeasure,orcarefullycountthescrewholes
+
+intheverticalmountingrails.
+
+Step4 Inserttheswitchintotherackandattachit.
+
+a) Alignthefourholesinonesideoffrontmountbracketstothreeholesontheleftorrightsideofthechassis(seethe
+
+figure).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+22
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+b) UsethreeM4x6mmscrewstoattachthebrackettothechassis.Tighteneachscrewto11to {{<spec_key>}}-lb(1.2to1.7
+
+N·m).
+
+c) RepeatSteps4toattachthesecondfrontmountbrackettotheothersideofthechassis.
+
+Step5 Inserttheswitchintotherackandattachit.
+
+a) Holdingtheswitchwithbothhands,positiontheswitchontotherack-mountbracketsandcarefullyslidethechassis
+
+intotherack(seethefigure).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+23
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+Step6 Rotateonefrontmountbrackettoalignwiththerack(seethefigure).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+24
+
+InstallingtheChassis
+
+InstallingtheSwitchusingtheNXK-ACC-RMK2-2RURack-MountKit
+
+a) Tightenthe10-32screwsto {{<spec_key>}}-lb(2.26N·m)ortightenthe12-24screwsto {{<spec_key>}}-lb(3.39N·m).
+
+b) RepeatStep6toattachtheotherfrontmountbracketonothersideofthechassis.
+
+Step7 Inserttheretainercliptoholdthechassisinplace.
+
+a) Aligntheretainercliptotheinsideofthebackofthesliderrail.Makesuretohooktheflangetothecutoutonthe
+
+bracketandalignthescrewholes(seethefigure).
+
+b) Attachthescrewstosecuretheretainerclip(seethefigure).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+25
+
+InstallingtheChassis
+
+GroundingtheChassis
+
+c) RepeatStep7toattachtheotherretainerclipontheothersideofthechassis.
+
+Step8 Ifyouattachedagroundingwiretothechassisgroundingpad,connecttheotherendofthewiretothefacilityground.
+
+Grounding the Chassis
+
+Theswitchchassisisautomaticallygroundedwhenyouproperlyinstalltheswitchinagroundedrackwith
+
+metal-to-metalconnectionsbetweentheswitchandrack.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+26
+
+InstallingtheChassis
+
+GroundingtheChassis
+
+Note Provideanelectricalconductingpathbetweentheproductchassisandthemetalsurfaceoftheenclosureor
+
+rackinwhichitismountedortoagroundingconductor.Toensureelectricalcontinuity,usethread-forming
+
+typemountingscrewsthatremoveanypaintornon-conductivecoatingsandestablishametal-to-metalcontact.
+
+Removeanypaintorothernon-conductivecoatingsonthesurfacesbetweenthemountinghardwareandthe
+
+enclosureorrack.Cleanthesurfacesandapplyanantioxidantbeforeinstallation.
+
+GroundtherackifusingLVDCpowersupplies.IfusingACorHVDCpowersupplies,thepowercordfor
+
+thechassisprovidesgrounding.
+
+GroundtherackifusingACpowersupplies.ThepowercordforACpowersuppliesprovidesthechassis
+
+grounding.
+
+Groundthechassis.Ifyouareusinga2-postrack,attachacustomer-suppliedgroundingcable.Attachthe
+
+cabletothechassisgroundingpadandthefacilityground.Ifyouareusinga4-postrack,ensurethatyour
+
+chassisisgroundedthroughtherackmountsystemorthepowercable(ACorHVDC).
+
+Warning Statement1024—GroundConductor
+
+Thisequipmentmustbegrounded.Toreducetheriskofelectricshock,neverdefeatthegroundconductoror
+
+operatetheequipmentintheabsenceofasuitablyinstalledgroundconductor.Contacttheappropriateelectrical
+
+inspectionauthorityoranelectricianifyouareuncertainthatsuitablegroundingisavailable.
+
+Warning Statement1046—InstallingorReplacingtheUnit
+
+Toreduceriskofelectricshock,wheninstallingorreplacingtheunit,thegroundconnectionmustalwaysbe
+
+madefirstanddisconnectedlast.
+
+Beforeyoubegin
+
+Beforeyoucangroundthechassis,connecttoearthgroundofthedatacenterbuilding.
+
+Procedure
+
+Step1 Useawire-strippingtooltoremoveapproximately0.75inch(19mm)ofthecoveringfromtheendofthegrounding
+
+wire.Werecommend6-AWGwirefortheU.S.installations.
+
+Step2 Insertthestrippedendofthegroundingwireintotheopenendofthegroundinglug.Useacrimpingtooltocrimpthe
+
+lugtothewire.Seethefigure.Verifythatthegroundwireissecurelyattachedtothegroundinglugbyattemptingtopull
+
+thewireoutofthecrimpedlug(tugtest).
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+27
+
+InstallingtheChassis
+
+StartingtheSwitch
+
+1 Chassisgroundingpad 3 2M4screwsareusedtosecurethegroundinglugto
+
+thechassis
+
+2 Groundingcable,with {{<spec_key>}}.(19mm)ofinsulation
+
+thatisstrippedfromoneend,whichisinsertedinto
+
+thegroundinglugandcrimpedinplace
+
+Step3 SecurethegroundinglugtothechassisgroundingpadwithtwoM4screws,seefigure1.Tightenthescrewsto11to15
+
+in-lb(1.24to1.69Nm)oftorque.
+
+Step4 Preparetheotherendofthegroundingwireandconnectittothefacilityground.
+
+Starting the Switch
+
+Starttheswitchbyconnectingittoitsdedicatedpowersource.Ifyouneedn+nredundancy,connecteach
+
+powersupplyinaswitchtoadifferentpowersource.
+
+Note Thisequipmentisdesignedtobootupinlessthan30minutes,dependentonitsneighboringdevicesbeing
+
+fullyupandrunning.
+
+Beforeyoubegin
+
+* Theswitchmustbeinstalledandsecuredtoarackorcabinet.
+
+* Theswitchmustbeadequatelygrounded.
+
+* Therackmustbecloseenoughtothededicatedpowersourcesothatyoucanconnecttheswitchtothe
+
+powersourcebyusingthedesignatedpowercables.
+
+* Youhavethedesignatedpowercablesforthepowersuppliesthatyouareconnectingtothededicated
+
+powersources.
+
+Note DependingontheoutletreceptacleonyourACpowerdistributionunit,youmight
+
+needanoptionaljumperpowercordtoconnecttheswitchtoyouroutletreceptacle.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+28
+
+InstallingtheChassis
+
+StartingtheSwitch
+
+* Theswitchisnotconnectedtothenetwork(thisincludesanymanagementorinterfaceconnections).
+
+* Thefanandpowersupplymodulesarefullysecuredintheirchassisslots.
+
+Procedure
+
+Step1 ForanyACpowersupply,dothis:
+
+a) UsingtherecommendedACpowercableforyourcountryorregion,connectoneendtotheACpowersupply.
+
+b) ConnecttheotherendofthepowercabletotheACpowersource.
+
+Step2 ForanyHVAC/HVDCpowersupply,connectittoapowersourcelikethis:
+
+a) Usingtherecommendedhighvoltagepowercableforyourcountryorregion,connecttheAndersonPowerSaf-D-Grid
+
+connectoronthepowercabletothepowerreceptacleonthepowersupply.Makesurethattheconnectorclickswhen
+
+fullypushedintothereceptacle.
+
+b) Connecttheotherendofthepowercabletoapowersource.
+
+* WhenconnectingtoanHVACpowersource,insertthepluginareceptaclefortheHVACpowersource.
+
+* WhenconnectingtoanHVDCpowersource,dothis:
+
+1. Verifythatthepoweristurnedoffatacircuitbreakerforthepowersourceterminals.
+
+2. Removethenutsfromeachoftheterminalpostsforthepowersource.
+
+3. Placethepowercableground-wireterminalringonthegroundterminalforthepowersourceandsecure
+
+themwithaterminalnut.
+
+4. Placethepowercablenegative-wireterminalringonthenegativeterminalforthepowersourceandsecure
+
+themwithaterminalnut.
+
+5. Placethepowercablepositive-wireterminalringonthepositiveterminalforthepowersourceandsecure
+
+themwithaterminalnut.
+
+6. Ifthereisasafetycoverforthepowersourceterminals,placeandsecureitovertheterminals.
+
+7. Turnonthepoweratthepowersourcecircuitbreaker.
+
+Step3 ForanyLVDCpowersupply,dothis:
+
+a) Turnoffthecircuitbreakerforthepowersource.
+
+b) WhenusinganLVDCpowersupplythatdoesnotusealug,connectthesuppliedwiringharnesstothesource.Or
+
+connecttheuser-suppliedwirestotheLVDCpowersource.
+
+c) WhenusinganLVDCpowersupplythatdoesnotusealug,connecttheattachedplugofthesuppliedwiringharness
+
+tothepowersupply.Orattachthelugsoftheusersuppliedwirestothepowersupply.
+
+d) Ifthereisasafetycoverforthepowersourceterminals,placeandsecureitovertheterminals.
+
+e) TurnonthepoweratthecircuitbreakerfortheDCpowersource.
+
+Step4 VerifythatthepowersupplyLEDisonandgreen.
+
+Step5 Listenforthefans;theyshouldbeginoperatingwhenthepowersupplyispowered.
+
+Step6 Aftertheswitchboots,verifythattheseLEDsarelit:
+
+* Onthefanmodules,theStatus(STAorSTS)LEDisgreen.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+29
+
+InstallingtheChassis
+
+StartingtheSwitch
+
+IfafanmoduleStatusLEDisnotgreen,tryreinstallingthefanmodule.
+
+* Afterinitialization,theswitchchassisStatus(labeledasSTAorSTS)LEDisgreen.
+
+Step7 Verifythatthesystemsoftwarehasbootedandtheswitchhasinitializedwithouterrormessages.
+
+Asetuputilityautomaticallylaunchesthefirsttimethatyouaccesstheswitchandguidesyouthroughthebasic
+
+configuration.Forinstructionsonhowtoconfiguretheswitchandcheckmoduleconnectivity,seetheappropriateCisco
+
+Nexus9000SeriesConfigurationGuides.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+30
+
+4
+
+CH APTER
+
+Connecting the Switch to the ACI Fabric
+
+* ACIFabricTopology,onpage31
+
+* PreparingtoConnecttoOtherDevices,onpage32
+
+* ConnectingLeafSwitchestoAPICs,onpage33
+
+* ConnectingLeafSwitchestoSpineSwitches,onpage35
+
+* ReplacinganExistingSwitchintheACIFabric,onpage36
+
+* SettingUpanOptionalConsoleInterface,onpage36
+
+* SettingUpanOptionalManagementConnection,onpage37
+
+* MaintainingTransceiversandOpticalCables,onpage37
+
+ACI Fabric Topology
+
+TheACIfabrictopologyincludesthesemajorcomponents:
+
+* ApplicationCentricInfrastructureController(APIC)appliance(clusterofAPICs)
+
+* Leafswitches(forswitchcompatibility,pleaseseethedatasheets)
+
+* Spineswitches(forswitchcompatibility,pleaseseethedatasheets)
+
+Foradditionalinformation,pleaseseetheCiscoAPICInstallation,Upgrade,andDowngradeGuide.
+
+Note Topreventsub-optimalforwardingbetweenendpoints,connecteveryleafswitchinthefabrictoeveryspine
+
+switchinthesamefabric.
+
+Asshowninthefigure,eachAPICisconnectedtooneortwoleafswitchesandeachleafswitchshouldbe
+
+connectedtoeveryspineswitchinthesamefabric.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+31
+
+ConnectingtheSwitchtotheACIFabric
+
+PreparingtoConnecttoOtherDevices
+
+Figure1:ConnectionsBetweenAPICClusters,LeafNodes,andSpineNodes
+
+Preparing to Connect to Other Devices
+
+Whenpreparingtoconnectthefabricdevices,considertheseitemsforeachtypeofinterface,andgatherall
+
+oftherequiredequipmentbeforemakingtheconnections:
+
+* Cablingtyperequiredforeachinterfacetype
+
+* Distancelimitationsforeachsignaltype
+
+* Additionalinterfaceequipmentrequired
+
+Note Whenrunningpoweranddatacablesinoverheadorsubfloorcabletrays,westronglyrecommendthatyou
+
+locatepowercablesandotherpotentialnoisesourcesasfarawayaspracticalfromnetworkcablingthat
+
+terminatesonCiscoequipment.Insituationswherelongparallelcablerunscannotbeseparatedbyatleast
+
+{{<spec_key>}}({{<spec_key>}}),werecommendthatyoushieldanypotentialnoisesourcesbyhousingtheminagrounded
+
+metallicconduit.
+
+Theopticaltransceiversthatarenotalreadyassembledtotheircablescomeseparatefromtheircables.To
+
+preventthesetransceiversandtheircablesfrombeingdamaged,werecommendthatyoukeepthetransceivers
+
+disconnectedfromtheircableswheninstallingtheminportsandtheninserttheopticalcableintothetransceiver.
+
+Whenremovingtransceiversfromports,removetheircablesbeforeremovingthetransceivers.
+
+Formoreinformationaboutremovingandinstallingthetransceivers,seetheCiscoNexus9408ACI-Mode
+
+SwitchHardwareInstallationGuide,"OpticTransceiverRemovalUsingtheOpticsExtractionTool".
+
+Tomaximizetheeffectivenessandlifeofyourtransceiversandopticalcables:
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+32
+
+ConnectingtheSwitchtotheACIFabric
+
+ConnectingLeafSwitchestoAPICs
+
+* WearanESD-preventativewriststrapthatisconnectedtoanearthgroundwheneverhandlingtransceivers.
+
+TheswitchistypicallygroundedwhenyouinstalltransceiversandprovidesanESDporttowhichyou
+
+canconnectyourwriststrap.IfyoucannotfindanESDport,connectthewriststraptoanearthground
+
+(suchasthegroundingconnectionforthechassis).
+
+* Donotremoveorinsertatransceivermoreoftenthannecessary.Repeatedremovalsandinsertionscan
+
+shortenitsusefullife.
+
+* Keepthetransceiversandfiber-opticcablescleananddustfreetomaintainhighsignalaccuracyandto
+
+preventdamagetotheconnectors.Attenuation(lossoflight)increaseswithcontaminationandshould
+
+bekeptbelow0.35dB.
+
+* Cleanthesepartsbeforeinstallingthemtopreventdustfromscratchingthefiber-opticcableends.
+
+* Cleantheconnectorsregularly;therequiredfrequencyofcleaningdependsupontheenvironment.
+
+Inaddition,cleanconnectorsiftheyareexposedtodustoraccidentallytouched.Bothwetanddry
+
+cleaningtechniquescanbeeffective;refertoyoursite'sfiber-opticconnectioncleaningprocedures.
+
+* Donottouchtheendsofconnectors.Touchingtheendscanleavefingerprintsandcauseother
+
+contamination.
+
+* Inspectroutinelyfordustanddamage.Ifyoususpectdamage,cleanandtheninspectfiberendsundera
+
+microscopetodetermineifdamagehasoccurred.
+
+Connecting Leaf Switches to APICs
+
+Downlinkoneortwo(recommendedforredundancy)CiscoNexus9300platformACI-modeleafswitches
+
+toeachApplicationPolicyInfrastructureController(APIC)inyourACIfabric.Thetypeofvirtualinterface
+
+card(VIC)installedontheAPICdeterminesthetypesofinterfacecablesthatyouusetoconnecttheleaf
+
+switchestotheAPICs.
+
+* TheVIC1225Tmodulesupportscopperconnectors,coppercables,andswitcheswithcopperdownlink
+
+ports(suchas:CiscoNexus93108TC-FXswitch).
+
+* TheVIC1225modulesupportsopticaltransceivers,opticalcables,andswitcheswithopticaldownlink
+
+ports(suchas:CiscoNexus93600CD-GXswitch).
+
+* TheVIC1455modulesupportsopticaltransceivers,opticalcables,andswitcheswithopticaldownlink
+
+ports(suchas:CiscoNexus93600CD-GXswitch).
+
+Note YoucannotusebreakoutportsforCiscoAPICconnectivity.
+
+Beforeyoubegin
+
+TheAPICandleafswitchesinthefabricmustbefullyinstalledintheirracksandgrounded.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+33
+
+ConnectingtheSwitchtotheACIFabric
+
+ConnectingLeafSwitchestoAPICs
+
+Procedure
+
+Step1 Connectaninterfacecabletooneofthetwotofourportsonthevirtualinterfacecard(VIC)installedontheAPIC.Ifthe
+
+cableisnotalreadyassembledtoitstransceiver,insertthetransceiverintotheVICport.Connecttheopticalinterface
+
+cabletothetransceiver.
+
+* ForaVIC1225T10GBASE-Tcoppermodule,use10GBASE-TcableswithRJ-45connectors.
+
+* ForaVIC1225opticalmodule,useoneofthesesetsoftransceiversandcables:
+
+* Cisco10GBASE-LRtransceivers(SFP-10G-LR)supportingalinklengthofupto6.1miles(10km)
+
+* Cisco10GBASE-SRtransceivers(SFP-10G-SR)supportingtheselinklengths:
+
+* Using2000MHzMMF(OM3)forupto {{<spec_key>}}({{<spec_key>}})
+
+* Using4700MHzMMF(OM4)forupto {{<spec_key>}}({{<spec_key>}})
+
+* CiscoSFP+ActiveOpticalCables(SFP-10G-AOCxM[wherex=1,3,5,7forlengthsinmeters])
+
+* CiscoSFP+TwinaxCables(SFP-H10GB-CUxM[wherex=7forlengthsinmeters])
+
+* ForaVIC1455SFP28module,10-Gigabitonly,useoneofthesesetsoftransceiversandcables:
+
+* Cisco10GBASE-LRtransceivers(SFP-10G-LR)supportingalinklengthofupto6.1miles(10km)
+
+* Cisco10GBASE-SRtransceivers(SFP-10G-SR)supportingtheselinklengths:
+
+* Using2000MHzMMF(OM3)forupto {{<spec_key>}}({{<spec_key>}})
+
+* Using4700MHzMMF(OM4)forupto {{<spec_key>}}({{<spec_key>}})
+
+* CiscoSFP+ActiveOpticalCables(SFP-10G-AOCxM[wherex=1,2,3,5,7,or10forlengthsinmeters])
+
+* CiscoSFP+TwinaxCables(SFP-H10GB-CUxM[wherex=1,2,3,5,7,or10forlengthsinmeters])
+
+Note
+
+TheVIC1455has4ports:port-1,port-2,port-3,andport-4fromlefttoright.
+
+* Allportsmusthavethesamespeed,either10-Gigabitor25-Gigabit.
+
+* Port-1andport-2isonepair,correspondingtoeth2-1onAPICandport-3andport-4isanotherpair,
+
+correspondingtoeth2-2onAPIC.Onlyoneconnectionisallowedforeachpair.Forexample,connectone
+
+cabletoeitherport-1orport-2.Connectanothercabletoeitherport-3orport-4.Donotconnecttwocables
+
+onanypair.
+
+Todeterminewhichtransceivers,adapters,andcablessupportthisswitch,seetheCiscoTransceiverModules
+
+CompatibilityInformationdocument.
+
+Toseethetransceiverspecificationsandinstallationinformation,seeTransceiverModuleInstallationGuides.
+
+Step2 Connecttheotherendoftheinterfacecabletoadownlinkportonaleafswitch.
+
+* ForaCisco10GBASE-LRor-SRtransceiverandcable,insertthetransceiverintoadownlinkopticalportonaleaf
+
+switchbeforeconnectingthecabletothetransceiver.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+34
+
+ConnectingtheSwitchtotheACIFabric
+
+ConnectingLeafSwitchestoSpineSwitches
+
+* ForCiscoSFP+ActiveOpticalCables,insertthetransceiveronthecableintoadownlinkopticalportonaleaf
+
+switch.
+
+* Fora10GBASE-Tcoppercable,inserttheRJ-45connectoronthecableintoadownlinkBASE-Tportonaleaf
+
+switch.
+
+Note
+
+Todeterminewhichtransceivers,adapters,andcablessupportthisswitch,seetheCiscoTransceiverModulesCompatibility
+
+Informationdocument.
+
+Connecting Leaf Switches to Spine Switches
+
+Foroptimalforwardingbetweenendpoints,connecteachleafswitchtoeveryspineswitchinthesameACI
+
+fabric.
+
+Todeterminewhichtransceivers,adapters,andcablessupportthisswitch,seetheCiscoTransceiverModules
+
+CompatibilityInformationdocument.
+
+Toseethetransceiverspecificationsandinstallationinformation,seeTransceiverModuleInstallationGuides.
+
+Warning Statement1055—Class1/1MLaser
+
+Invisiblelaserradiationispresent.Donotexposetousersoftelescopicoptics.ThisappliestoClass1/1M
+
+laserproducts.
+
+Warning Statement1056—UnterminatedFiberCable
+
+Invisiblelaserradiationmaybeemittedfromtheendoftheunterminatedfibercableorconnector.Donot
+
+viewdirectlywithopticalinstruments.Viewingthelaseroutputwithcertainopticalinstruments,forexample,
+
+eyeloupes,magnifiers,andmicroscopes,withinadistanceof100mm,mayposeaneyehazard.
+
+Warning Statement1255—LaserComplianceStatement
+
+PluggableopticalmodulescomplywithIEC60825-1Ed.3and21CFR1040.10and1040.11withorwithout
+
+exceptionforconformancewithIEC60825-1Ed.3asdescribedinLaserNoticeNo.56,datedMay8,2019.
+
+Beforeyoubegin
+
+* Theleafandspineswitchesinthefabric(suchas:N9K-C9364C,N9K-C9332C,N9K-C9316D-GX,and
+
+N9K-C9332D-GX2B)mustbefullyinstalledintheirracksandgrounded.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+35
+
+ConnectingtheSwitchtotheACIFabric
+
+ReplacinganExistingSwitchintheACIFabric
+
+* Iftherearemodularswitchesinthefabric,theirACI-modelinecardsmustalreadybeinstalled.Theline
+
+cardscanbeofthesetypes:
+
+* 32-port100-Gigabit(suchas:N9K-X9732C-EX)
+
+* 36-port100-Gigabit(suchas:N9K-X9736C-FX)
+
+Note •YoucannotincludeNX-OSlinecardsinthesamechassiswhenrunninginACImode.
+
+* Multipleuplinksfromaleafswitchtoaspineswitchissupported.Asymmetricaltopologyisrecommended
+
+sothatalldeviceshaveequalaccesstoresources.
+
+Procedure
+
+Step1 Forthetransceiverswithremovablecables,separatethetransceiversfromtheirinterfacecables.
+
+Step2 Inserttheappropriatetransceiverintoanactiveuplinkportontheleafswitch.
+
+Step3 Insertthesametypeoftransceiverinthespineswitchportonthelinecard.
+
+Step4 Fortransceiverswithremovablecables,inserttheinterfacecableintotheopenendofeachofthosetransceivers.
+
+Step5 RepeatSteps1through4foreachspineswitchintheACIfabric.
+
+TheleafswitchisconnectedtoeachspineswitchintheACIfabric.
+
+Step6 RepeatSteps1through5foreachleafswitchintheACIfabric.
+
+EachleafswitchintheACIfabricisconnectedtoeachspineswitchinthenetwork.
+
+ThefabricautomaticallyimplementsEqualCostMulti-Pathing(ECMP)andenablesalllinks.Youdonot
+
+needtoconfigurethelinks.
+
+Replacing an Existing Switch in the ACI Fabric
+
+ToreplaceanexistingswitchintheACIfabric,see"UpgradingtheSwitchHardware"intheCiscoAPIC
+
+InstallationandACIUpgradeandDowngradeGuide.
+
+Setting Up an Optional Console Interface
+
+Optionallysetupaconsoleinterfaceforperformingtheinitialconfigurationoftheswitch.Usetheinterface
+
+cableprovidedintheaccessorykittoconnecttheswitchtoyourconsoledevice.Connecttheconsoleporton
+
+theswitchtoamodem.Ifyoudonotconnectittoamodem,maketheconnectioneitherbeforepoweringup
+
+theswitchoraftercompletingthebootprocessfortheswitch.
+
+Beforeyoubegin
+
+TheconsoledevicemustsupportVT100terminalemulationsandasynchronoustransmissions.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+36
+
+ConnectingtheSwitchtotheACIFabric
+
+SettingUpanOptionalManagementConnection
+
+Procedure
+
+Step1 Configuretheterminalemulatorprogramtomatcheachofthesedefaultportcharacteristics:
+
+* 9600baud
+
+* 8databits
+
+* 1stopbit
+
+* Noparity
+
+Step2 InserttheRJ-45connectorontheinterfacecablefoundintheaccessorykitintotheRS-232portontheswitch.Insertthe
+
+DB-9connectorontheotherendofthecabletotheserialportontheconsoledevice.
+
+Whattodonext
+
+Performtheinitialconfigurationfortheswitch(seetheCiscoACIGettingStartedGuide).
+
+Setting Up an Optional Management Connection
+
+Optionallysetupanout-of-bandmanagementconnectionformonitoringandtroubleshootingpurposes.
+
+Dependingonyourswitch,connecteithertheRJ-45managementportortheSFPmanagementportonthe
+
+switchtoanexternalhub,switch,orrouter.
+
+Beforeyoubegin
+
+TopreventanIPaddressconflict,completetheinitialconfigurationfortheswitchandestablishanIPaddress
+
+beforeyoucreatethemanagementconnection.
+
+Procedure
+
+Step1 Connecttheinterfacecabletoamanagementportontheswitch.
+
+Step2 Connecttheotherendofthecabletoanexternalhub,switch,orrouter.
+
+Maintaining Transceivers and Optical Cables
+
+Keeptransceiversandfiber-opticcablescleananddustfreetomaintainhighsignalaccuracyandprevent
+
+damagetotheconnectors.Contaminationincreasesattenuation(lossoflight)andshouldbebelow0.35dB.
+
+Considerthesemaintenanceguidelines:
+
+* Transceiversarestaticsensitive.TopreventESDdamage,wearanESD-preventativewriststrapthatis
+
+connectedtothegroundedchassis.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+37
+
+ConnectingtheSwitchtotheACIFabric
+
+MaintainingTransceiversandOpticalCables
+
+* Donotremoveandinsertatransceivermoreoftenthanisnecessary.Repeatedremovalsandinsertions
+
+canshortenitsusefullife.
+
+* Keepallopticalconnectionscoveredwhennotinuse.Cleanthembeforeusingtopreventdustfrom
+
+scratchingthefiber-opticcableends.
+
+* Donottouchtheendsofconnectors.Touchingtheendscanleavefingerprintsandcauseother
+
+contamination.
+
+* Cleantheconnectorsregularly;therequiredfrequencyofcleaningdependsupontheenvironment.In
+
+addition,cleanconnectorsiftheyareexposedtodustoraccidentallytouched.Bothwetanddrycleaning
+
+techniquescanbeeffective;refertothefiber-opticconnectioncleaningproceduresforyoursite.
+
+* Inspectroutinelyfordustanddamage.Ifyoususpectdamage,cleanandtheninspectfiberendsundera
+
+microscopetodetermineifdamagehasoccurred.
+
+Note Whenyouneedtoremoveafiber-optictransceiver,firstremovethefiber-opticcablefromthetransceiver
+
+beforeyouremovethetransceiverfromtheport.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+38
+
+5
+
+CH APTER
+
+Replacing Components
+
+* ReplacingaFanModuleDuringOperations,onpage39
+
+* ReplacingaPowerSupplyModule,onpage41
+
+* InstallingandRemovingSmall-FormPluggableModules,onpage46
+
+* InstallandRemoveOSFP/QSFPTransceiverModules,onpage47
+
+* AttachingtheOpticalNetworkCable,onpage49
+
+* RemovingtheTransceiverModule,onpage50
+
+Replacing a Fan Module During Operations
+
+Allfanandpowersupplymodulesmusthavethesameairflowdirectionorelseanerrorcanoccurwiththe
+
+switchoverheatingandshuttingdown.Youcandeterminetheairflowdirectionofafanmodulebythecolor
+
+ofthestripeonthefrontofthemodule.Ifthefanmodulehasaredstripeforport-sideintakeairflow,the
+
+powersuppliesmusthaveredcoloringforthesameairflowdirection.Toavoidoverheatingtheswitch,make
+
+surethatthefanmodulesarepositionedthisway:
+
+* Forport-sideintakeairflowwithredcoloring,positionthefansinacoldaisle.
+
+* Forport-sideexhaustairflowwithbluecoloring,positionthefansinacoldaisle.
+
+Beforeyoubegin
+
+Beforeyoucanreplaceafanmodule,ensurethattheseconditionsexist:
+
+* Therearefourfunctioningfanmodulesintheotherfanslots.Inordertoreplaceafanmoduleduring
+
+operations,theremustbethreefanmodulescirculatingairinthechassisatalltimes.Theotherfanmodule
+
+isredundantandcanbereplaced.
+
+* Thereplacementfanmodulemusthavethesameairflowdirectionastheothermodulesinthechassis.
+
+Ifyoumustreplacethefanmoduleduringoperationsandtheaboveconditionsarenotmet,leavethefan
+
+modulethatyouneedtoreplaceinthechassistopreservethedesignedairflowuntilyouhavetherequired
+
+module.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+39
+
+ReplacingComponents
+
+ReplacingaFanModuleDuringOperations
+
+Procedure
+
+Step1 Removethefanmodulethatyouneedtoreplace.
+
+a) Pressthetwocoloredsidesofthefanmodulehandletowardseachotherandpullthehandletoslidethemoduleout
+
+ofthechassis.
+
+1 Pressinwardonbothcoloredslidesofthehandle. 2 Whileholdingthesidesinward,pullonthehandle
+
+toremovethemodulefromthechassis.
+
+b) Placetheremovedmoduleonanantistaticsurfaceorinanantistaticbag.Ifpossible,repackthemoduleinitspacking
+
+materialsforsafeshippingorstorage.
+
+c) Asyoupressthelatches,pullthefanmodulefullyoutofthechassis.
+
+d) Placetheremovedmoduleonanantistaticsurfaceorinanantistaticbag.Ifpossible,repackthemoduleinitspacking
+
+materialsforsafeshippingorstorage.
+
+Step2 Usethesestepstoreplacethemissingfanmodulewithintwominutestoavoidashutdown.
+
+a) Removethereplacementfanmodulefromitspackingmaterialsandplaceitonanantistaticsurface.
+
+Holdthemodulebyitshandleanddonottouchtheelectricalconnectorsonitsbackside.Also,toprotecttheelectrical
+
+connectors,avoidlettingthemcomeincontactwithanythingotherthantheelectricalconnectorsinsidethechassis.
+
+b) Verifythatyouhavetherightfanmoduleforthechassis.Thecorrectfanmodulehasoneofthesepartnumbers:
+
+* NXASFAN-160CFM2PE(port-sideexhaustairflowdirectionandabluestripe)
+
+* NXASFAN-160CFM2PI(port-sideintakeairflowdirectionandaredstripe)
+
+Note
+
+BesurethattheairflowdirectionofthenewfanmodulematchestheairflowdirectionoftheotherfanandACpower
+
+supplymodulesalreadyinstalledinthechassis.Port-sideintakeairflowisindicatedwithredcoloring,andport-side
+
+exhaustairflowisindicatedwithbluecoloring.Powersupplieswithdual-directionairflow(airflowdirectionisset
+
+bythefanmodules)havewhitecoloring.
+
+c) Positionthefanmoduleinfrontoftheopenfanslot(besurethatthebacksideofthemodulewiththeelectrical
+
+connectorsispositionedtoentertheslotfirst)andslidethemoduleallthewayintothechassisuntilitsfrontside
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+40
+
+ReplacingComponents
+
+ReplacingaPowerSupplyModule
+
+comesincontactwiththechassis.Forthelast {{<spec_key>}}({{<spec_key>}}),carefullymountthemoduleontothechassis
+
+connectorsbypushingmorefirmly,butdonotforcethemoduleifitdoesnotmovefurther(excessiveforcecan
+
+damagetheconnectors).
+
+Note
+
+Ifyouarenotabletopushthemoduleallthewayintotheslot,carefullyslidethemoduleoutoftheslotandcheck
+
+itselectricalconnectorsfordamage.Ifdamaged,contactCiscoTechnicalAssistanceforhelp.Ifundamaged,repeat
+
+thissteptoreinstallthemodule.
+
+d) VerifythattheSTSLEDturnsonandbecomesgreen.
+
+IftheSTSLEDdoesnotturnon,slidethemoduleoutofthechassis,andvisuallychecktheelectricalconnectorson
+
+thebacksideofthechassisfordamage.Ifdamaged,contactCiscoTechnicalAssistanceforhelp.Ifundamaged,
+
+repeattheprevioussteptoreinstallthemodule.
+
+Replacing a Power Supply Module
+
+Theswitchrequirestwopowersuppliesforredundancy.Withonepowersupplyprovidingthenecessary
+
+powerforoperations,replacetheotherpowersupplyduringoperationsaslongasthenewpowersupplyhas
+
+thesameairflowdirectionastheothermodulesinthechassis.
+
+Replaceapowersupplywithanothersupportedpowersupplythathasthesamepowersourcetypeasthe
+
+otherinstalledpowersupply.Additionally,theairflowdirectionofthepowersupplymustmatchorconform
+
+totheairflowdirectionoftheinstalledfanmodules.Fortheairflowdirectionusedbytheswitch,seethe
+
+coloringofthefanmodules.
+
+Removing an AC Power Supply
+
+ToremoveanACpowersupply,disconnectthepowercableandremovethemodulefromthechassis.
+
+Beforeyoubegin
+
+* Toreplaceapowersupplyduringoperations,theremustbeafunctioningpowersupplyprovidingpower
+
+totheswitchwhileyoureplacetheotherpowersupply.Ifthereisonlyonepowersupplyinstalledinthe
+
+switchandyouneedtoreplaceit,installthenewpowersupplyintheopenslotandpoweritupbefore
+
+removingtheoriginalpowersupply.
+
+* Ensurethatthechassisisgrounded.Forgroundinginstructions,seeGroundingtheChassis,onpage26.
+
+Procedure
+
+Step1 Disconnectthepowercordfromthepowerreceptacleonthepowersupplytoberemoved.VerifythattheLEDturnsoff.
+
+Note
+
+TheLEDmightbeonandambercolored.Thisindicatesthattheinputpowerhasbeendisconnected.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+41
+
+ReplacingComponents
+
+RemovinganHVAC/HVDCPowerSupply
+
+Step2 Removethepowersupplyfromthechassisbypushingandholdingitsthumblatchtotheleftandpullingthepowersupply
+
+partwayoutofthechassis.
+
+Step3 Placeyourotherhandunderthepowersupplytosupportitwhileyouslideitoutofthechassis.
+
+Eitherplacethepowersupplyonanantistaticsurfaceorpackitinitspackingmaterials.
+
+Whattodonext
+
+Installthereplacementpowersupply.
+
+Removing an HVAC/HVDC Power Supply
+
+Youcanremoveonepowersupplywhiletheotheroneprovidespowertotheswitch.
+
+Todisconnectthepowersupplyfromitspowercables,shutoffthepowerfromthepowersourceanddisconnect
+
+theconnectorforthepowercables.
+
+Procedure
+
+Step1 RemovethepowercablefromthepowersupplybypressingthetaboftheAndersonPowerSAF-D-Gridconnectorand
+
+pullthecableandconnectoroutofthepowersupply.
+
+VerifythattheLEDsturnoffonthepowersupplythatyouareremoving.
+
+Step2 Graspthepowersupplyhandlewhilepressingthereleaselatchtowardsthepowersupplyhandle.
+
+Step3 Placeyourotherhandunderthepowersupplytosupportitwhileyouslideitoutofthechassis.
+
+Caution
+
+Donottouchtheelectricalconnectorsonthebacksideofthemodule.Preventanythingelsefromcomingintocontact
+
+withordamagingtheconnectors.
+
+Whattodonext
+
+InstallanHVAC/HVDCpowersupplyintheopenslot.
+
+Removing a DC Power Supply
+
+Youcanremoveonepowersupplywhiletheotheroneprovidespowertotheswitch.
+
+Todisconnectthepowersupplyfromitspowercables,shutoffthepowerfromthepowersourceanddisconnect
+
+theconnectorforthepowercables.
+
+Procedure
+
+Step1 Turnoffthecircuitbreakerforthepowerfeedtothepowersupplythatyouarereplacing.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+42
+
+ReplacingComponents
+
+InstallinganACPowerSupply
+
+VerifythattheLEDsturnoffonthepowersupplythatyouareremoving.
+
+Step2 RemovethepowercablefromthepowersupplybypressingthelatchontheCisco-suppliedpowercordtoallowremoval
+
+fromthepowersupply.
+
+* Usethesuppliedcabletoconnectthepowersupplytoexternalpower.
+
+Step3 Graspthepowersupplyhandlewhilepressingthereleaselatchtowardsthepowersupplyhandle.
+
+Step4 Pullthepowersupplyoutofthebay.
+
+Whattodonext
+
+InstallaDCpowersupplyintheopenslot.
+
+Installing an AC Power Supply
+
+Youcanreplaceonepowersupplywhiletheotheroneprovidespowertotheswitch.
+
+Beforeyoubegin
+
+* Thepowersupplythatyouareinstallingmustbecapableofusingthesameairflowdirectionasthefan
+
+traysinstalledinthesameswitch.Itmustusethesametypeofpowersourceastheotherpowersupply
+
+installedinthesameswitch.(DonotmixACandDCpowersuppliesinthesameswitch.) AmixofAC
+
+andDCpowersuppliesinthesameswitcharesupportedforhotswappingpurposeswithinatimelimit
+
+of15minutes
+
+Note HVAC/HVDCpowersupplywithredcoloringhavethesameport-sideintake
+
+airflowdirectionasthepowersupplieswithredcoloring.Ifthepowersupply
+
+thatyouarereplacinghasadifferentcolorhandlethanthereplacementpower
+
+supply,verifythatithasorwillhavethesameairflowdirectionastheother
+
+modulesintheswitch.
+
+* AnACpowersourcemustbewithinreachofthepowercablethatwillbeusedwiththereplacement
+
+powersupply.Ifyouareusingn+npowerredundancy,theremustbeaseparatepowersourceforeach
+
+powersupplyinstalledinthechassis.Otherwise,onlyonepowersourceisrequired.
+
+* Theremustbeanearth-groundconnectiontothechassisthatyouareinstallingthereplacementmodule.
+
+Typically,thechassisisgroundedbyitsmetal-to-metalconnectionwithagroundedrack.Ifyouneedto
+
+groundthechassis,seeGroundingtheChassis,onpage26.
+
+Procedure
+
+Step1 Holdingthereplacementpowersupplywithonehandunderneaththemoduleandtheotherhandholdingthehandle,turn
+
+thepowersupplysothatitsreleaselatchisontherightside.Alignthebackendofthepowersupply(theendwiththe
+
+electricalconnections)totheopenpowersupplyslot.Carefullyslidethepowersupplyallthewayintotheslotuntilit
+
+clicksintoplace.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+43
+
+ReplacingComponents
+
+InstallinganHVAC/HVDCPowerSupply
+
+Note
+
+Ifthepowersupplydoesnotfitintotheopenslot,turnthemoduleover,beforeslidingitcarefullyintotheopenslot.
+
+Step2 Testtheinstallationbytryingtopullthepowersupplyoutoftheslotwithoutusingthereleaselatch.
+
+Ifthepowersupplydoesnotmoveoutofplace,itissecuredintheslot.Ifthepowersupplymoves,carefullypressitall
+
+thewayintotheslotuntilitclicksintoplace.
+
+Step3 Attachthepowercabletotheelectricalinletonthefrontofthepowersupply.
+
+Step4 Verifythattheotherendofthepowercableisattachedtotheappropriatepowersourceforthepowersupply.
+
+Step5 Verifythatthepowersupplyisoperationalbymakingsurethatthepowersupply LEDisgreen.
+
+Installing an HVAC/HVDC Power Supply
+
+Youcanreplaceonepowersupplywhiletheotheroneprovidespowertotheswitch.
+
+Note Ifthepowersupplythatyouarereplacinghasadifferentcolorhandlethanthereplacementpowersupply,
+
+verifythatithasorwillhavethesameairflowdirectionastheothermodulesintheswitch.
+
+Beforeyoubegin
+
+* Ifyouareusingn+npowerredundancy,theremustbeaseparatepowersourceforeachpowersupply
+
+installedinthechassis.Powersourcesmustbeofthesametype—donotmixACandDCpowersources
+
+forthesameswitch.Otherwise,onlyonepowersourceisrequired.
+
+* Theremustbeanearth-groundconnectiontothechassisthatyouareinstallingthereplacementmodule.
+
+Typically,thechassisisgroundedbyitsmetal-to-metalconnectiontoagroundedrack.Ifyouneedto
+
+groundthischassisbyanothermeans,seeGroundingtheChassis,onpage26.
+
+Procedure
+
+Step1 Holdingthereplacementpowersupplywithonehandunderneaththemoduleandtheotherhandholdingthehandle,turn
+
+thepowersupplysothatitsreleaselatchisontherightside.Alignthebackendofthepowersupply(theendwiththe
+
+electricalconnections)totheopenpowersupplyslot.Carefullyslidethepowersupplyallthewayintotheslotuntilit
+
+clicksintoplace.
+
+Note
+
+Ifthepowersupplydoesnotfitintotheopenslot,turnthemoduleover.Slideitintotheopenslot.
+
+Step2 Testtheinstallationbytryingtopullthepowersupplyoutoftheslotwithoutusingthereleaselatch.
+
+Ifthepowersupplydoesnotmoveoutofplace,itissecuredintheslot.Ifthepowersupplymoves,carefullypressitall
+
+thewayintotheslotuntilitclicksintoplace.
+
+Step3 InsertthepowersupplycordAndersonSAF-D-Gridconnectorintothepowersupplyinlet.Ensuretheconnectorislocked.
+
+Gentlytugonthecordneartheconnectortoensurethelockingtabisengaged.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+44
+
+ReplacingComponents
+
+InstallingaDCPowerSupply
+
+Step4 Verifythattheotherendofthepowercableisconnectedtotheappropriatepowersourceforthepowersupply.
+
+Step5 IfusinganHVDCpowersource,turnonthecircuitbreakerfortheDCpowersourceconnectedtothepowersupply.
+
+Step6 Verifythatthepowersupplyisoperationalbymakingsurethatthepowersupply LEDisgreen.
+
+Installing a DC Power Supply
+
+Thistopicisforinstallingthe48-VDCpowersupplyintotheswitchchassis.
+
+Youcanreplaceonepowersupplywhiletheotheroneprovidespowertotheswitch.
+
+Beforeyoubegin
+
+* ThecircuitbreakerfortheDCpowersourceforthepowersupplymustbeturnedoff.
+
+* Thepowersupplythatyouareinstallingmustbecapableofusingthesameairflowdirectionasthefan
+
+traysinstalledinthesameswitch.
+
+* ADCpowersourcemustbewithinreachofthepowercablethatwillbeusedwiththereplacementpower
+
+supply.Ifyouareusingn+npowerredundancy,theremustbeaseparatepowersourceforeachpower
+
+supplyinstalledinthechassis. AmixofACandDCpowersuppliesinthesameswitcharesupported
+
+forhotswappingpurposeswithinatimelimitof15minutes.Otherwise,onlyonepowersourceisrequired.
+
+* Theremustbeanearth-groundconnectiontothechassisthatyouareinstallingthereplacementmodule.
+
+Typically,thechassisisgroundedbyitsmetal-to-metalconnectiontoagroundedrack.Ifyouneedto
+
+groundthischassisbyanothermeans,seeGroundingtheChassis,onpage26.
+
+* AllDCpowersupplieshavereversepolarityprotection.Whenyouinadvertentlyconnecttheinputpower
+
+(+)totheDCPSU’s–terminalandtheinputpower–totheDCPSU’s(+)terminal,thePSUwillnot
+
+bedamagedandwilloperatefineaftertheinputpowerfeedsarecorrectlywired.
+
+Procedure
+
+Step1 Holdingthereplacementpowersupplywithonehandunderneaththemoduleandtheotherhandholdingthehandle,turn
+
+thepowersupplysothatitsreleaselatchisontherightside.Alignthebackendofthepowersupply(theendwiththe
+
+electricalconnections)totheopenpowersupplyslot.Carefullyslidethepowersupplyallthewayintotheslotuntilit
+
+clicksintoplace.
+
+Note
+
+Ifthepowersupplydoesnotfitintotheopenslot,turnthemoduleover.Carefullyslideitintotheopenslot.
+
+Step2 Verifytherackisproperlygrounded,sothatwhenthechassisisinstalledintherack,itwillbegrounded.
+
+Step3 TurnonthecircuitbreakerfortheDCpowersourceconnectedtothepowersupply.
+
+Step4 Verifythatthepowersupplyisoperationalbymakingsurethatthepowersupply LEDisgreen.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+45
+
+ReplacingComponents
+
+InstallingandRemovingSmall-FormPluggableModules
+
+Installing and Removing Small-Form Pluggable Modules
+
+Beforeyoubegin
+
+Seethe {{Product name}} datasheetoncisco.comforalistofsupportedSFPandSFP+modules.
+
+UseonlysupportedSFP/SFP+modulesontheplatform.
+
+Warning Statement1008—Class1LaserProduct
+
+ThisproductisaClass1laserproduct.
+
+Note Werecommendthatyouwait30secondsbetweenremovalandinsertionofanSFPonaninterfacemodule.
+
+ThisallowsthetransceiversoftwaretoinitializeandsynchronizewiththestandbyRSP.ChanginganSFP
+
+morequicklycouldresultintransceiverinitializationissuesthatdisabletheSFP.
+
+* DonotremovethedustplugsfromtheSFPandSFP+modulesortherubbercapsfromthefiber-optic
+
+cableuntilyouarereadytoconnectthecable.Theplugsandcapsprotectthemoduleportsandcables
+
+fromcontaminationandambientlight.
+
+* RemovingandinstallinganSFPandSFP+modulecanshortenitsusefullife.Donotremoveandinsert
+
+anySFP/SFP+modulemoreoftenthanisnecessary.
+
+* TopreventESDdamage,followyournormalboardandcomponenthandlingprocedureswhenconnecting
+
+cablestotheswitchandotherdevices.
+
+* WhenyouinsertseveralSFPandSFP+modulesinmultipleports,waitfor5secondsbetweeninserting
+
+eachSFP/SFP+.Thiswillpreventtheportsfromgoingintoerror/disabledmode.Similarly,whenyou
+
+removeanSFPandSFP+fromaport,waitfor5secondsbeforereinsertingit.
+
+SUMMARYSTEPS
+
+1. AttachanESD-preventivewriststraptoyourwristandtoanearthgroundsurface.
+
+2. Findthesend(TX)andreceive(RX)markingsthatidentifythetopoftheSFP/SFP+module.
+
+3. IftheSFP/SFP+modulehasabale-clasplatch,moveittotheopen,unlockedposition.
+
+4. Alignthemoduleinfrontoftheslotopeningandpushuntilyoufeeltheconnectorsnapintoplace.
+
+5. Ifthemodulehasabale-clasplatch,closeittolocktheSFP/SFP+moduleinplace.
+
+6. RemovetheSFPandSFP+dustplugsandsave.
+
+7. ConnecttheSFPandSFP+cables.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+46
+
+ReplacingComponents
+
+InstallandRemoveOSFP/QSFPTransceiverModules
+
+DETAILEDSTEPS
+
+Procedure
+
+CommandorAction Purpose
+
+Step1 AttachanESD-preventivewriststraptoyourwristandto
+
+anearthgroundsurface.
+
+Step2 Findthesend(TX)andreceive(RX)markingsthatidentify OnsomeSFP/SFP+modules,thesendandreceive(TXand
+
+thetopoftheSFP/SFP+module. RX)markingsmightbeshownbyarrowsthatshowthe
+
+directionoftheconnection.
+
+Step3 IftheSFP/SFP+modulehasabale-clasplatch,moveitto
+
+theopen,unlockedposition.
+
+Step4 Alignthemoduleinfrontoftheslotopeningandpushuntil
+
+youfeeltheconnectorsnapintoplace.
+
+Step5 Ifthemodulehasabale-clasplatch,closeittolockthe
+
+SFP/SFP+moduleinplace.
+
+Step6 RemovetheSFPandSFP+dustplugsandsave.
+
+Step7 ConnecttheSFPandSFP+cables.
+
+Install and Remove OSFP/QSFP Transceiver Modules
+
+Thissectionprovidestheinstallation,cabling,andremovalinstructionsfortheQuadSmallForm-Factor
+
+Pluggabletransceivermodules.RefertotheCiscoTransceiverModulesCompatibilityInformationforadditional
+
+detailsonopticaltransceivers.
+
+InstallingtheTransceiverModule
+
+Warning Statement1079—HotSurface
+
+Thisiconisahotsurfacewarning.Toavoidpersonalinjury,donottouchwithoutproperprotection.
+
+Caution Thetransceivermoduleisastatic-sensitivedevice.AlwaysuseanESDwriststraporsimilarindividual
+
+groundingdevicewhenhandlingtransceivermodulesorcomingintocontactwithsystemmodules.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+47
+
+ReplacingComponents
+
+InstallandRemoveOSFP/QSFPTransceiverModules
+
+Caution Protectthetransceiverportsbyinsertingcleandustcaps(8000-QSFP-DCAP)intoanyportsnotinuseorthat
+
+donothaveopticalmodulespluggedin.Ifopticalmodulesarepluggedinbutnotinuse,usethedustcaps
+
+thatweresuppliedwiththeopticalmodulestoprotecttheTXandRXsurfacesoftheopticalmodule.
+
+Cleantheopticsurfacesofthefibercablesbeforeyouplugthembackintotheopticalportsofanothermodule.
+
+Theswitchshipswithdustcapspluggedin.Wehighlyrecommendyoukeepthedustcapspluggedinuntil
+
+youarereadytopluganoptic.ThedustcapsprotecttheportsfrompossibleEMIinterferenceandalsoavoid
+
+contaminationduetodustcollection.
+
+Caution TomeettheEMIinterferencerequirements,usethemetaldustcapswhentheportsarenotinusebyoptical
+
+modules.
+
+Beforeyoubegin
+
+RequiredToolsandEquipment
+
+* WriststraporotherpersonalgroundingdevicetopreventESDoccurrences
+
+* Antistaticmatorantistaticfoamtosetthetransceiveron
+
+* Fiber-opticend-facecleaningtoolsandinspectionequipment
+
+Procedure
+
+Step1 AttachanESDwriststraptoyourselfandaproperlygroundedpointonthechassisortherack.
+
+Step2 Removethetransceivermodulefromitsprotectivepackaging.
+
+Step3 Checkthelabelonthetransceivermodulebodytoverifythatyouhavethecorrectmodelforyournetwork.Donotremove
+
+thedustpluguntilyou’rereadytoattachthenetworkinterfacecable.Thedustplugisnotshownintheimages.
+
+Step4 Holdthetransceiverbythepull-tabsothattheidentifierlabelisonthetop.
+
+Step5 Alignthetransceivermoduleinfrontofthemodule’stransceiversocketopeningandcarefullyslidethetransceiverinto
+
+thesocketuntilthetransceivercontactsthesocketelectricalconnector.
+
+Figure2:InstallingtheQSFPTransceiverModule
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+48
+
+ReplacingComponents
+
+AttachingtheOpticalNetworkCable
+
+Step6 Pressfirmlyonthefrontofthetransceivermodulewithyourthumbtofullyseatthetransceiverinthemodule’stransceiver
+
+socket(seefigureSeatingtheQSFPTransceiverModule).
+
+Figure3:SeatingtheQSFPTransceiverModule
+
+IMPORTANT:Ifthelatchisn’tfullyengaged,youmightaccidentallydisconnectthetransceivermodule.
+
+Attaching the Optical Network Cable
+
+Beforeyoubegin
+
+Beforeyouremovethedustplugsandmakeanyopticalconnections,usetheseguidelines:
+
+* Keeptheprotectivedustplugsinstalledintheunpluggedfiber-opticcableconnectorsandinthetransceiver
+
+opticalboresuntilyouarereadytomakeaconnection.
+
+* Inspectandcleantheopticalconnectorendfacesjustbeforeyoumakeanyconnections.
+
+* Grasptheopticalconnectoronlybythehousingtoplugorunplugafiber-opticcable.
+
+Note •Thetransceivermodulesandfiberconnectorsarekeyedtopreventincorrectinsertion.
+
+* Themultiple-fiberpush-on(MPO)connectorsontheopticaltransceiverssupportnetworkinterfacecables
+
+witheitherphysicalcontact(PC)orultra-physicalcontact(UPC)flatpolishedfacetypes.TheMPO
+
+connectorsontheopticaltransceiversdonotsupportnetworkinterfacecableswithanangle-polished
+
+contact(APC)facetype.
+
+* InspecttheMPOconnectorforthecorrectcabletype,cleanliness,andanydamage.Forcomplete
+
+informationoninspectingandcleaningfiber-opticconnections,seetheInspectionandCleaning
+
+ProceduresforFiber-OpticConnectionsdocument.
+
+Procedure
+
+Step1 RemovethedustplugsfromtheopticalnetworkinterfacecableMPOconnectorsandfromthetransceivermoduleoptical
+
+bores.Savethedustplugsforfutureuse.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+49
+
+ReplacingComponents
+
+RemovingtheTransceiverModule
+
+Step2 AttachthenetworkinterfacecableMPOconnectorsimmediatelytothetransceivermodule.
+
+Figure4:CablingaTransceiverModule
+
+Removing the Transceiver Module
+
+Caution Thetransceivermoduleisastatic-sensitivedevice.AlwaysuseanESDwriststraporsimilarindividual
+
+groundingdevicewhenhandlingtransceivermodulesorcomingintocontactwithmodules.
+
+Toremoveatransceivermodule,usethesesteps:
+
+Procedure
+
+Step1 Disconnectthenetworkinterfacecablefromthetransceiverconnector.
+
+Step2 Installthedustplugimmediatelyintothetransceiver’sopticalbore.
+
+Step3 Graspthepull-tabandgentlypulltoreleasethetransceiverfromthesocket.
+
+Figure5:RemovingtheQSFPTransceiverModule
+
+Step4 Slidethetransceiveroutofthesocket.
+
+Step5 Placethetransceivermoduleintoanantistaticbag.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+50
+
+A
+
+AP PEND IX
+
+Rack Specifications
+
+* OverviewofRacks,onpage51
+
+* GeneralRequirementsforCabinetsandRacks,onpage51
+
+* RequirementsSpecifictoStandardOpenRacks,onpage52
+
+* RequirementsSpecifictoPerforatedCabinets,onpage52
+
+* CableManagementGuidelines,onpage52
+
+Overview of Racks
+
+Installtheswitchinthesetypesofcabinetsandracks,assuminganexternalambientairtemperaturerangeof
+
+0to {{<spec_key>}}(0to {{<spec_key>}}):
+
+* Standardperforatedcabinets
+
+* Solid-walledcabinetswitharooffantray(bottomtotopcooling)
+
+* Standardopenracks
+
+Note •Ifyouareusinganenclosedcabinet,werecommendoneofthethermallyvalidatedtypes,eitherstandard
+
+perforatedorsolid-walledwithafantray.
+
+* Wedonotrecommendusingracksthathaveobstructions(suchaspowerstrips).Theobstructionscould
+
+impairaccesstofield-replaceableunits(FRUs).
+
+General Requirements for Cabinets and Racks
+
+Thecabinetorrackmustmeettheserequirements:
+
+* Standard19-inch({{<spec_key>}})(two-orfour-postEIAcabinetorrack,withmountingrailsthatconformto
+
+Englishuniversalholespacingpersection1ofANSI/EIA-310-D-1992).Formoreinformation,see
+
+RequirementsSpecifictoPerforatedCabinets,onpage52.
+
+Thespacingbetweenthepostsoftherackmustbe(EIA-310-D-199219-inchrackcompatible)wide
+
+enoughtoaccommodatethewidthofthechassis.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+51
+
+RackSpecifications
+
+RequirementsSpecifictoStandardOpenRacks
+
+* Theminimumverticalrackspacerequirementperchassisis:
+
+* ForaoneRU(rackunit)switch,{{<spec_key>}}({{<spec_key>}})
+
+* ForaoneandahalfRU(rackunit)switch,2.63({{<spec_key>}})
+
+* ForatwoRU(rackunit)switch,{{<spec_key>}}({{<spec_key>}})
+
+* ForathreeRU(rackunit)switch,{{<spec_key>}}({{<spec_key>}})
+
+* Thewidthbetweentherack-mountingrailsmustbeatleast {{<spec_key>}}({{<spec_key>}})iftherearofthe
+
+deviceisnotattachedtotherack.Forfour-postEIAracks,thismeasurementisthedistancebetweenthe
+
+twofrontrails.
+
+Four-postEIAcabinets(perforatedorsolid-walled)mustmeettheserequirements:
+
+* Theminimumspacingforthebendradiusforfiber-opticcablesshouldhavethefront-mountingrailsof
+
+thecabinetoffsetfromthefrontdoorbyaminimumof {{<spec_key>}}({{<spec_key>}}).
+
+* Thedistancebetweentheoutsidefaceofthefrontmountingrailandtheoutsidefaceofthebackmounting
+
+railshouldbe23.0to {{<spec_key>}}(58.4to {{<spec_key>}})toallowforrear-bracketinstallation.
+
+Requirements Specific to Standard Open Racks
+
+Ifyouaremountingthechassisinanopenrack(nosidepanelsordoors),ensurethattherackmeetsthese
+
+requirements:
+
+* Theminimumverticalrackspaceperchassismustbeequaltotherackunit(RU)ofthechassis.One
+
+rackunitisequalto {{<spec_key>}}({{<spec_key>}}).
+
+* Thedistancebetweenthechassisairventsandanywallsshouldbe {{<spec_key>}}({{<spec_key>}}).
+
+Requirements Specific to Perforated Cabinets
+
+Aperforatedcabinethasperforationsinitsfrontandreardoorsandsidewalls.Perforatedcabinetsmustmeet
+
+theserequirements:
+
+* Thefrontandreardoorsmusthaveatleasta60percentopenareaperforationpattern,withatleast15
+
+squareinches(96.8squarecm)ofopenareaperrackunitofdoorheight.
+
+* Theroofshouldbeperforatedwithatleasta20percentopenarea.
+
+* Thecabinetfloorshouldbeopenorperforatedtoenhancecooling.
+
+TheCiscoRSeriesrackconformstotheserequirements.
+
+Cable Management Guidelines
+
+Tohelpwithcablemanagement,allowadditionalspaceintherackaboveandbelowthechassistomakeit
+
+easiertorouteallofthefiberopticorcoppercablesthroughtherack.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+52
+
+B
+
+AP PEND IX
+
+System Specifications
+
+* EnvironmentalSpecifications,onpage53
+
+* SwitchDimensions,onpage53
+
+* SwitchandModuleWeightsandQuantities,onpage53
+
+* TransceiverandCableSpecifications,onpage54
+
+* SwitchPowerInputRequirements,onpage54
+
+* PowerSpecifications,onpage54
+
+* PowerCableSpecifications,onpage56
+
+* RegulatoryStandardsComplianceSpecifications,onpage58
+
+Environmental Specifications
+
+Switch Dimensions
+
+Switch Width Depth Height
+
+CiscoNexus9364C-H1 {{<spec_key>}}(44.23 {{<spec_key>}}(56.58 {{<spec_key>}}({{<spec_key>}})({{Rack units}})
+
+cm) cm)
+
+Switch and Module Weights and Quantities
+
+Component WeightperUnit Quantity
+
+CiscoNexus9364C-H1Chassis({{Model number}}) {{<spec_key>}}({{<spec_key>}}) 1
+
+FanModule — 4
+
+–2Port-sideexhaust(blue)(NXASFAN-160CFM2PE) {{<spec_key>}}({{<spec_key>}})
+
+–2Port-sideintake(red)(NXAS-FAN-160CFM2PI) {{<spec_key>}}({{<spec_key>}})
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+53
+
+SystemSpecifications
+
+TransceiverandCableSpecifications
+
+Component WeightperUnit Quantity
+
+PowerSupplymodule — 2(1foroperations
+
+and1for
+
+–1400-WACport-sideexhaust(blue)(NXA-PAC-{{Power input requirements}}-PE) {{<spec_key>}}({{<spec_key>}})
+
+redundancy)
+
+–1400-WACport-sideintake(red)(NXA-PAC-{{Power input requirements}}-PI) {{<spec_key>}}({{<spec_key>}})
+
+–2000-WHVAC/HVDCportintake(red)({{2000-W HVAC/HVDC power supply part number}}) {{<spec_key>}}({{<spec_key>}})
+
+–2000-WDCport-sideexhaust(blue)({{2000-W DC power supply part number}}) {{<spec_key>}}({{<spec_key>}})
+
+–2000-WDCport-sideintake(red)({{2000-W DC power supply part number (intake)}}) {{<spec_key>}}({{<spec_key>}})
+
+Transceiver and Cable Specifications
+
+Toseethetransceiverspecificationsandinstallationinformation,seehttps://www.cisco.com/c/en/us/support/
+
+interfaces-modules/transceiver-modules/products-device-support-tables-list.html.
+
+Switch Power Input Requirements
+
+Thistableliststhetypicalamountofpowerthattheswitchconsumes.Italsoliststhemaximumamountof
+
+powerthatyoumustprovisionfortheswitchandpowersupplyforpeakconditions.
+
+Note Somepowersupplieshavecapabilitiesthataregreaterthanthemaximumpowerrequirementsforaswitch.
+
+Todeterminethepowerconsumptioncharacteristicsfortheswitch,usethetypicalandmaximumrequirements
+
+thatarelistedhere.
+
+Switch TypicalPower MaximumPower HeatDissipation
+
+Consumption(ACorDC) Consumption(ACor Requirement
+
+DC)
+
+CiscoNexus9364C-H1 {{Power input requirements}} {{Power input requirements}} {{<spec_key>}}
+
+perhour
+
+Power Specifications
+
+Powerspecificationsincludethespecificationsforeachtypeofpowersupplymodule.
+
+1400-W AC Power Supply Specifications
+
+Property Specification
+
+Power {{Power input requirements}}
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+54
+
+SystemSpecifications
+
+2000-WHVAC/HVDCPowerSupplySpecifications
+
+Property Specification
+
+InputVoltageRange 100VACto127VAC
+
+200VACto240VAC
+
+Frequency 50to60Hz
+
+Efficiency 90%orgreater(20to100%load)
+
+OutputPower 1,{{Power input requirements}}/{{Power input requirements}}
+
+1,{{Power input requirements}}/{{Power input requirements}}
+
+RedundancyModes 1+1
+
+RoHSCompliance Yes
+
+HotSwappable Yes
+
+2000-W HVAC/HVDC Power Supply Specifications
+
+ThesespecificationsapplytotheNXA-PHV-2KWpowersupplies.
+
+Property Specification
+
+Power {{Power input requirements}}
+
+InputVoltageRange 200to277VAC
+
+240VDCto380VDC
+
+OutputPower {{Power input requirements}}(36Wstandby)
+
+Frequency 50to60Hz(200to277VAC)
+
+Efficiency 90%orgreater(20to100%load)
+
+RedundancyModes 1+1
+
+RoHSCompliance Yes
+
+HotSwappable Yes
+
+2000-W DC Power Supply Specifications
+
+ThesespecificationsapplytotheNXA-PDC-2KWpowersupplies.
+
+Property Specification
+
+Power {{Power input requirements}}
+
+InputVoltageRange Nominal:-48to-60VDC
+
+Frequency -
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+55
+
+SystemSpecifications
+
+PowerCableSpecifications
+
+Property Specification
+
+Efficiency 90%orgreater(20to100%load)
+
+OutputPower {{Power input requirements}}(36Wstandby)
+
+RedundancyModes 1+1
+
+RoHSCompliance Yes
+
+HotSwappable Yes
+
+Power Cable Specifications
+
+Thesesectionsshowthepowercablesthatyoucanorderandusewiththisswitch.
+
+Power Cable Specifications for AC Power Supplies
+
+Locale PowerCordPartNumber CordSetDescription
+
+CAB-C13-C14-2M PowerCordJumper,C13-C14Connectors,{{<spec_key>}}
+
+({{<spec_key>}})
+
+CAB-C13-CBN Cabinetjumperpowercord,250VAC,10A,C14-C13
+
+connectors,{{<spec_key>}}({{<spec_key>}})
+
+Argentina CAB-250V-10A-AR 250V,10A,{{<spec_key>}}({{<spec_key>}})
+
+Australia CAB-9K10A-AU 250VAC,10A,3112plug,{{<spec_key>}}({{<spec_key>}})
+
+Brazil CAB-250V-10A-BR 250V,10A,{{<spec_key>}}({{<spec_key>}})
+
+EuropeanUnion CAB-9K10A-EU 250VAC,10A,CEE7/7plug,{{<spec_key>}}({{<spec_key>}})
+
+India CAB-IND-10A 10A,{{<spec_key>}}({{<spec_key>}})
+
+India CAB-C13-C14-2M-IN PowerCordJumper,C13-C14Connectors,{{<spec_key>}}
+
+({{<spec_key>}})
+
+India CAB-C13-C14-3M-IN PowerCordJumper,C13-C14Connectors,{{<spec_key>}}
+
+({{<spec_key>}})
+
+Israel CAB-250V-10A-IS 250V,10A,{{<spec_key>}}({{<spec_key>}})
+
+Italy CAB-9K10A-IT 250VAC,10A,CEI23-16/VIIplug,{{<spec_key>}}({{<spec_key>}})
+
+Japan CAB-C13-C14-2M-JP PowerCordJumper,C13-C14Connectors,{{<spec_key>}}
+
+({{<spec_key>}})
+
+NorthAmerica CAB-9K12A-NA 125VAC,13A,NEMA5-15plug,{{<spec_key>}}({{<spec_key>}})
+
+NorthAmerica CAB-AC-L620-C13 NEMAL6-20-C13,{{<spec_key>}}({{<spec_key>}})
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+56
+
+SystemSpecifications
+
+HVAC/HVDCPowerCablesSupportedbyACI-ModeandNX-OSModeSwitches
+
+Locale PowerCordPartNumber CordSetDescription
+
+PeoplesRepublicofChina CAB-250V-10A-CN 250V,10A,{{<spec_key>}}({{<spec_key>}})
+
+SouthAfrica CAB-250V-10A-ID 250V,10A,{{<spec_key>}}({{<spec_key>}})
+
+Switzerland CAB-9K10A-SW 250VAC,10A,MP232plug,{{<spec_key>}}({{<spec_key>}})
+
+UnitedKingdom CAB-9K10A-UK 250VAC,10A,BS1363plug(13Afuse),8.2(2.5
+
+m)
+
+AllexceptArgentina,Brazil, NO-POWER-CORD Nopowercordincludedwithswitch
+
+andJapan
+
+HVAC/HVDCPowerCablesSupportedbyACI-ModeandNX-OSModeSwitches
+
+PartNumber CordSetDescription Photo
+
+CAB-HVAC-SD-0.6M HVAC
+
+2-foot({{<spec_key>}})cablewith
+
+Saf-D-GridandSD
+
+connectors
+
+277VAC
+
+CAB-HVAC-C14-2M HVAC
+
+6.6-foot({{<spec_key>}})cable
+
+withSaf-D-GridandC14
+
+(useforupto240V)
+
+connector
+
+250VAC
+
+CAB-HVAC-RT-0.6M HVAC
+
+2-foot({{<spec_key>}})cablewith
+
+Saf-D-GridandRT
+
+connector
+
+277VAC
+
+CAB-HVDC-{{Traffic processing capability}}-2M HVDC
+
+6.6-foot({{<spec_key>}})cable
+
+withSaf-D-Gridandthree
+
+terminalconnectors
+
+300VAC/400VDC
+
+(+200/-200VDC)
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+57
+
+SystemSpecifications
+
+DCPowerCableSpecifications
+
+PartNumber CordSetDescription Photo
+
+NO-POWER-CORD AllexceptArgentina, Notapplicable
+
+Brazil,andJapan
+
+Nopowercordincluded
+
+withswitch
+
+Table3:HVAC/HVDCPowerCablesCalloutTable
+
+1 Connectthisendtothepowersupplyunit.
+
+DC Power Cable Specifications
+
+Regulatory Standards Compliance Specifications
+
+Thistableliststheregulatorystandardscompliancefortheswitch.
+
+Table4:RegulatoryStandardsCompliance:SafetyandEMC
+
+Specification Description
+
+Regulatorycompliance ProductsshouldcomplywithCEMarkingsaccordingtodirectives2004/108/EC
+
+and2006/95/EC.
+
+Safety •CAN/CSA-C22.2No.60950-1SecondEdition
+
+* CAN/CSA-C22.2No.62368-1-19ThirdEdition
+
+* ANSI/UL60950-1Secondedition
+
+* IEC62368-1
+
+* EN62368-1
+
+* AS/NZS62368-1
+
+* GB4943
+
+* UL62368-1
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+58
+
+SystemSpecifications
+
+SystemSpecifications
+
+Specification Description
+
+EMC:Emissions •47CFRPart15(CFR47)ClassA
+
+* AS/NZSCISPR22ClassA
+
+* CISPR22ClassA
+
+* EN55022ClassA
+
+* ICES003ClassA
+
+* VCCIClassA
+
+* EN61000-3-2
+
+* EN61000-3-3
+
+* KN22ClassA
+
+* CNS13438ClassA
+
+EMC:Immunity •EN55024
+
+* CISPR24
+
+* EN300386
+
+* KN61000-4series
+
+RoHS TheproductisRoH-6compliantwithexceptionsforleaded-ballgrid-array(BGA)
+
+ballsandleadpress-fitconnectors.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+59
+
+SystemSpecifications
+
+SystemSpecifications
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+60
+
+C
+
+AP PEND IX
+
+LEDs
+
+* SwitchChassisLEDs,onpage61
+
+* UplinkModuleLEDs,onpage62
+
+* FanModuleLEDs,onpage62
+
+* PowerSupplyLEDs,onpage62
+
+Switch Chassis LEDs
+
+TheBCN,STS,andENV,LEDsarelocatedontheleftsideofthefrontoftheswitch.TheportLEDsappear
+
+astrianglespointingupordowntothenearestport.
+
+LED Color Status
+
+BCN Flashingblue TheoperatorhasactivatedthisLEDtoidentifythisswitchinthechassis.
+
+Off Thisswitchisnotbeingidentified.
+
+STS Green Theswitchisoperational.
+
+Flashingamber Theswitchisbootingup.
+
+Amber Temperatureexceedstheminoralarmthreshold.
+
+Red Temperatureexceedsthemajoralarmthreshold.
+
+Off Theswitchisnotreceivingpower.
+
+ENV Green Fansandpowersupplymodulesareoperational.
+
+Amber Atleastonefanorpowersupplymoduleisnotoperating.
+
+(port) Green Portadminstateis'Enabled',SFPispresentandtheinterfaceisconnected(thatis,cabled,
+
+andthelinkisup).
+
+Amber Portadminstateis'Disabled,ortheSFPisabsent,orboth.
+
+Off Portadminstateis'Enabled'andSFPispresent,butinterfaceisnotconnected.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+61
+
+LEDs
+
+UplinkModuleLEDs
+
+LED Color Status
+
+(GPS) Green GPSinterfaceprovisionedandportsareturnedon.ToD,1PPS,10MHzareallvalid.
+
+Off Eithertheinterfaceisnotprovisioned,ortheportsarenotturnedon.ToD,1PPS,10MHz
+
+arenotvalid.
+
+Uplink Module LEDs
+
+TheStatus(STS)LEDislocatedontheleftsideoftheuplinkmodule.ThereisanACTLEDlocatedbelow
+
+eachtwouplinkports.NexttoeachACTLEDaretwotriangularportLEDsthatpointtothetoporbottom
+
+toidentifytheirportasbeingthetoporbottomport.
+
+LED Color Status
+
+STS Green Thismoduleisoperational.
+
+Red Temperatureisnotoperational.
+
+Off Themoduleisnotreceivingpower.
+
+ACT On(white) ThetwoportsabovethisLEDareenabled.
+
+Off ThetwoportsabovethisLEDarenotenabled.
+
+(port) Green Theportisconnectedwithatransceiverorotherconnector.
+
+Off Theportisnotconnected.
+
+Fan Module LEDs
+
+ThefanmodulestatusLEDislocatedbelowtheairholesonthefrontofthefanmodule.Everyfanmodule
+
+hasanLED.
+
+LED Color Status
+
+Status Green Thefanmoduleisoperational.
+
+Red Thefanmoduleisnotoperational(fanisprobablynotfunctional).
+
+Off Fanmoduleisnotreceivingpower.
+
+Power Supply LEDs
+
+ThepowersupplyLEDsarelocatedontherightportionofthepowersupply.Combinationsofstatesindicated
+
+bytheOKandFaultLEDssignifythestatusforthemoduleasshowninthistable.
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+62
+
+LEDs
+
+LEDs
+
+OKLED FAILorFAIL/ID Status
+
+LED
+
+Green Off Powersupplyisonandoutputtingpowertotheswitch.
+
+Flashing Off Powersupplyisconnectedtoapowersourcebutnotoutputtingpowerto
+
+green theswitch.Thepowersupplymaynotbeproperlyinstalledinthechassis.
+
+Off Off Eitheralltheinstalledpowersuppliesarenotreceivingpoweroran
+
+uninstalledpowersupplyisnotreceivingpower.
+
+Off Flashingamber Powersupplyisoperatingbutawarningconditionhasoccurred—possibly
+
+oneoftheseconditions:
+
+* Hightemperature
+
+* Highpower
+
+* Slowpowersupplyfan
+
+* Lowvoltage
+
+* Powersupplyisinstalledinthechassisbutwasdisconnectedfrom
+
+thepowersource.
+
+Off Flashingamber Powersupplyisinstalledwithoutaconnectiontoapowersource.
+
+(10seconds)
+
+thenamber
+
+Off Amber Powersupplyfailure—possiblyoneoftheseconditions:
+
+* Overvoltage
+
+* Overcurrent
+
+* Overtemperature
+
+* Powersupplyfanfailure
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+63
+
+LEDs
+
+LEDs
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+64
+
+D
+
+AP PEND IX
+
+Additional Kits
+
+* RackMountKitNXK-ACC-RMK2-{{Rack units}},onpage65
+
+Rack Mount Kit NXK-ACC-RMK2-{{Rack units}}
+
+Thetablelistsandillustratesthecontentsforthe2-RUrack-mountkit(NXK-ACC-RMK2-{{Rack units}}).
+
+Illustration Description Quantity
+
+Rack-mountkit 1
+
+* Rack-mountbrackets(2)
+
+* Rack-mountfront-mountbrackets(2)
+
+* Rack-mountsliderrails(2)
+
+* Rack-mountretainerclips(2)
+
+* Phillipscountersinkscrews(12)
+
+* FlatheadscrewsM4(6)
+
+* FlatheadscrewsM3(4)
+
+Notapplicable EACCompliancedocument 1
+
+Notapplicable Hazardoussubstanceslistforcustomersin 1
+
+China
+
+Thetablelistsandillustratestheconsolecable(CAB-CONSOLE-RJ45)thatcanbeordered.
+
+Illustration Description Quantity
+
+ConsolecablewithDB-9FandRJ-45F 1
+
+connectors
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+65
+
+AdditionalKits
+
+AdditionalKits
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+66
+
+E
+
+AP PEND IX
+
+Site Preparation and Maintenance Records
+
+* SitePreparationChecklist,onpage67
+
+* ContactandSiteInformation,onpage68
+
+* ChassisandModuleInformation,onpage69
+
+Site Preparation Checklist
+
+Planningthelocationandlayoutofyourequipmentrackorcabinetisessentialforsuccessfulswitchoperation,
+
+ventilation,andaccessibility.
+
+Thetableliststhesiteplanningtasks.Werecommendthatyoucompletethetasksbeforeyouinstalltheswitch.
+
+Yourcompletionofeachtaskensuresasuccessfulswitchinstallation.
+
+PlanningActivity VerificationTimeandDate
+
+Spaceevaluation:
+
+Spaceandlayout
+
+Floorcovering
+
+Impactandvibration
+
+Lighting
+
+Physicalaccess
+
+Maintenanceaccess
+
+Environmentalevaluation:
+
+Ambienttemperature
+
+Humidity
+
+Altitude
+
+Atmosphericcontamination
+
+Airflow
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+67
+
+SitePreparationandMaintenanceRecords
+
+ContactandSiteInformation
+
+PlanningActivity VerificationTimeandDate
+
+Powerevaluation:
+
+Inputpowertype
+
+Powerreceptacles
+
+Receptacleproximitytothe
+
+equipment
+
+Dedicated(separate)
+
+circuitsforpower
+
+redundancy
+
+UPSforpowerfailures
+
+Grounding:properwire
+
+gaugeandlugs
+
+Circuitbreakersize
+
+Groundingevaluation:
+
+Datacenterground
+
+Cableandinterfaceequipment
+
+evaluation:
+
+Cabletype
+
+Connectortype
+
+Cabledistancelimitations
+
+Interfaceequipment
+
+(transceivers)
+
+EMIevaluation:
+
+Distancelimitationsfor
+
+signaling
+
+Sitewiring
+
+RFIlevels
+
+Contact and Site Information
+
+Usetheworksheettorecordcontactandsiteinformationfortheinstallation.
+
+Contactperson
+
+Contactphone
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+68
+
+SitePreparationandMaintenanceRecords
+
+ChassisandModuleInformation
+
+Contacte-mail
+
+Building/sitename
+
+Datacenterlocation
+
+Floorlocation
+
+Address(line1)
+
+Address(line2)
+
+City
+
+State/Provence
+
+Contactperson
+
+ZIP/postalcode
+
+Country
+
+Chassis and Module Information
+
+Usetheworksheettorecordinformationabouttheswitch.
+
+Contractnumber
+
+Chassisserialnumber
+
+ProductIdentification(PID)
+
+number
+
+Usetheworksheettorecordnetwork-relatedinformation.
+
+SwitchIPaddress
+
+SwitchIPnetmask
+
+Hostname
+
+Domainname
+
+IPbroadcastaddress
+
+Gateway/routeraddress
+
+DNSaddress
+
+Usetheworksheettorecordinformationaboutthemodulesintheswitch.
+
+ModuleSlot ModuleType ModuleSerialNumber Notes
+
+QSFP/QSFP-DDTranceiver
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+69
+
+SitePreparationandMaintenanceRecords
+
+SitePreparationandMaintenanceRecords
+
+ModuleSlot ModuleType ModuleSerialNumber Notes
+
+SFP/SFP+Tranceiver
+
+CiscoNexus9364C-H1ACI-ModeSwitchHardwareInstallationGuide
+
+70
+

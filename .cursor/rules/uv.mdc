@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Python Package Management with uv
+
+Use uv exclusively for Python package management in all projects.
+
+## Package Management Commands
+- All Python dependencies **must be installed, synchronized, and locked** using uv  
+- Never use pip, pip-tools, poetry, or conda directly for dependency management
+
+**Use these commands**  
+- Install dependencies: `uv add <package>`  
+- Remove dependencies:  `uv remove <package>`  
+- Sync dependencies:    `uv sync`
+## Running Python Code
+- Run a script:        `uv run <script-name>.py`  
+- Run tools (pytest, ruff): `uv run pytest` or `uv run ruff`  
+- Launch REPL:         `uv run python`

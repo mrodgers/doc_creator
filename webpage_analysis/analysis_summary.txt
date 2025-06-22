@@ -1,0 +1,27 @@
+GUIDE ANALYSIS SUMMARY
+==================================================
+
+Guide: webpage.html
+Analysis Date: 2025-06-21T12:10:07.708552
+
+OVERALL SCORES:
+--------------------
+Structure Score: 0.71
+Style Score: 0.76
+Confidence Score: 0.34
+Completeness Score: 0.00
+
+RECOMMENDATIONS:
+--------------------
+• Review 239 low-confidence content items
+
+CONTENT TYPE DISTRIBUTION:
+------------------------------
+technical_specification: 202
+warning: 14
+installation_procedure: 34
+troubleshooting: 3
+configuration: 3
+requirement: 1
+note: 1
+table_reference: 1

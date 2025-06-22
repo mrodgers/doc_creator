@@ -1,0 +1,102 @@
+[project]
+name = "ai-doc-gen"
+version = "0.1.0"
+description = "AI-Assisted Hardware Documentation Generation System"
+authors = [
+    {name = "AI Documentation Team", email = "team@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "openai>=1.88.0",
+    "anthropic>=0.7.0",
+    "pdfplumber>=0.11.7",
+    "python-docx>=1.1.0",
+    "lxml>=4.9.0",
+    "pydantic>=2.5.0",
+    "jinja2>=3.1.0",
+    "markdown>=3.5.0",
+    "weasyprint>=60.0",
+    "neo4j>=5.0.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+    "pyyaml>=6.0.2",
+    "aiofiles>=23.0.0",
+    "python-multipart>=0.0.6",
+    "httpx>=0.25.0",
+    "PyPDF2>=3.0.0",
+    "asyncio-mqtt>=0.13.0",
+    "flask>=3.0.0",
+    "werkzeug>=3.0.0",
+    "requests>=2.32.4",
+    "beautifulsoup4>=4.13.4",
+    "pandas>=2.3.0",
+    "trafilatura>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "mypy>=1.7.0",
+    "pre-commit>=3.5.0",
+    "pytest-cov>=4.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = ["E", "F", "I", "N", "W", "B", "C4", "UP"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_doc_gen"] 

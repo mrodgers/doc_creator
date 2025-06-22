@@ -1,0 +1,248 @@
+Fetching: https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/hardware/install/b_c9300_hig/Configuring-a-switch.html
+
+=== BeautifulSoup: Headings and Paragraphs ===
+[h1] Cisco Catalyst 9300 Series Switches Hardware Installation Guide
+[h3] Bias-Free Language
+[h3] Book TitleCisco Catalyst 9300 Series Switches Hardware Installation GuideChapter TitleConfiguring the
+	 Switch
+[h3] Configuring the
+	 Switch
+[h2] Results
+[h2] Chapter: Configuring the
+	 Switch
+[h1] Configuring the
+                     	 Switch
+[h2] Configuring the Switch Using the Web User Interface
+[h2] Accessing the CLI Through the Console Port
+[h3] Connecting the RJ45 Console Port
+[h4] Procedure
+[h3] Connecting the USB
+                           	 Console Port
+[h4] Before you begin
+[h4] Procedure
+[h2] Installing the  Microsoft Windows USB Device Driver
+[h3] Installing the Cisco Microsoft Windows USB Driver
+[h4] Procedure
+[h3] Installing the Silicon Labs Windows USB Device Driver
+[h4] Procedure
+[h2] Uninstalling the Cisco Microsoft Windows USB Driver
+[h3] Uninstalling the Cisco Microsoft Windows USB Driver
+[h4] Before you begin
+[h4] Procedure
+[h3] Was this Document Helpful?
+[h3] Contact Cisco
+[p] The documentation set for this product strives to use bias-free language. For the purposes of this documentation set, bias-free is defined as language that does not imply discrimination based on age, disability, gender, racial identity, ethnic identity, sexual orientation, socioeconomic status, and intersectionality. Exceptions may be present in the documentation due to language that is hardcoded in the user interfaces of the product software, language used based on RFP documentation, or language that is used by a referenced third-party product.Learn moreabout how Cisco is using Inclusive Language.
+[p] Cisco Catalyst 9300 Series Switches Hardware Installation Guide
+[p] Chapter Title
+[p] View with Adobe Reader on a variety of devices
+[p] View in various apps on iPhone, iPad, Android, Sony Reader, or Windows Phone
+[p] View on Kindle device or Kindle app on multiple devices
+[p] For instructions on setting up the switch using the WebUI, refer to the required version of thesoftware configuration guide. In the guide, go toConfiguring the Switch Using the Web User Interface.
+[p] 
+[p] Configuring the Switch Using the CLI
+[p] You can access the CLI on a
+                           		configured or unconfigured switch by connecting the RJ-45 console port or USB
+                           		console port of the switch to your PC or workstation and accessing the switch
+                           		through a terminal emulation program.
+[p] Note
+[p] If you have stacked your switches, connect to the console port of one of the switches in the stack. You can initially configure
+                                       the entire stack from any member switch.
+[p] Step 1
+[p] Connect the RJ45 port adapter to the serial port on the terminal server or your PC using the optional RJ45-to-DB9 adapter
+                                          cable. Connect the other end of the cable to the switch console port.
+[p] Step 2
+[p] Start the terminal-emulation program on the PC or the terminal. The program,
+                                          					frequently a PC application such as Putty or TeraTerm, makes communication
+                                          					between the switch and your PC or terminal possible.
+[p] Step 3
+[p] Configure the baud rate and character format of the PC or terminal to match the
+                                          					console port default characteristics:
+[p] 9600 baud
+[p] 8 data bits
+[p] 1 stop bit
+[p] No parity
+[p] None (flow control)
+[p] Step 4
+[p] Power on the switch.
+[p] Step 5
+[p] The PC or terminal displays the bootloader sequence. PressEnterto display the setup prompt.
+[p] The Cisco Catalyst9300Series Switches will either have the Cisco USB Device or Silicon Labs USB Device (CP2102N). To identify which USB device
+                                 is in the switch, do the following:
+[p] Connect a USB cable from the Windows-based PC or Mac-based PC to the USB console port.
+[p] On the Windows-based PC, open the Device Manager or on the Mac-based PC, open the System Report and view the following:
+[p] Type of USB Device
+[p] Device Name
+[p] Cisco USB device
+[p] Cisco USB Console or USB Serial Device
+[p] Silicon Labs USB device
+[p] Silicon Labs CP210x USB to UART Bridge  or CP2102N USB to UART Bridge
+[p] Step 1
+[p] To install the USB driver to a Windows-based PC or Mac-based PC for the first time, do the following:.
+[p] Windows-based PC
+[p] For Cisco USB Device, seeInstalling the Microsoft Windows USB Device Driver.
+[p] For Silicon Labs USB Device. you can either download the USB driver from the Silicon Labswebsiteor seeInstalling the Silicon Labs Windows USB Device Driver.
+[p] Mac-based PC
+[p] For Cisco USB Device, no driver installation is required.
+[p] For Silicon Labs USB Device. you can download the USB driver from the Silicon Labswebsite. Once the installation is completed, a virtual COM port session, "tty.SLAB_USBtoUART", will be started.
+[p] Note
+[p] Do not use the generic USB serial driver available on the Mac-based PC.
+[p] Note
+[p] USB Type A port on the switch provides file system support and isNOTa console port. See USB Type A Port section.
+[p] Step 2
+[p] Connect a USB cable to the PC USB port. Connect the other end of the cable to the switchmini-B(5-pin-connector) USB console port.
+[p] Step 3
+[p] Start the terminal-emulation program on the PC or the terminal. The program,
+                                          					frequently a PC application such as Putty or TeraTerm, makes communication
+                                          					between the switch and your PC or terminal possible.
+[p] Step 4
+[p] Configure the
+                                          			 baud rate and character format of the PC or terminal to match the console port
+                                          			 default characteristics:
+[p] 9600 baud
+[p] 8 data bits
+[p] 1 stop bit
+[p] No parity
+[p] None (flow control)
+[p] Step 5
+[p] Power on the
+                                          			 switch as described in the switch getting started guide.
+[p] Step 6
+[p] The PC or
+                                          			 terminal displays the bootloader sequence. PressEnterto display the
+                                          			 setup prompt. Follow the steps in the Setup program.
+[p] A USB device driver must be installed the first time a Microsoft Windows-based PC is connected to the USB console port on
+                           the switch.
+[p] Step 1
+[p] Obtain the Cisco USB console driver file from the Cisco.com web site and unzip it.
+[p] Note
+[p] You can download the driver file from the Cisco.com site for downloading the switch software.
+[p] Windows 10 includes a USB to RS232 driver. However for added functionality, download the USB Console Software from the Software
+                                             Download Center at cisco.com.
+[p] Step 2
+[p] If using 32-bit Windows,
+                                          double-click the setup.exe file in the Windows_32 folder. If using 64-bit
+                                          Windows, double-click the setup(x64).exe file in the Windows_64 folder.
+[p] Step 3
+[p] The Cisco Virtual Com InstallShield Wizard begins. ClickNext.
+[p] Step 4
+[p] The Ready to Install the Program window appears. ClickInstall.
+[p] Note
+[p] If a User Account Control warning appears, clickAllow - I trust this programto proceed.
+[p] Step 5
+[p] The InstallShield Wizard Completed window appears. ClickFinish.
+[p] Step 6
+[p] Connect the USB cable to the PC and the switch console port. The USB console port LED turns green, and the Found New Hardware
+                                          Wizard appears. Follow the instructions to complete the driver installation.
+[p] Step 1
+[p] Connect a USB cable to the PC USB port. Connect the other end of the cable to the switchmini-B(5-pin-connector) USB console port.
+[p] Step 2
+[p] Launch the Windows Update page by clicking on theUpdate & Securitybutton on the Windows Settings.
+[p] Step 3
+[p] ClickView optional updates.
+[p] Step 4
+[p] ExpandDriver updatesand selectSilicon Laboratories Inc. – Ports 10.x.x.x.
+[p] Step 5
+[p] ClickDownload and installbutton.
+[p] Once the driver installation is complete, disconnect the USB cable from the PC USB port and the switch.
+[p] Note
+[p] Windows assigns different COM ports to Silicon Labs USB device. To view the COM port assignment, see Device Manager.
+[p] Disconnect the switch console terminal before uninstalling the driver.
+[p] Step 1
+[p] Run setup.exe for Windows 32-bit or setup(x64).exe for Windows-64bit. ClickNext.
+[p] Step 2
+[p] The InstallShield Wizard for Cisco Virtual Com appears. ClickNext.
+[p] Step 3
+[p] When the Program Maintenance window appears, select the Remove radio button. ClickNext.
+[p] Step 4
+[p] When the Remove the Program window appears, clickRemove.
+[p] Note
+[p] If a User Account Control warning appears, clickAllow - I trust this program to proceed.
+[p] Step 5
+[p] When the InstallShield Wizard Completed window appears, clickFinish.
+
+=== BeautifulSoup: Notes/Warnings (by image alt or table) ===
+
+=== BeautifulSoup: Tables (first 2 rows of each) ===
+Table 1:
+   ['Note', 'If you have stacked your switches, connect to the console port of one of the switches in the stack. You can initially configure\n                                       the entire stack from any member switch.']
+Table 2:
+   ['Step\xa01', 'Connect the RJ45 port adapter to the serial port on the terminal server or your PC using the optional RJ45-to-DB9 adapter\n                                          cable. Connect the other end of the cable to the switch console port.']
+   ['Step\xa02', 'Start the terminal-emulation program on the PC or the terminal. The program,\n                                          \t\t\t\t\tfrequently a PC application such as Putty or TeraTerm, makes communication\n                                          \t\t\t\t\tbetween the switch and your PC or terminal possible.']
+Table 3:
+   ['Type of USB Device', 'Device Name']
+   ['Cisco USB device', 'Cisco USB Console or USB Serial Device']
+Table 4:
+   ['Step\xa01', 'To install the USB driver to a Windows-based PC or Mac-based PC for the first time, do the following:.Windows-based PCFor Cisco USB Device, seeInstalling the Microsoft Windows USB Device Driver.For Silicon Labs USB Device. you can either download the USB driver from the Silicon Labswebsiteor seeInstalling the Silicon Labs Windows USB Device Driver.Mac-based PCFor Cisco USB Device, no driver installation is required.For Silicon Labs USB Device. you can download the USB driver from the Silicon Labswebsite. Once the installation is completed, a virtual COM port session, "tty.SLAB_USBtoUART", will be started.NoteDo not use the generic USB serial driver available on the Mac-based PC.NoteUSB Type A port on the switch provides file system support and isNOTa console port. See USB Type A Port section.', 'Note', 'Do not use the generic USB serial driver available on the Mac-based PC.', 'Note', 'USB Type A port on the switch provides file system support and isNOTa console port. See USB Type A Port section.']
+   ['Note', 'Do not use the generic USB serial driver available on the Mac-based PC.']
+Table 5:
+   ['Note', 'Do not use the generic USB serial driver available on the Mac-based PC.']
+Table 6:
+   ['Note', 'USB Type A port on the switch provides file system support and isNOTa console port. See USB Type A Port section.']
+Table 7:
+   ['Step\xa01', 'Obtain the Cisco USB console driver file from the Cisco.com web site and unzip it.NoteYou can download the driver file from the Cisco.com site for downloading the switch software.Windows 10 includes a USB to RS232 driver. However for added functionality, download the USB Console Software from the Software\n                                             Download Center at cisco.com.', 'Note', 'You can download the driver file from the Cisco.com site for downloading the switch software.']
+   ['Note', 'You can download the driver file from the Cisco.com site for downloading the switch software.']
+Table 8:
+   ['Note', 'You can download the driver file from the Cisco.com site for downloading the switch software.']
+Table 9:
+   ['Note', 'If a User Account Control warning appears, clickAllow - I trust this programto proceed.']
+Table 10:
+   ['Step\xa01', 'Connect a USB cable to the PC USB port. Connect the other end of the cable to the switchmini-B(5-pin-connector) USB console port.']
+   ['Step\xa02', 'Launch the Windows Update page by clicking on theUpdate & Securitybutton on the Windows Settings.']
+Table 11:
+   ['Note', 'Windows assigns different COM ports to Silicon Labs USB device. To view the COM port assignment, see Device Manager.']
+Table 12:
+   ['Step\xa01', 'Run setup.exe for Windows 32-bit or setup(x64).exe for Windows-64bit. ClickNext.']
+   ['Step\xa02', 'The InstallShield Wizard for Cisco Virtual Com appears. ClickNext.']
+Table 13:
+   ['Note', 'If a User Account Control warning appears, clickAllow - I trust this program to proceed.']
+
+=== pandas.read_html: All Tables (first 2 rows of each) ===
+pandas Table 1 (shape (1, 2)):
+      0                                                  1
+0  Note  If you have stacked your switches, connect to ...
+pandas Table 2 (shape (5, 2)):
+        0                                                  1
+0  Step 1  Connect the RJ45 port adapter to the serial po...
+1  Step 2  Start the terminal-emulation program on the PC...
+pandas Table 3 (shape (2, 2)):
+        Type of USB Device                                        Device Name
+0         Cisco USB device             Cisco USB Console or USB Serial Device
+1  Silicon Labs USB device  Silicon Labs CP210x USB to UART Bridge or CP21...
+pandas Table 4 (shape (8, 2)):
+        0                                                  1
+0  Step 1  To install the USB driver to a Windows-based P...
+1    Note  Do not use the generic USB serial driver avail...
+pandas Table 5 (shape (1, 2)):
+      0                                                  1
+0  Note  Do not use the generic USB serial driver avail...
+pandas Table 6 (shape (1, 2)):
+      0                                                  1
+0  Note  USB Type A port on the switch provides file sy...
+pandas Table 7 (shape (8, 2)):
+        0                                                  1
+0  Step 1  Obtain the Cisco USB console driver file from ...
+1    Note  You can download the driver file from the Cisc...
+pandas Table 8 (shape (1, 2)):
+      0                                                  1
+0  Note  You can download the driver file from the Cisc...
+pandas Table 9 (shape (1, 2)):
+      0                                                  1
+0  Note  If a User Account Control warning appears, cli...
+pandas Table 10 (shape (6, 2)):
+        0                                                  1
+0  Step 1  Connect a USB cable to the PC USB port. Connec...
+1  Step 2  Launch the Windows Update page by clicking on ...
+pandas Table 11 (shape (1, 2)):
+      0                                                  1
+0  Note  Windows assigns different COM ports to Silicon...
+pandas Table 12 (shape (6, 2)):
+        0                                                  1
+0  Step 1  Run setup.exe for Windows 32-bit or setup(x64)...
+1  Step 2  The InstallShield Wizard for Cisco Virtual Com...
+pandas Table 13 (shape (1, 2)):
+      0                                                  1
+0  Note  If a User Account Control warning appears, cli...
+
+=== trafilatura: Main Content Extraction ===
+Bias-Free Language
+The documentation set for this product strives to use bias-free language. For the purposes of this documentation set, bias-free is defined as language that does not imply discrimination based on age, disability, gender, racial identity, ethnic identity, sexual orientation, socioeconomic status, and intersectionality. Exceptions may be present in the documentation due to language that is hardcoded in the user interfaces of the product software, language used based on RFP documentation, or language that is used by a referenced third-party product. Learn more about how Cisco is using Inclusive Language....

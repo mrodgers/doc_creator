@@ -1,0 +1,62 @@
+total_rules: 15
+unit_rules:
+- description: Auto-generated rule for BTU measurements
+  pattern: (\d+(?:\.\d+)?)\s*BTUs?\b
+  placeholder: '{{<spec_key>}}'
+  priority: 25
+- description: Auto-generated rule for BTU/hr measurements
+  pattern: (\d+(?:\.\d+)?)\s*BTU/hrs?\b
+  placeholder: '{{<spec_key>}}'
+  priority: 28
+- description: Auto-generated rule for CFM measurements
+  pattern: (\d+(?:\.\d+)?)\s*CFM\b
+  placeholder: '{{<spec_key>}}'
+  priority: 23
+- description: Auto-generated rule for RU measurements
+  pattern: (\d+(?:\.\d+)?)\s*RU\b
+  placeholder: '{{<spec_key>}}'
+  priority: 22
+- description: Auto-generated rule for T measurements
+  pattern: (\d+(?:\.\d+)?)\s*T\b
+  placeholder: '{{<spec_key>}}'
+  priority: 21
+- description: Auto-generated rule for W measurements
+  pattern: (\d+(?:\.\d+)?)\s*W\b
+  placeholder: '{{<spec_key>}}'
+  priority: 21
+- description: Auto-generated rule for cm measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:cm|centimeters?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 39
+- description: Auto-generated rule for ft measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:ft|feet?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 32
+- description: Auto-generated rule for in measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:in|inches?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 34
+- description: Auto-generated rule for kW measurements
+  pattern: (\d+(?:\.\d+)?)\s*kW\b
+  placeholder: '{{<spec_key>}}'
+  priority: 22
+- description: Auto-generated rule for kg measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:kg|kilograms?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 37
+- description: Auto-generated rule for lb measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:lb|pounds?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 34
+- description: Auto-generated rule for m measurements
+  pattern: (\d+(?:\.\d+)?)\s*(?:m|meters?)\b
+  placeholder: '{{<spec_key>}}'
+  priority: 33
+- description: "Auto-generated rule for \xB0C measurements"
+  pattern: "(\\d+(?:\\.\\d+)?)\\s*(?:\xB0C|degrees?\\s*celsius?)\\b"
+  placeholder: '{{<spec_key>}}'
+  priority: 46
+- description: "Auto-generated rule for \xB0F measurements"
+  pattern: "(\\d+(?:\\.\\d+)?)\\s*(?:\xB0F|degrees?\\s*fahrenheit?)\\b"
+  placeholder: '{{<spec_key>}}'
+  priority: 49
