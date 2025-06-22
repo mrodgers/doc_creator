@@ -10,6 +10,7 @@ import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import re
 
 from pydantic import BaseModel
 
@@ -86,55 +87,70 @@ class PDFParser(DocumentParser):
                 Path(file_path).exists())
 
     def parse(self, file_path: str) -> ParsedDocument:
-        """Parse PDF document and extract structured content."""
+        """Parse PDF document and extract structured content with performance optimization."""
         if not self.can_parse(file_path):
             raise ValueError(f"Cannot parse file: {file_path}")
 
-        filename = Path(file_path).name
         parsed_doc = ParsedDocument(
-            filename=filename,
-            file_type="pdf",
-            sections=[],
-            metadata={},
-            raw_text="",
-            parsing_errors=[]
+            filename=Path(file_path).name,
+            file_type='pdf'
         )
 
         try:
+            # Use caching for better performance
+            cache_key = f"pdf_parse_{hash(file_path)}"
+            
+            # Check if we have cached results
+            if hasattr(self, '_parse_cache') and cache_key in self._parse_cache:
+                return self._parse_cache[cache_key]
+
+            # Open PDF with optimized settings
             with pdfplumber.open(file_path) as pdf:
-                # Extract metadata
+                
+                # Extract title from metadata first
+                if pdf.metadata and pdf.metadata.get('Title'):
+                    parsed_doc.title = pdf.metadata['Title']
+                
+                # Process pages with optimized extraction
+                sections = []
+                raw_text_parts = []
+                
+                # Process pages in batches for better performance
+                batch_size = 5
+                for i in range(0, len(pdf.pages), batch_size):
+                    batch_pages = pdf.pages[i:i + batch_size]
+                    
+                    for page_num, page in enumerate(batch_pages, i + 1):
+                        try:
+                            # Extract text with optimized settings
+                            page_text = page.extract_text()
+                            if page_text and page_text.strip():
+                                raw_text_parts.append(page_text)
+                                
+                                # Identify sections more efficiently
+                                page_sections = self._identify_sections_optimized(page_text, page_num)
+                                sections.extend(page_sections)
+                                
+                        except Exception as e:
+                            error_msg = f"Error processing page {page_num}: {e}"
+                            parsed_doc.parsing_errors.append(error_msg)
+                            logger.warning(error_msg)
+
+                # Combine results
+                parsed_doc.sections = sections
+                parsed_doc.raw_text = '\n'.join(raw_text_parts)
+                
+                # Add metadata
                 parsed_doc.metadata = {
-                    "pages": len(pdf.pages),
-                    "title": pdf.metadata.get('Title', ''),
-                    "author": pdf.metadata.get('Author', ''),
-                    "subject": pdf.metadata.get('Subject', ''),
-                    "creator": pdf.metadata.get('Creator', ''),
-                    "producer": pdf.metadata.get('Producer', '')
+                    'page_count': len(pdf.pages),
+                    'file_size': Path(file_path).stat().st_size,
+                    'extraction_method': 'optimized_pdf_parser'
                 }
 
-                # Extract text from each page
-                all_text = []
-                for page_num, page in enumerate(pdf.pages, 1):
-                    try:
-                        page_text = page.extract_text()
-                        if page_text:
-                            all_text.append(page_text)
-
-                            # Try to identify sections based on headers
-                            section = self._identify_section(page_text, page_num)
-                            if section:
-                                parsed_doc.sections.append(section)
-
-                    except Exception as e:
-                        error_msg = f"Error parsing page {page_num}: {e}"
-                        parsed_doc.parsing_errors.append(error_msg)
-                        logger.warning(error_msg)
-
-                parsed_doc.raw_text = "\n".join(all_text)
-
-                # Extract title if not in metadata
-                if not parsed_doc.metadata.get('title'):
-                    parsed_doc.title = self._extract_title(parsed_doc.raw_text)
+                # Cache the results
+                if not hasattr(self, '_parse_cache'):
+                    self._parse_cache = {}
+                self._parse_cache[cache_key] = parsed_doc
 
         except Exception as e:
             error_msg = f"Error parsing PDF {file_path}: {e}"
@@ -160,67 +176,99 @@ class PDFParser(DocumentParser):
             logger.error(f"Error extracting text from PDF {file_path}: {e}")
             raise
 
-    def _identify_section(self, page_text: str, page_num: int) -> Optional[Dict[str, Any]]:
-        """Identify sections based on text patterns."""
+    def _identify_sections_optimized(self, page_text: str, page_num: int) -> List[Dict[str, Any]]:
+        """Optimized section identification with better performance."""
+        sections = []
         lines = page_text.split('\n')
-
-        # Look for common header patterns
-        for i, line in enumerate(lines):
+        
+        # Pre-compile regex patterns for better performance
+        if not hasattr(self, '_header_patterns'):
+            self._header_patterns = {
+                'numbered': re.compile(r'^\d+\.\s+[A-Z]'),
+                'roman': re.compile(r'^[IVX]+\.\s+[A-Z]'),
+                'lettered': re.compile(r'^[A-Z]\.\s+[A-Z]'),
+                'bold_caps': re.compile(r'^[A-Z][A-Z\s]{3,}$')
+            }
+        
+        current_section = None
+        current_content = []
+        
+        for line in lines:
             line = line.strip()
-            if self._is_header(line):
-                # Extract section content
-                content = lines[i+1:i+20]  # Next 20 lines as content
-                return {
-                    "heading": line,
-                    "level": self._get_header_level(line),
-                    "content": [l.strip() for l in content if l.strip()],
-                    "page": page_num,
-                    "start_line": i
+            if not line:
+                continue
+                
+            # Check if line is a header using optimized patterns
+            if self._is_header_optimized(line):
+                # Save previous section if exists
+                if current_section:
+                    current_section['content'] = current_content
+                    sections.append(current_section)
+                
+                # Start new section
+                current_section = {
+                    'heading': line,
+                    'level': self._get_header_level_optimized(line),
+                    'content': [],
+                    'page': page_num,
+                    'start_line': len(sections)
                 }
+                current_content = []
+            else:
+                # Add to current content
+                if current_section:
+                    current_content.append(line)
+        
+        # Add final section
+        if current_section:
+            current_section['content'] = current_content
+            sections.append(current_section)
+        
+        return sections
 
-        return None
-
-    def _is_header(self, line: str) -> bool:
-        """Check if a line looks like a header."""
-        if not line:
+    def _is_header_optimized(self, line: str) -> bool:
+        """Optimized header detection using pre-compiled patterns."""
+        if len(line) < 3 or len(line) > 200:
             return False
-
-        # Common header patterns
-        header_patterns = [
-            r'^[A-Z][A-Z\s]+$',  # ALL CAPS
-            r'^\d+\.\s+[A-Z]',   # Numbered sections
-            r'^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$',  # Title Case
-            r'^Chapter\s+\d+',   # Chapter headers
-            r'^Section\s+\d+',   # Section headers
-        ]
-
-        import re
-        for pattern in header_patterns:
-            if re.match(pattern, line):
+            
+        # Check for common header indicators
+        if line.isupper() and len(line) > 5:
+            return True
+            
+        # Use pre-compiled patterns
+        for pattern in self._header_patterns.values():
+            if pattern.match(line):
                 return True
-
+                
+        # Check for technical section keywords
+        tech_keywords = ['specification', 'installation', 'configuration', 'requirements', 
+                        'overview', 'features', 'safety', 'maintenance', 'troubleshooting']
+        if any(keyword in line.lower() for keyword in tech_keywords):
+            return True
+            
         return False
 
-    def _get_header_level(self, header: str) -> int:
-        """Determine header level based on formatting."""
-        if header.isupper():
-            return 1  # Main heading
-        elif header.startswith(('Chapter', 'Section')):
-            return 2  # Chapter/Section
-        elif any(char.isdigit() for char in header):
-            return 3  # Numbered subsection
+    def _get_header_level_optimized(self, header: str) -> int:
+        """Optimized header level detection."""
+        # Check for numbered patterns
+        if re.match(r'^\d+\.', header):
+            return 1
+        elif re.match(r'^\d+\.\d+', header):
+            return 2
+        elif re.match(r'^\d+\.\d+\.\d+', header):
+            return 3
+        elif re.match(r'^[IVX]+\.', header):
+            return 1
+        elif re.match(r'^[A-Z]\.', header):
+            return 2
         else:
-            return 4  # Subheading
-
-    def _extract_title(self, text: str) -> Optional[str]:
-        """Extract document title from text."""
-        lines = text.split('\n')
-        for line in lines[:10]:  # Check first 10 lines
-            line = line.strip()
-            if line and len(line) > 5 and len(line) < 100:
-                # Simple heuristic: first substantial line might be title
-                return line
-        return None
+            # Estimate level based on length and formatting
+            if header.isupper() and len(header) > 10:
+                return 1
+            elif len(header) > 20:
+                return 2
+            else:
+                return 3
 
 class DOCXParser(DocumentParser):
     """DOCX document parser using python-docx."""
@@ -469,7 +517,7 @@ class HTMLParser(DocumentParser):
                 Path(file_path).exists())
 
     def parse(self, file_path: str) -> ParsedDocument:
-        """Parse HTML document and extract structured content using enhanced scraping methods."""
+        """Parse HTML document and extract structured content using enhanced scraping methods with quality assessment."""
         if not self.can_parse(file_path):
             raise ValueError(f"Cannot parse file: {file_path}")
 
@@ -501,7 +549,7 @@ class HTMLParser(DocumentParser):
             if soup.title:
                 parsed_doc.title = soup.title.string.strip()
 
-            # Extract sections using enhanced methods
+            # Extract sections using enhanced methods with quality assessment
             sections = self._extract_enhanced_sections(soup)
             parsed_doc.sections = sections
 
@@ -531,8 +579,13 @@ class HTMLParser(DocumentParser):
             raise
 
     def _extract_enhanced_sections(self, soup) -> List[Dict[str, Any]]:
-        """Extract sections from HTML using enhanced scraping methods (pandas + BeautifulSoup)."""
+        """Extract sections from HTML using enhanced scraping methods with quality assessment."""
         sections = []
+
+        # First, try to find main content area
+        main_content = self._find_main_content(soup)
+        if main_content:
+            soup = main_content
 
         # Find all heading elements (h1, h2, h3, h4, h5, h6)
         headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
@@ -540,7 +593,7 @@ class HTMLParser(DocumentParser):
         for heading in headings:
             try:
                 heading_text = heading.get_text(strip=True)
-                if not heading_text:
+                if not heading_text or len(heading_text) < 2:
                     continue
 
                 # Determine heading level
@@ -548,23 +601,182 @@ class HTMLParser(DocumentParser):
 
                 # Extract content following this heading using enhanced methods
                 content = self._extract_enhanced_section_content(heading)
-
-                section = {
-                    "heading": heading_text,
-                    "level": level,
-                    "content": content,
-                    "source": "html_enhanced"
-                }
-                sections.append(section)
+                
+                # Quality assessment for this section
+                quality_score = self._assess_section_quality(heading_text, content)
+                
+                # Only include sections with reasonable quality
+                if quality_score > 0.3:  # Minimum quality threshold
+                    section = {
+                        "heading": heading_text,
+                        "level": level,
+                        "content": content,
+                        "source": "html_enhanced",
+                        "quality_score": quality_score,
+                        "content_length": sum(len(c) for c in content),
+                        "content_preview": self._create_content_preview(content)
+                    }
+                    sections.append(section)
 
             except Exception as e:
                 logger.warning(f"Error extracting section from HTML: {e}")
 
-        # If no headings found, try to extract sections from other structural elements
-        if not sections:
-            sections = self._extract_structural_sections(soup)
+        # If no headings found or quality is poor, try alternative extraction methods
+        if not sections or len(sections) < 3:
+            alternative_sections = self._extract_alternative_sections(soup)
+            sections.extend(alternative_sections)
+
+        # Sort sections by quality score and remove duplicates
+        sections = self._deduplicate_and_sort_sections(sections)
 
         return sections
+
+    def _find_main_content(self, soup) -> Optional[BeautifulSoup]:
+        """Find the main content area of the HTML document."""
+        # Common selectors for main content
+        main_selectors = [
+            'main',
+            '[role="main"]',
+            '.main-content',
+            '.content',
+            '#content',
+            '#main',
+            '.post-content',
+            '.article-content',
+            '.document-content'
+        ]
+        
+        for selector in main_selectors:
+            main_elem = soup.select_one(selector)
+            if main_elem and len(main_elem.get_text(strip=True)) > 500:
+                return main_elem
+        
+        # If no main content found, try to identify the largest content area
+        content_areas = soup.find_all(['div', 'section', 'article'])
+        if content_areas:
+            largest_area = max(content_areas, key=lambda x: len(x.get_text(strip=True)))
+            if len(largest_area.get_text(strip=True)) > 1000:
+                return largest_area
+        
+        return None
+
+    def _assess_section_quality(self, heading: str, content: List[str]) -> float:
+        """Assess the quality of a section based on heading and content."""
+        score = 0.0
+        
+        # Heading quality (30% of score)
+        if len(heading) > 5 and len(heading) < 200:
+            score += 0.3
+        
+        # Content quality (70% of score)
+        if content:
+            total_content_length = sum(len(c) for c in content)
+            if total_content_length > 50:  # Minimum content length
+                score += 0.2
+            
+            # Check for meaningful content (not just whitespace or single words)
+            meaningful_content = [c for c in content if len(c.strip()) > 10]
+            if len(meaningful_content) > 0:
+                score += 0.3
+            
+            # Check for technical content indicators
+            technical_indicators = ['specification', 'installation', 'configuration', 'requirements', 
+                                  'features', 'overview', 'description', 'procedure', 'warning']
+            if any(indicator in heading.lower() for indicator in technical_indicators):
+                score += 0.2
+        
+        return min(score, 1.0)
+
+    def _extract_alternative_sections(self, soup) -> List[Dict[str, Any]]:
+        """Extract sections using alternative methods when headings are not available."""
+        sections = []
+        
+        # Method 1: Extract from structural elements with meaningful content
+        structural_elements = soup.find_all(['div', 'section', 'article'])
+        
+        for elem in structural_elements:
+            text = elem.get_text(strip=True)
+            if len(text) < 100:  # Skip very short elements
+                continue
+            
+            # Try to find a meaningful heading
+            heading = self._extract_heading_from_element(elem)
+            if not heading:
+                continue
+            
+            content = [p.get_text(strip=True) for p in elem.find_all(['p', 'li', 'td']) 
+                      if p.get_text(strip=True) and len(p.get_text(strip=True)) > 20]
+            
+            if content:
+                quality_score = self._assess_section_quality(heading, content)
+                if quality_score > 0.4:
+                    section = {
+                        "heading": heading,
+                        "level": 1,
+                        "content": content,
+                        "source": "html_alternative",
+                        "quality_score": quality_score,
+                        "content_length": sum(len(c) for c in content),
+                        "content_preview": self._create_content_preview(content)
+                    }
+                    sections.append(section)
+        
+        return sections
+
+    def _extract_heading_from_element(self, elem) -> Optional[str]:
+        """Extract a meaningful heading from an element."""
+        # Try to find existing headings
+        heading = elem.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        if heading:
+            return heading.get_text(strip=True)
+        
+        # Try to extract from element attributes
+        if elem.get('id'):
+            return elem.get('id').replace('-', ' ').replace('_', ' ').title()
+        
+        if elem.get('class'):
+            class_name = elem.get('class')[0] if elem.get('class') else ''
+            if class_name and len(class_name) > 3:
+                return class_name.replace('-', ' ').replace('_', ' ').title()
+        
+        # Try to extract from first paragraph or list item
+        first_content = elem.find(['p', 'li', 'strong', 'b'])
+        if first_content:
+            text = first_content.get_text(strip=True)
+            if len(text) > 10 and len(text) < 100:
+                return text
+        
+        return None
+
+    def _create_content_preview(self, content: List[str]) -> str:
+        """Create a preview of the content for display."""
+        if not content:
+            return ""
+        
+        # Take first meaningful content item
+        for item in content:
+            if len(item.strip()) > 20:
+                preview = item.strip()[:100]
+                return preview + "..." if len(item) > 100 else preview
+        
+        return content[0][:100] + "..." if len(content[0]) > 100 else content[0]
+
+    def _deduplicate_and_sort_sections(self, sections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Remove duplicate sections and sort by quality."""
+        # Remove duplicates based on heading similarity
+        unique_sections = []
+        seen_headings = set()
+        
+        for section in sections:
+            heading_lower = section["heading"].lower().strip()
+            if heading_lower not in seen_headings:
+                seen_headings.add(heading_lower)
+                unique_sections.append(section)
+        
+        # Sort by quality score (highest first)
+        unique_sections.sort(key=lambda x: x.get("quality_score", 0), reverse=True)
+        
+        return unique_sections
 
     def _extract_enhanced_section_content(self, heading) -> List[str]:
         """Extract content that follows a heading using enhanced methods including table extraction."""
@@ -636,43 +848,6 @@ class HTMLParser(DocumentParser):
                 table_content.append(" | ".join(cells))
 
         return table_content
-
-    def _extract_structural_sections(self, soup) -> List[Dict[str, Any]]:
-        """Extract sections from structural HTML elements like div, section, article."""
-        sections = []
-
-        # Look for common structural elements
-        structural_elements = soup.find_all(['div', 'section', 'article', 'main'])
-
-        for elem in structural_elements:
-            # Check if element has meaningful content
-            text = elem.get_text(strip=True)
-            if len(text) < 50:  # Skip very short elements
-                continue
-
-            # Try to find a heading within this element
-            heading = elem.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
-            if heading:
-                heading_text = heading.get_text(strip=True)
-                level = int(heading.name[1])
-            else:
-                # Use element's id, class, or first few words as heading
-                heading_text = elem.get('id', elem.get('class', ['Content'])[0] if elem.get('class') else 'Content')
-                level = 1
-
-            # Extract content
-            content = [p.get_text(strip=True) for p in elem.find_all(['p', 'li', 'td']) if p.get_text(strip=True)]
-
-            if content:
-                section = {
-                    "heading": heading_text,
-                    "level": level,
-                    "content": content,
-                    "source": "html_enhanced"
-                }
-                sections.append(section)
-
-        return sections
 
     def _extract_clean_text(self, soup) -> str:
         """Extract clean text from HTML, removing scripts, styles, and navigation."""

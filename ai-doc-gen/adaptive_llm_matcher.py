@@ -465,21 +465,75 @@ Analyze each document section and provide matches with detailed reasoning."""
             return []
 
     def _create_matching_prompt(self, doc_sections: List[Dict], template_sections: List[Dict]) -> str:
-        """Create the current version of the matching prompt."""
+        """Create the current version of the matching prompt with enhanced technical focus."""
         doc_sections_text = "\n".join([
-            f"Doc Section {s['id']}: '{s['heading']}' (Content: {s['content_preview']})"
-            for s in doc_sections
+            f"Section {i+1}: {section.get('heading', 'Unknown')}\n"
+            f"Content Preview: {section.get('content_preview', 'No content available')}\n"
+            f"Level: {section.get('level', 1)}\n"
+            for i, section in enumerate(doc_sections)
         ])
 
         template_sections_text = "\n".join([
-            f"Template Section {s['id']}: '{s['title']}' (Type: {s['content_type']}, Source: {s['recommended_source']})"
-            for s in template_sections
+            f"Template Section {i+1}: {section.get('title', 'Unknown')}\n"
+            f"Description: {section.get('description', 'No description')}\n"
+            f"Required: {section.get('required', False)}\n"
+            for i, section in enumerate(template_sections)
         ])
 
-        return self.base_prompt.format(
-            doc_sections_text=doc_sections_text,
-            template_sections_text=template_sections_text
-        )
+        # Enhanced prompt with technical focus and specific examples
+        prompt = f"""You are an expert technical documentation analyst specializing in Cisco hardware documentation. Your task is to match document sections to template sections with high accuracy.
+
+CONTEXT:
+- This is for Cisco hardware installation and configuration documentation
+- Focus on technical accuracy and completeness
+- Consider industry standards for hardware documentation
+
+DOCUMENT SECTIONS:
+{doc_sections_text}
+
+TEMPLATE SECTIONS:
+{template_sections_text}
+
+MATCHING INSTRUCTIONS:
+1. **Technical Accuracy**: Prioritize technical content over general descriptions
+2. **Semantic Matching**: Look for technical terms, procedures, and specifications
+3. **Hierarchy Consideration**: Match sections based on their logical relationship
+4. **Completeness**: Ensure all required template sections are matched
+
+TECHNICAL MATCHING CRITERIA:
+- **Specifications**: Match technical specs, requirements, and parameters
+- **Installation**: Match setup, deployment, and configuration procedures
+- **Safety**: Match warnings, precautions, and safety requirements
+- **Features**: Match capabilities, functions, and characteristics
+- **Maintenance**: Match service, upkeep, and troubleshooting procedures
+
+EXAMPLES OF GOOD MATCHES:
+- "Product Specifications" ↔ "Technical Specifications" (0.95 similarity)
+- "Installation Guide" ↔ "Installation Procedures" (0.92 similarity)
+- "Safety Warnings" ↔ "Safety Requirements" (0.90 similarity)
+- "Hardware Overview" ↔ "Product Overview" (0.88 similarity)
+- "Configuration Steps" ↔ "Configuration Procedures" (0.85 similarity)
+
+OUTPUT FORMAT:
+Return a JSON array of matches with this structure:
+[
+  {{
+    "doc_section_id": <section number>,
+    "template_section_id": <template section number>,
+    "similarity_score": <0.0-1.0>,
+    "confidence": <0.0-1.0>,
+    "reasoning": "<brief explanation of why this match was chosen>"
+  }}
+]
+
+IMPORTANT:
+- Only include matches with similarity_score >= 0.6
+- Provide detailed reasoning for each match
+- Consider technical domain expertise
+- Ensure JSON is valid and properly formatted
+"""
+
+        return prompt
 
     def _parse_matching_response(self, response: str, doc_sections: List[Dict], template_sections: List[Dict]) -> List[MatchResult]:
         """Parse LLM response into structured matches with safety validation."""
@@ -545,31 +599,7 @@ Analyze each document section and provide matches with detailed reasoning."""
                     'reasoning': match.reasoning
                 })
 
-            evaluation_prompt = f"""
-You are an expert evaluator of semantic matching performance. Analyze the following matching results and identify areas for improvement.
-
-MATCHING RESULTS:
-{json.dumps(match_summary, indent=2)}
-
-DOCUMENT SECTIONS COUNT: {len(doc_sections)}
-TEMPLATE SECTIONS COUNT: {len(template_sections)}
-MATCHES FOUND: {len(matches)}
-COVERAGE: {len(matches) / len(template_sections) * 100:.1f}% if template_sections else 0
-
-EVALUATION CRITERIA:
-1. Coverage: Are important template sections being matched?
-2. Confidence: Are confidence scores appropriate and well-justified?
-3. Reasoning: Are the reasoning explanations detailed and accurate?
-4. Semantic Accuracy: Are the matches semantically correct?
-
-Provide your evaluation as JSON with these fields:
-- overall_score: 0-100 rating of matching quality
-- confidence_issues: List of specific confidence problems
-- reasoning_issues: List of reasoning quality problems  
-- coverage_issues: List of coverage problems
-- prompt_suggestions: List of specific prompt improvements
-- specific_improvements: List of actionable improvements
-"""
+            evaluation_prompt = self._create_evaluation_prompt(matches, doc_sections, template_sections)
 
             # Validate evaluation prompt
             if not SafetyValidator.is_valid_string(evaluation_prompt):
@@ -600,6 +630,97 @@ Provide your evaluation as JSON with these fields:
         except Exception as e:
             print(f"   ❌ Self-evaluation failed: {e}")
             return self._create_default_evaluation()
+
+    def _create_evaluation_prompt(self, matches: List[MatchResult], doc_sections: List[Dict], template_sections: List[Dict]) -> str:
+        """Create prompt for LLM self-evaluation with enhanced technical focus."""
+        matches_text = "\n".join([
+            f"Match {i+1}: Doc Section '{match.doc_section}' → Template Section '{match.template_section}' "
+            f"(Score: {match.similarity_score:.2f}, Confidence: {match.confidence:.2f})"
+            for i, match in enumerate(matches)
+        ])
+
+        doc_sections_text = "\n".join([
+            f"Doc Section {i+1}: {section.get('heading', 'Unknown')}"
+            for i, section in enumerate(doc_sections)
+        ])
+
+        template_sections_text = "\n".join([
+            f"Template Section {i+1}: {section.get('title', 'Unknown')} (Required: {section.get('required', False)})"
+            for i, section in enumerate(template_sections)
+        ])
+
+        # Enhanced evaluation prompt with technical expertise focus
+        prompt = f"""You are an expert technical documentation quality analyst. Evaluate the quality of section matching for Cisco hardware documentation.
+
+CONTEXT:
+- This is for Cisco hardware installation and configuration documentation
+- Focus on technical accuracy, completeness, and industry standards
+- Consider the critical nature of hardware documentation
+
+MATCHES TO EVALUATE:
+{matches_text}
+
+DOCUMENT SECTIONS:
+{doc_sections_text}
+
+TEMPLATE SECTIONS:
+{template_sections_text}
+
+EVALUATION CRITERIA:
+
+1. **Technical Accuracy (30% weight)**:
+   - Are technical terms correctly matched?
+   - Are specifications properly identified?
+   - Are procedures accurately categorized?
+
+2. **Completeness (25% weight)**:
+   - Are all required template sections covered?
+   - Are critical hardware documentation sections included?
+   - Is the coverage comprehensive?
+
+3. **Semantic Quality (25% weight)**:
+   - Do matches make logical sense?
+   - Are related concepts properly grouped?
+   - Is the hierarchy maintained?
+
+4. **Confidence Assessment (20% weight)**:
+   - Are confidence scores appropriate?
+   - Are high-confidence matches actually good?
+   - Are low-confidence matches flagged correctly?
+
+EVALUATION SCALE:
+- 90-100: Excellent - Matches are technically accurate and comprehensive
+- 80-89: Good - Most matches are correct with minor issues
+- 70-79: Fair - Some good matches but significant gaps
+- 60-69: Poor - Many incorrect matches or missing critical sections
+- 0-59: Very Poor - Major technical errors or incomplete coverage
+
+OUTPUT FORMAT:
+Return a JSON object with this structure:
+{{
+  "overall_score": <0-100>,
+  "confidence_issues": ["list of specific confidence problems"],
+  "reasoning_issues": ["list of reasoning quality problems"],
+  "coverage_issues": ["list of coverage problems"],
+  "prompt_suggestions": ["list of specific prompt improvements"],
+  "specific_improvements": ["detailed improvement recommendations"]
+}}
+
+TECHNICAL FOCUS AREAS:
+- Hardware specifications and requirements
+- Installation and configuration procedures
+- Safety warnings and precautions
+- Maintenance and troubleshooting
+- Feature descriptions and capabilities
+
+IMPORTANT:
+- Be specific about technical issues
+- Provide actionable improvement suggestions
+- Consider industry best practices for hardware documentation
+- Ensure JSON is valid and properly formatted
+"""
+
+        return prompt
 
     def _create_default_evaluation(self) -> EvaluationResult:
         """Create default evaluation when evaluation fails."""

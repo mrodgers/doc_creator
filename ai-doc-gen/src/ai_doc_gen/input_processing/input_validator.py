@@ -48,7 +48,7 @@ class InputValidator:
         self.max_file_size = 50 * 1024 * 1024  # 50MB maximum
         self.min_text_length = 100  # Minimum characters
         self.max_text_length = 1000000  # 1M characters maximum
-        self.supported_extensions = {'.pdf', '.docx', '.doc', '.xml', '.txt'}
+        self.supported_extensions = {'.pdf', '.docx', '.doc', '.xml', '.txt', '.html'}
 
         # Quality thresholds
         self.min_sections = 2

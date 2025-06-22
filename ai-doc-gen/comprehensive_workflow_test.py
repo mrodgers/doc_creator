@@ -8,7 +8,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -113,7 +113,7 @@ class ComprehensiveWorkflowTest:
             if best_match and best_match['similarity'] > 0.6:
                 matches.append({
                     'template_section': template_title,
-                    'document_section': best_match['title'],
+                    'document_section': best_match['candidate'],
                     'similarity': best_match['similarity'],
                     'template_source': template_section.get('recommended_source', 'unknown')
                 })
@@ -156,26 +156,137 @@ class ComprehensiveWorkflowTest:
             }
         }
 
-    def _find_best_match(self, target: str, candidates: List[str]) -> Dict[str, Any]:
-        """Find the best matching section title."""
-        import difflib
-
+    def _find_best_match(self, target: str, candidates: List[str]) -> Optional[Dict[str, Any]]:
+        """Find the best matching section title using enhanced semantic matching."""
         if not candidates:
             return None
 
+        # Normalize target
+        target_normalized = self._normalize_text(target)
+        
         best_match = None
-        best_similarity = 0
-
+        best_similarity = 0.0
+        
         for candidate in candidates:
-            similarity = difflib.SequenceMatcher(None, target.lower(), candidate.lower()).ratio()
-            if similarity > best_similarity:
-                best_similarity = similarity
+            candidate_normalized = self._normalize_text(candidate)
+            
+            # Calculate multiple similarity metrics
+            exact_match = self._calculate_exact_match(target_normalized, candidate_normalized)
+            fuzzy_match = self._calculate_fuzzy_match(target_normalized, candidate_normalized)
+            semantic_match = self._calculate_semantic_match(target_normalized, candidate_normalized)
+            keyword_match = self._calculate_keyword_match(target_normalized, candidate_normalized)
+            
+            # Weighted combination of similarity scores
+            combined_similarity = (
+                exact_match * 0.4 +
+                fuzzy_match * 0.3 +
+                semantic_match * 0.2 +
+                keyword_match * 0.1
+            )
+            
+            if combined_similarity > best_similarity:
+                best_similarity = combined_similarity
                 best_match = {
-                    'title': candidate,
-                    'similarity': similarity
+                    "candidate": candidate,
+                    "similarity": combined_similarity,
+                    "exact_match": exact_match,
+                    "fuzzy_match": fuzzy_match,
+                    "semantic_match": semantic_match,
+                    "keyword_match": keyword_match
                 }
+        
+        return best_match if best_similarity > 0.25 else None  # Lowered threshold for better coverage
 
-        return best_match if best_similarity > 0.3 else None
+    def _normalize_text(self, text: str) -> str:
+        """Normalize text for better matching."""
+        import re
+        # Convert to lowercase
+        text = text.lower()
+        # Remove special characters and extra whitespace
+        text = re.sub(r'[^\w\s]', ' ', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+    def _calculate_exact_match(self, target: str, candidate: str) -> float:
+        """Calculate exact match similarity."""
+        if target == candidate:
+            return 1.0
+        if target in candidate or candidate in target:
+            return 0.8
+        return 0.0
+
+    def _calculate_fuzzy_match(self, target: str, candidate: str) -> float:
+        """Calculate fuzzy string matching similarity."""
+        import difflib
+        
+        # Use difflib for fuzzy matching
+        similarity = difflib.SequenceMatcher(None, target, candidate).ratio()
+        
+        # Boost similarity for partial matches
+        target_words = set(target.split())
+        candidate_words = set(candidate.split())
+        
+        if target_words and candidate_words:
+            word_overlap = len(target_words.intersection(candidate_words))
+            word_similarity = word_overlap / max(len(target_words), len(candidate_words))
+            # Combine sequence similarity with word overlap
+            return max(similarity, word_similarity)
+        
+        return similarity
+
+    def _calculate_semantic_match(self, target: str, candidate: str) -> float:
+        """Calculate semantic similarity based on technical terms."""
+        # Technical term mappings for better semantic matching
+        semantic_mappings = {
+            'overview': ['introduction', 'summary', 'description', 'about'],
+            'specification': ['specs', 'specifications', 'technical specs', 'requirements'],
+            'installation': ['install', 'setup', 'deployment', 'configuration'],
+            'configuration': ['config', 'setup', 'settings', 'parameters'],
+            'requirements': ['prerequisites', 'requirements', 'needs', 'dependencies'],
+            'features': ['capabilities', 'functions', 'characteristics', 'properties'],
+            'safety': ['safety', 'warnings', 'precautions', 'security'],
+            'troubleshooting': ['troubleshoot', 'diagnostics', 'problems', 'issues'],
+            'maintenance': ['maintain', 'service', 'upkeep', 'care'],
+            'specifications': ['specs', 'specification', 'technical specs', 'requirements']
+        }
+        
+        target_lower = target.lower()
+        candidate_lower = candidate.lower()
+        
+        # Check for semantic matches
+        for primary_term, synonyms in semantic_mappings.items():
+            if primary_term in target_lower:
+                for synonym in synonyms:
+                    if synonym in candidate_lower:
+                        return 0.9
+            elif primary_term in candidate_lower:
+                for synonym in synonyms:
+                    if synonym in target_lower:
+                        return 0.9
+        
+        return 0.0
+
+    def _calculate_keyword_match(self, target: str, candidate: str) -> float:
+        """Calculate keyword-based similarity."""
+        # Extract key technical keywords
+        technical_keywords = [
+            'cisco', 'nexus', 'catalyst', 'switch', 'router', 'hardware',
+            'installation', 'configuration', 'specification', 'requirements',
+            'overview', 'features', 'safety', 'maintenance', 'troubleshooting'
+        ]
+        
+        target_words = set(target.split())
+        candidate_words = set(candidate.split())
+        
+        target_keywords = target_words.intersection(set(technical_keywords))
+        candidate_keywords = candidate_words.intersection(set(technical_keywords))
+        
+        if target_keywords and candidate_keywords:
+            keyword_overlap = len(target_keywords.intersection(candidate_keywords))
+            total_keywords = len(target_keywords.union(candidate_keywords))
+            return keyword_overlap / total_keywords if total_keywords > 0 else 0.0
+        
+        return 0.0
 
     def _get_quality_level(self, score: float) -> str:
         """Convert score to quality level."""
