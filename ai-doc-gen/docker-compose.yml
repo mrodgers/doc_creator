@@ -16,6 +16,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - DEBUG=${DEBUG:-true}
       - ENVIRONMENT=development
+      - WEB_PORT=${WEB_PORT:-5476}
     volumes:
       - ./src:/app/src:ro
       - ./examples:/app/examples:ro
@@ -23,7 +24,7 @@ services:
       - ./output:/app/output
       - ./data:/app/data
     ports:
-      - "5432:5432"
+      - "${WEB_PORT:-5476}:5476"
     working_dir: /app
     command: ["uv", "run", "python", "launch_ui.py"]
     networks:

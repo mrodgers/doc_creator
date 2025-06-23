@@ -29,15 +29,16 @@ def main():
     Path("uploads").mkdir(exist_ok=True)
     Path("outputs").mkdir(exist_ok=True)
 
-    print("\nStarting web server...")
-    print("Access the UI at: http://localhost:5432")
+    port = int(os.getenv('WEB_PORT', 5476))
+    print(f"\nStarting web server on port {port}...")
+    print(f"Access the UI at: http://localhost:{port}")
     print("Press Ctrl+C to stop the server")
     print("\n" + "=" * 50)
 
     try:
         # Import and run the Flask app
         from ai_doc_gen.ui.app import app
-        app.run(debug=True, host='0.0.0.0', port=5432)
+        app.run(debug=True, host='0.0.0.0', port=port)
     except KeyboardInterrupt:
         print("\n\nServer stopped by user")
     except Exception as e:

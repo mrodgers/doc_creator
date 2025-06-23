@@ -1,69 +1,96 @@
 #!/usr/bin/env python3
 """
-Test web UI upload functionality with serialization fix.
+Test script for web upload functionality.
 """
 
+import os
+import time
+import requests
 from pathlib import Path
 
-import requests
-
+# Get the web UI port from environment variable
+WEB_PORT = os.getenv('WEB_PORT', '5476')
+BASE_URL = f'http://localhost:{WEB_PORT}'
 
 def test_web_upload():
-    """Test the web UI upload endpoint."""
-    print("Testing web UI upload...")
-
-    # Check if the server is running
+    """Test the web upload functionality."""
+    print("🧪 Testing Web Upload Functionality")
+    print("=" * 50)
+    
+    # Test 1: Check if the web UI is running
+    print("1. Checking if web UI is running...")
     try:
-        response = requests.get('http://localhost:5432/')
+        response = requests.get(f'{BASE_URL}/')
         if response.status_code == 200:
             print("✅ Web UI is running")
         else:
-            print(f"❌ Web UI returned status {response.status_code}")
-            return
+            print(f"❌ Web UI returned status code: {response.status_code}")
+            return False
     except requests.exceptions.ConnectionError:
-        print("❌ Web UI is not running. Please start it with: uv run python launch_ui.py")
-        return
-
-    # Test with a simple text file
-    test_file_path = Path("test_upload.txt")
-    test_content = "This is a test document for upload testing."
-
-    # Create test file
-    with open(test_file_path, 'w') as f:
-        f.write(test_content)
-
+        print("❌ Web UI is not running")
+        print(f"💡 Start it with: cd ai-doc-gen && podman-compose up -d")
+        return False
+    
+    # Test 2: Upload a test PDF
+    print("\n2. Testing PDF upload...")
+    test_pdf = Path("examples/cisco_nexus_9000_series.pdf")
+    
+    if not test_pdf.exists():
+        print(f"❌ Test PDF not found: {test_pdf}")
+        return False
+    
     try:
-        # Test upload
-        with open(test_file_path, 'rb') as f:
-            files = {'document': f}
-            response = requests.post('http://localhost:5432/upload', files=files)
-
+        with open(test_pdf, 'rb') as f:
+            files = {'file': (test_pdf.name, f, 'application/pdf')}
+            response = requests.post(f'{BASE_URL}/upload', files=files)
+        
         if response.status_code == 200:
             result = response.json()
-            print("✅ Upload successful!")
-            print(f"Job ID: {result.get('job_id')}")
-            print(f"Status: {result.get('status')}")
-            print(f"Filename: {result.get('filename')}")
-
-            # Test getting results
             job_id = result.get('job_id')
-            if job_id:
-                results_response = requests.get(f'http://localhost:5432/results/{job_id}')
-                if results_response.status_code == 200:
-                    print("✅ Results retrieval successful!")
-                else:
-                    print(f"❌ Results retrieval failed: {results_response.status_code}")
+            print(f"✅ Upload successful, job ID: {job_id}")
         else:
-            print(f"❌ Upload failed: {response.status_code}")
-            print(f"Response: {response.text}")
-
+            print(f"❌ Upload failed with status code: {response.status_code}")
+            return False
     except Exception as e:
-        print(f"❌ Test failed: {e}")
-
-    finally:
-        # Clean up test file
-        if test_file_path.exists():
-            test_file_path.unlink()
+        print(f"❌ Upload error: {e}")
+        return False
+    
+    # Test 3: Check processing results
+    print("\n3. Checking processing results...")
+    max_wait = 60  # Wait up to 60 seconds
+    start_time = time.time()
+    
+    while time.time() - start_time < max_wait:
+        try:
+            results_response = requests.get(f'{BASE_URL}/results/{job_id}')
+            if results_response.status_code == 200:
+                results = results_response.json()
+                status = results.get('status')
+                
+                if status == 'completed':
+                    print("✅ Processing completed successfully")
+                    print(f"📊 Confidence: {results.get('confidence', 'N/A')}")
+                    return True
+                elif status == 'failed':
+                    print(f"❌ Processing failed: {results.get('error', 'Unknown error')}")
+                    return False
+                else:
+                    print(f"⏳ Processing status: {status}")
+                    time.sleep(2)
+            else:
+                print(f"❌ Failed to get results: {results_response.status_code}")
+                return False
+        except Exception as e:
+            print(f"❌ Error checking results: {e}")
+            return False
+    
+    print("❌ Processing timed out")
+    return False
 
 if __name__ == "__main__":
-    test_web_upload()
+    success = test_web_upload()
+    if success:
+        print("\n🎉 All tests passed!")
+    else:
+        print("\n❌ Tests failed!")
+        exit(1)

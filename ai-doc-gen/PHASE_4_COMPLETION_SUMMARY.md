@@ -87,7 +87,7 @@ cp env.example .env
 # 4. Launch web UI
 uv run python launch_ui.py
 
-# 5. Access at: http://localhost:5432
+# 5. Access at: http://localhost:5476
 ```
 
 ### **Key Features to Try:**

@@ -7,6 +7,7 @@ Tests the Flask web UI integration with the AI pipeline using real documents.
 
 import json
 from pathlib import Path
+import os
 
 from ai_doc_gen.ui.app import app, process_document
 
@@ -110,5 +111,5 @@ if __name__ == "__main__":
         for job in successful_jobs:
             print(f"  - {job['filename']}: {job['job_id']}")
 
-    print("\nUI is ready for testing at: http://localhost:5432")
+    print("\nUI is ready for testing at: http://localhost:" + os.getenv('WEB_PORT', '5476'))
     print("Run: uv run python -m ai_doc_gen.ui.app")

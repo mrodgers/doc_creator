@@ -61,7 +61,7 @@ RUN chown -R app:app /app
 USER app
 
 # Expose port for web UI
-EXPOSE 5432
+EXPOSE 5476
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -103,7 +103,7 @@ RUN chown -R app:app /app
 USER app
 
 # Expose port for web UI
-EXPOSE 5432
+EXPOSE 5476
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

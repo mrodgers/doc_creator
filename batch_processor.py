@@ -1,371 +1,353 @@
 #!/usr/bin/env python3
 """
 Batch Processor for AI Documentation Generation
-Monitors upload folder and processes new PDF files automatically.
+
+Processes PDF files from the uploads/pending directory and generates documentation.
 """
 
-import json
-import logging
-import hashlib
-import time
-import shutil
-import argparse
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional
+import os
 import sys
+import json
+import shutil
+import logging
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
 
-sys.path.insert(0, str(Path(__file__).parent / 'ai-doc-gen' / 'src'))
+# Import error handler
+try:
+    from error_handler import ErrorHandler
+except ImportError:
+    print("⚠️  Error handler not found. Basic error handling will be used.")
+    ErrorHandler = None
 
-from ai_doc_gen.core.workflow_orchestrator import WorkflowOrchestrator
-from ai_doc_gen.core.draft_generator import ContentSection
-from ai_doc_gen.utils.pdf_extractor import PDFExtractor
+# Import PDF extractor
+try:
+    from pdf_extractor import PDFExtractor
+except ImportError:
+    print("❌ PDF extractor not found!")
+    sys.exit(1)
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Import workflow orchestrator
+try:
+    from workflow_orchestrator import WorkflowOrchestrator
+except ImportError:
+    print("❌ Workflow orchestrator not found!")
+    sys.exit(1)
 
 
 class BatchProcessor:
-    """Simple batch processor for PDF documentation generation."""
+    """Handles batch processing of PDF documents."""
     
     def __init__(self):
-        self.upload_dir = Path("uploads/pending")
-        self.processed_dir = Path("uploads/processed")
-        self.log_file = Path("processing_log.json")
-        self.extractor = PDFExtractor()
-        self.orchestrator = WorkflowOrchestrator()
+        self.project_root = Path(__file__).parent
+        self.uploads_dir = self.project_root / "uploads"
+        self.pending_dir = self.uploads_dir / "pending"
+        self.processed_dir = self.uploads_dir / "processed"
+        self.outputs_dir = self.project_root / "outputs"
+        self.log_file = self.project_root / "processing_log.json"
+        
+        self.error_handler = ErrorHandler() if ErrorHandler else None
+        self.pdf_extractor = PDFExtractor()
+        self.workflow = WorkflowOrchestrator()
+        
+        # Setup logging
+        self.setup_logging()
         
         # Ensure directories exist
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
-        self.processed_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Load or create processing log
-        self.processing_log = self._load_processing_log()
+        self.ensure_directories()
     
-    def _load_processing_log(self) -> Dict:
-        """Load processing log or create new one."""
+    def setup_logging(self):
+        """Setup logging configuration."""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('batch_processing.log'),
+                logging.StreamHandler(sys.stdout)
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def ensure_directories(self):
+        """Ensure all required directories exist."""
+        directories = [self.uploads_dir, self.pending_dir, self.processed_dir, self.outputs_dir]
+        
+        for directory in directories:
+            if not directory.exists():
+                try:
+                    directory.mkdir(parents=True, exist_ok=True)
+                    self.logger.info(f"Created directory: {directory}")
+                except Exception as e:
+                    if self.error_handler:
+                        self.error_handler.handle_error('permission_denied', 
+                                                       f"Failed to create directory {directory}: {e}")
+                    else:
+                        self.logger.error(f"Failed to create directory {directory}: {e}")
+                        raise
+    
+    def load_processing_log(self) -> Dict:
+        """Load the processing log from JSON file."""
         if self.log_file.exists():
             try:
                 with open(self.log_file, 'r') as f:
                     return json.load(f)
-            except Exception as e:
-                logger.warning(f"Failed to load processing log: {e}")
-        
-        return {
-            "processed_files": {},
-            "last_check": datetime.now().isoformat()
-        }
+            except (json.JSONDecodeError, IOError) as e:
+                if self.error_handler:
+                    self.error_handler.handle_error('file_not_found', 
+                                                   f"Failed to load processing log: {e}")
+                else:
+                    self.logger.warning(f"Failed to load processing log: {e}")
+                return {}
+        return {}
     
-    def _save_processing_log(self):
-        """Save processing log to file."""
+    def save_processing_log(self, log_data: Dict):
+        """Save the processing log to JSON file."""
         try:
             with open(self.log_file, 'w') as f:
-                json.dump(self.processing_log, f, indent=2)
-        except Exception as e:
-            logger.error(f"Failed to save processing log: {e}")
+                json.dump(log_data, f, indent=2, default=str)
+        except IOError as e:
+            if self.error_handler:
+                self.error_handler.handle_error('permission_denied', 
+                                               f"Failed to save processing log: {e}")
+            else:
+                self.logger.error(f"Failed to save processing log: {e}")
     
-    def _calculate_file_hash(self, file_path: Path) -> str:
-        """Calculate SHA-256 hash of file."""
+    def get_pending_files(self) -> List[Path]:
+        """Get list of pending PDF files."""
         try:
-            hash_sha256 = hashlib.sha256()
-            with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hash_sha256.update(chunk)
-            return hash_sha256.hexdigest()
+            pdf_files = list(self.pending_dir.glob("*.pdf"))
+            self.logger.info(f"Found {len(pdf_files)} pending PDF files")
+            return pdf_files
         except Exception as e:
-            logger.warning(f"Failed to calculate hash for {file_path}: {e}")
-            return "hash_calculation_failed"
+            if self.error_handler:
+                self.error_handler.handle_error('file_not_found', 
+                                               f"Failed to scan pending directory: {e}")
+            else:
+                self.logger.error(f"Failed to scan pending directory: {e}")
+            return []
     
-    def _is_new_file(self, file_path: Path) -> bool:
-        """Check if file is new or has been updated."""
-        filename = file_path.name
-        current_hash = self._calculate_file_hash(file_path)
-        
-        if filename not in self.processing_log["processed_files"]:
-            logger.info(f"New file detected: {filename}")
-            return True
-        
-        stored_hash = self.processing_log["processed_files"][filename].get("hash", "")
-        if current_hash != stored_hash:
-            logger.info(f"Updated file detected: {filename}")
-            return True
-        
-        logger.info(f"File already processed: {filename}")
-        return False
-    
-    def _extract_content_from_pdf(self, pdf_path: Path) -> (list, bool):
-        """Extract content sections from a PDF file. Returns (sections, used_placeholder)."""
+    def validate_pdf_file(self, file_path: Path) -> Tuple[bool, str]:
+        """Validate that a PDF file is readable and not corrupted."""
         try:
-            logger.info(f"Extracting content from: {pdf_path.name}")
-            extracted_text = self.extractor.extract_text(str(pdf_path))
-            used_placeholder = False
+            # Check file size
+            if file_path.stat().st_size == 0:
+                return False, "File is empty"
             
-            # Check for clear placeholder marker
-            if '[PLACEHOLDER_CONTENT]' in extracted_text:
-                used_placeholder = True
-                logger.warning(f"Placeholder content detected for {pdf_path.name}")
+            # Try to extract text to validate PDF
+            with open(file_path, 'rb') as f:
+                # Read first few bytes to check PDF header
+                header = f.read(4)
+                if header != b'%PDF':
+                    return False, "Not a valid PDF file (missing PDF header)"
             
-            # Create content sections based on common documentation patterns
-            sections = [
-                ("Hardware Overview", "hardware_overview"),
-                ("Installation Preparation", "installation_preparation"),
-                ("Hardware Installation", "hardware_installation"),
-                ("Initial Configuration", "initial_configuration"),
-                ("Advanced Configuration", "advanced_configuration"),
-                ("Verification and Testing", "verification_testing"),
-                ("Troubleshooting", "troubleshooting"),
-                ("Maintenance and Support", "maintenance")
-            ]
+            # Try to extract a small amount of text
+            text = self.pdf_extractor.extract_text(str(file_path), max_pages=1)
+            if not text or len(text.strip()) < 10:
+                return False, "PDF appears to be empty or contains no readable text"
             
-            content_sections = []
-            for section_title, template_id in sections:
-                # Extract relevant content for this section
-                content = self._extract_section_content(extracted_text, section_title)
-                if content and len(content.strip()) > 50:
-                    content_section = ContentSection(
-                        id=f"{pdf_path.stem}_{template_id}",
-                        title=section_title,
-                        content=content,
-                        source=str(pdf_path),
-                        confidence=0.85,
-                        template_match=template_id,
-                        acronyms_found=self._extract_acronyms(content)
-                    )
-                    content_sections.append(content_section)
-                    logger.info(f"Created content section: {section_title}")
-            
-            return content_sections, used_placeholder
+            return True, "Valid PDF file"
             
         except Exception as e:
-            logger.error(f"Failed to extract content from {pdf_path}: {e}")
-            return [], True
+            return False, f"PDF validation failed: {str(e)}"
     
-    def _extract_section_content(self, text: str, section_title: str) -> str:
-        """Extract relevant content for a specific section."""
-        lines = text.split('\n')
-        content_lines = []
-        in_section = False
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-                
-            # Check if this line contains the section title
-            if section_title.lower() in line.lower():
-                in_section = True
-                content_lines.append(line)
-                continue
-                
-            # If we're in the section, collect content until we hit another major heading
-            if in_section:
-                if line.isupper() and len(line) < 100:  # Likely a new heading
-                    break
-                if line.startswith('Chapter') or line.startswith('Section'):
-                    break
-                content_lines.append(line)
-                
-                # Limit content length
-                if len('\n'.join(content_lines)) > 1000:
-                    break
-        
-        content = '\n'.join(content_lines)
-        
-        # If no specific content found, create a generic placeholder
-        if not content or len(content) < 50:
-            content = f"Content extracted from documentation for {section_title}. This section contains relevant information about {section_title.lower()} procedures and requirements."
-        
-        return content
-    
-    def _extract_acronyms(self, text: str) -> List[tuple]:
-        """Extract common Cisco acronyms from text."""
-        acronyms = []
-        common_cisco_acronyms = [
-            ('VLAN', 'Virtual Local Area Network'),
-            ('SNMP', 'Simple Network Management Protocol'),
-            ('SSH', 'Secure Shell'),
-            ('TFTP', 'Trivial File Transfer Protocol'),
-            ('FTP', 'File Transfer Protocol'),
-            ('HTTP', 'Hypertext Transfer Protocol'),
-            ('HTTPS', 'Hypertext Transfer Protocol Secure'),
-            ('DNS', 'Domain Name System'),
-            ('DHCP', 'Dynamic Host Configuration Protocol'),
-            ('NTP', 'Network Time Protocol'),
-            ('BGP', 'Border Gateway Protocol'),
-            ('OSPF', 'Open Shortest Path First'),
-            ('QoS', 'Quality of Service'),
-            ('MPLS', 'Multiprotocol Label Switching'),
-            ('VPN', 'Virtual Private Network'),
-            ('IPSec', 'Internet Protocol Security'),
-            ('RADIUS', 'Remote Authentication Dial-In User Service'),
-            ('TACACS+', 'Terminal Access Controller Access-Control System Plus'),
-            ('AAA', 'Authentication, Authorization, and Accounting'),
-            ('CDP', 'Cisco Discovery Protocol'),
-            ('LLDP', 'Link Layer Discovery Protocol'),
-            ('PoE', 'Power over Ethernet'),
-            ('ACL', 'Access Control List'),
-            ('CPU', 'Central Processing Unit'),
-            ('RAM', 'Random Access Memory'),
-            ('ROM', 'Read-Only Memory'),
-            ('NVRAM', 'Non-Volatile Random Access Memory'),
-            ('ASIC', 'Application-Specific Integrated Circuit'),
-            ('UCS', 'Unified Computing System'),
-            ('ACI', 'Application Centric Infrastructure'),
-            ('SDN', 'Software-Defined Networking'),
-            ('VXLAN', 'Virtual Extensible Local Area Network')
-        ]
-        
-        text_upper = text.upper()
-        for acronym, definition in common_cisco_acronyms:
-            if acronym.upper() in text_upper:
-                acronyms.append((acronym, definition))
-        
-        return acronyms
-    
-    def check_for_new_files(self) -> List[Path]:
-        """Find new PDF files in upload folder."""
-        new_files = []
-        
-        for file_path in self.upload_dir.glob("*.pdf"):
-            if self._is_new_file(file_path):
-                new_files.append(file_path)
-        
-        logger.info(f"Found {len(new_files)} new files to process")
-        return new_files
-    
-    def process_file(self, file_path: Path) -> dict:
+    def process_single_file(self, file_path: Path) -> Dict:
         """Process a single PDF file."""
-        start_time = time.time()
+        file_info = {
+            'filename': file_path.name,
+            'filepath': str(file_path),
+            'processed_at': datetime.now().isoformat(),
+            'status': 'processing',
+            'error': None,
+            'output_files': [],
+            'confidence_score': 0.0,
+            'processing_time': 0
+        }
+        
+        start_time = datetime.now()
+        
         try:
-            # Extract content from PDF
-            content_sections, used_placeholder = self._extract_content_from_pdf(file_path)
-            if not content_sections:
-                logger.warning(f"No content extracted from {file_path.name}")
-                return {
-                    "status": "failed",
-                    "error": "No content extracted",
-                    "processing_time": time.time() - start_time
-                }
+            self.logger.info(f"Processing file: {file_path.name}")
             
-            # Generate document title from filename
-            doc_title = file_path.stem.replace('_', ' ').replace('-', ' ').title()
+            # Validate PDF file
+            is_valid, validation_message = self.validate_pdf_file(file_path)
+            if not is_valid:
+                file_info['status'] = 'failed'
+                file_info['error'] = validation_message
+                if self.error_handler:
+                    self.error_handler.handle_error('pdf_extraction_failed', 
+                                                   f"{file_path.name}: {validation_message}")
+                else:
+                    self.logger.error(f"PDF validation failed for {file_path.name}: {validation_message}")
+                return file_info
             
-            # Create output directory with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_dir = f"outputs/batch_{timestamp}_{file_path.stem}"
+            # Extract text from PDF
+            try:
+                text_content = self.pdf_extractor.extract_text(str(file_path))
+                if not text_content:
+                    raise ValueError("No text content extracted from PDF")
+            except Exception as e:
+                file_info['status'] = 'failed'
+                file_info['error'] = f"Text extraction failed: {str(e)}"
+                if self.error_handler:
+                    self.error_handler.handle_error('pdf_extraction_failed', 
+                                                   f"{file_path.name}: {str(e)}")
+                else:
+                    self.logger.error(f"Text extraction failed for {file_path.name}: {e}")
+                return file_info
             
-            # Run workflow orchestrator
-            outputs = self.orchestrator.run(
-                content_sections=content_sections,
-                document_title=doc_title,
-                output_dir=output_dir
-            )
-            
-            processing_time = time.time() - start_time
-            
-            # Compile results
-            results = {
-                "status": "completed_with_warnings" if used_placeholder else "completed",
-                "processed_at": datetime.now().isoformat(),
-                "hash": self._calculate_file_hash(file_path),
-                "output_dir": output_dir,
-                "processing_time": processing_time,
-                "content_sections": len(content_sections),
-                "coverage": outputs.get("coverage", 0),
-                "confidence": outputs.get("confidence", 0),
-                "output_files": {
-                    k: v for k, v in outputs.items() 
-                    if k.endswith('_md') or k.endswith('_json')
-                }
-            }
-            
-            if used_placeholder:
-                results["warning"] = "Placeholder extraction used: PDF may be corrupted or not a valid PDF."
-            
-            logger.info(f"Successfully processed {file_path.name}")
-            return results
+            # Run workflow
+            try:
+                result = self.workflow.process_document(
+                    filename=file_path.name,
+                    content=text_content,
+                    output_dir=self.outputs_dir
+                )
+                
+                file_info['status'] = 'completed'
+                file_info['confidence_score'] = result.get('confidence_score', 0.0)
+                file_info['output_files'] = result.get('output_files', [])
+                
+                self.logger.info(f"Successfully processed {file_path.name}")
+                
+            except Exception as e:
+                file_info['status'] = 'failed'
+                file_info['error'] = f"Workflow processing failed: {str(e)}"
+                if self.error_handler:
+                    self.error_handler.handle_error('network_error', 
+                                                   f"{file_path.name}: {str(e)}")
+                else:
+                    self.logger.error(f"Workflow processing failed for {file_path.name}: {e}")
             
         except Exception as e:
-            logger.error(f"Failed to process {file_path.name}: {e}")
-            return {
-                "status": "failed",
-                "error": str(e),
-                "processing_time": time.time() - start_time
-            }
+            file_info['status'] = 'failed'
+            file_info['error'] = f"Unexpected error: {str(e)}"
+            if self.error_handler:
+                self.error_handler.handle_error('network_error', 
+                                               f"{file_path.name}: {str(e)}")
+            else:
+                self.logger.error(f"Unexpected error processing {file_path.name}: {e}")
+        
+        finally:
+            # Calculate processing time
+            end_time = datetime.now()
+            file_info['processing_time'] = (end_time - start_time).total_seconds()
+        
+        return file_info
     
-    def move_to_processed(self, file_path: Path):
-        """Move processed file to processed folder."""
+    def move_processed_file(self, file_path: Path, success: bool):
+        """Move processed file to appropriate directory."""
         try:
-            processed_path = self.processed_dir / file_path.name
-            shutil.move(str(file_path), str(processed_path))
-            logger.info(f"Moved {file_path.name} to processed folder")
+            if success:
+                destination = self.processed_dir / file_path.name
+            else:
+                # Move failed files to a failed subdirectory
+                failed_dir = self.processed_dir / "failed"
+                failed_dir.mkdir(exist_ok=True)
+                destination = failed_dir / file_path.name
+            
+            shutil.move(str(file_path), str(destination))
+            self.logger.info(f"Moved {file_path.name} to {destination}")
+            
         except Exception as e:
-            logger.error(f"Failed to move {file_path.name}: {e}")
+            if self.error_handler:
+                self.error_handler.handle_error('permission_denied', 
+                                               f"Failed to move {file_path.name}: {e}")
+            else:
+                self.logger.error(f"Failed to move {file_path.name}: {e}")
     
-    def update_log(self, filename: str, results: Dict):
-        """Update processing log with results."""
-        self.processing_log["processed_files"][filename] = results
-        self.processing_log["last_check"] = datetime.now().isoformat()
-        self._save_processing_log()
-    
-    def process_new_files(self, specific_file: Optional[str] = None):
-        """Process all new files or a specific file."""
-        if specific_file:
-            # Process specific file
-            file_path = self.upload_dir / specific_file
-            if not file_path.exists():
-                logger.error(f"File not found: {specific_file}")
-                return
+    def run_batch_processing(self) -> Dict:
+        """Run batch processing on all pending files."""
+        print("🚀 Starting batch processing...")
+        print("=" * 50)
+        
+        # Load existing log
+        processing_log = self.load_processing_log()
+        
+        # Get pending files
+        pending_files = self.get_pending_files()
+        
+        if not pending_files:
+            print("✅ No pending files to process")
+            return {'processed': 0, 'successful': 0, 'failed': 0}
+        
+        print(f"📄 Found {len(pending_files)} files to process")
+        print("=" * 50)
+        
+        processed_count = 0
+        successful_count = 0
+        failed_count = 0
+        
+        for i, file_path in enumerate(pending_files, 1):
+            print(f"\n[{i}/{len(pending_files)}] Processing: {file_path.name}")
             
-            logger.info(f"Processing specific file: {specific_file}")
-            results = self.process_file(file_path)
-            self.update_log(specific_file, results)
+            # Process the file
+            file_info = self.process_single_file(file_path)
             
-            if results["status"] == "completed":
-                self.move_to_processed(file_path)
+            # Update processing log
+            processing_log[file_path.name] = file_info
             
-            return
-        
-        # Process all new files
-        new_files = self.check_for_new_files()
-        
-        if not new_files:
-            logger.info("No new files to process")
-            return
-        
-        logger.info(f"Processing {len(new_files)} new files")
-        
-        for file_path in new_files:
-            logger.info(f"Processing: {file_path.name}")
-            results = self.process_file(file_path)
-            self.update_log(file_path.name, results)
+            # Move file to processed directory
+            success = file_info['status'] == 'completed'
+            self.move_processed_file(file_path, success)
             
-            if results["status"] == "completed":
-                self.move_to_processed(file_path)
+            # Update counters
+            processed_count += 1
+            if success:
+                successful_count += 1
+                print(f"✅ Success: {file_path.name} (Confidence: {file_info['confidence_score']:.1%})")
+            else:
+                failed_count += 1
+                print(f"❌ Failed: {file_path.name} - {file_info['error']}")
         
-        logger.info(f"Batch processing completed. Processed {len(new_files)} files.")
+        # Save updated log
+        self.save_processing_log(processing_log)
+        
+        # Print summary
+        print("\n" + "=" * 50)
+        print("📊 BATCH PROCESSING SUMMARY")
+        print("=" * 50)
+        print(f"📄 Total files processed: {processed_count}")
+        print(f"✅ Successful: {successful_count}")
+        print(f"❌ Failed: {failed_count}")
+        
+        if successful_count > 0:
+            success_rate = (successful_count / processed_count) * 100
+            print(f"📈 Success rate: {success_rate:.1f}%")
+        
+        if failed_count > 0:
+            print(f"\n⚠️  Failed files moved to: {self.processed_dir}/failed/")
+        
+        print(f"📁 Output files: {self.outputs_dir}")
+        print(f"📋 Processing log: {self.log_file}")
+        print("=" * 50)
+        
+        return {
+            'processed': processed_count,
+            'successful': successful_count,
+            'failed': failed_count
+        }
 
 
 def main():
-    """Main function for batch processing."""
-    parser = argparse.ArgumentParser(description="Batch process PDF files for documentation generation")
-    parser.add_argument("--file", help="Process specific file in uploads/pending/")
-    parser.add_argument("--list", action="store_true", help="List processed files")
-    args = parser.parse_args()
-    
-    processor = BatchProcessor()
-    
-    if args.list:
-        # List processed files
-        print("Processed files:")
-        for filename, info in processor.processing_log["processed_files"].items():
-            status = info.get("status", "unknown")
-            processed_at = info.get("processed_at", "unknown")
-            print(f"  {filename}: {status} ({processed_at})")
-        return
-    
-    # Process files
-    processor.process_new_files(args.file)
+    """Main function."""
+    try:
+        processor = BatchProcessor()
+        result = processor.run_batch_processing()
+        
+        if result['failed'] > 0:
+            sys.exit(1)  # Exit with error code if any files failed
+        else:
+            sys.exit(0)  # Exit successfully
+            
+    except KeyboardInterrupt:
+        print("\n⚠️  Batch processing interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n❌ Unexpected error: {e}")
+        if processor and processor.error_handler:
+            processor.error_handler.handle_error('network_error', str(e))
+        sys.exit(1)
 
 
 if __name__ == "__main__":
