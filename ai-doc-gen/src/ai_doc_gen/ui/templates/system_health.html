@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block title %}System Health - AI Documentation Generation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-heartbeat me-2"></i>System Health Dashboard
+        </h1>
+        <p class="text-muted">Real-time system performance metrics and health monitoring</p>
+    </div>
+</div>
+
+<!-- Health Status Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Overall Health Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="health-indicator" id="overall-health">
+                            <i class="fas fa-circle fa-3x text-success"></i>
+                            <h4 class="mt-2">Healthy</h4>
+                            <small class="text-muted">System Status</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="health-indicator">
+                            <i class="fas fa-microchip fa-3x text-primary"></i>
+                            <h4 class="mt-2" id="cpu-usage">0%</h4>
+                            <small class="text-muted">CPU Usage</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="health-indicator">
+                            <i class="fas fa-memory fa-3x text-info"></i>
+                            <h4 class="mt-2" id="memory-usage">0%</h4>
+                            <small class="text-muted">Memory Usage</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="health-indicator">
+                            <i class="fas fa-hdd fa-3x text-warning"></i>
+                            <h4 class="mt-2" id="disk-usage">0%</h4>
+                            <small class="text-muted">Disk Usage</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>System Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>Job Queue Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="jobQueueChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Metrics -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-microchip me-2"></i>CPU Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="metric-item">
+                    <span class="metric-label">CPU Cores:</span>
+                    <span class="metric-value" id="cpu-cores">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Current Usage:</span>
+                    <span class="metric-value" id="cpu-current">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Load Average:</span>
+                    <span class="metric-value" id="cpu-load">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Process CPU:</span>
+                    <span class="metric-value" id="process-cpu">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-memory me-2"></i>Memory Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="metric-item">
+                    <span class="metric-label">Total Memory:</span>
+                    <span class="metric-value" id="memory-total">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Used Memory:</span>
+                    <span class="metric-value" id="memory-used">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Usage Percentage:</span>
+                    <span class="metric-value" id="memory-percent">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Process Memory:</span>
+                    <span class="metric-value" id="process-memory">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-hdd me-2"></i>Disk Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="metric-item">
+                    <span class="metric-label">Total Space:</span>
+                    <span class="metric-value" id="disk-total">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Used Space:</span>
+                    <span class="metric-value" id="disk-used">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Usage Percentage:</span>
+                    <span class="metric-value" id="disk-percent">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Free Space:</span>
+                    <span class="metric-value" id="disk-free">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Processing Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-2">
+                        <div class="stat-card bg-primary text-white">
+                            <h3 id="active-jobs">0</h3>
+                            <small>Active Jobs</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card bg-warning text-white">
+                            <h3 id="pending-jobs">0</h3>
+                            <small>Pending Jobs</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card bg-success text-white">
+                            <h3 id="completed-jobs">0</h3>
+                            <small>Completed Jobs</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card bg-danger text-white">
+                            <h3 id="failed-jobs">0</h3>
+                            <small>Failed Jobs</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card bg-info text-white">
+                            <h3 id="total-results">0</h3>
+                            <small>Total Results</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stat-card bg-secondary text-white">
+                            <h3 id="success-rate">0%</h3>
+                            <small>Success Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Alerts -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>System Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="system-alerts">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p>No alerts at this time</p>
+                        <small>System is running normally</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let performanceChart = null;
+let jobQueueChart = null;
+let metricsInterval = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    startMetricsMonitoring();
+});
+
+function initializeCharts() {
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    performanceChart = new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'CPU Usage (%)',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }, {
+                label: 'Memory Usage (%)',
+                data: [],
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Job Queue Chart
+    const jobQueueCtx = document.getElementById('jobQueueChart').getContext('2d');
+    jobQueueChart = new Chart(jobQueueCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Pending', 'Completed', 'Failed'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    'rgb(75, 192, 192)',
+                    'rgb(255, 205, 86)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 99, 132)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function startMetricsMonitoring() {
+    // Initial load
+    loadSystemMetrics();
+    
+    // Update every 5 seconds
+    metricsInterval = setInterval(loadSystemMetrics, 5000);
+}
+
+function loadSystemMetrics() {
+    fetch('/api/system/metrics')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            updateHealthStatus(data);
+            updatePerformanceMetrics(data);
+            updateJobStatistics(data);
+            updateCharts(data);
+            updateAlerts(data);
+        })
+        .catch(error => {
+            console.error('Failed to load system metrics:', error);
+            showErrorAlert('Failed to load system metrics: ' + error.message);
+        });
+}
+
+function updateHealthStatus(data) {
+    const healthIndicator = document.getElementById('overall-health');
+    const icon = healthIndicator.querySelector('i');
+    const status = healthIndicator.querySelector('h4');
+    
+    // Update overall health status
+    if (data.health_status === 'healthy') {
+        icon.className = 'fas fa-circle fa-3x text-success';
+        status.textContent = 'Healthy';
+    } else if (data.health_status === 'warning') {
+        icon.className = 'fas fa-circle fa-3x text-warning';
+        status.textContent = 'Warning';
+    } else {
+        icon.className = 'fas fa-circle fa-3x text-danger';
+        status.textContent = 'Critical';
+    }
+    
+    // Update individual metrics
+    document.getElementById('cpu-usage').textContent = data.cpu.percent + '%';
+    document.getElementById('memory-usage').textContent = data.memory.percent + '%';
+    document.getElementById('disk-usage').textContent = data.disk.percent + '%';
+}
+
+function updatePerformanceMetrics(data) {
+    // CPU Information
+    document.getElementById('cpu-cores').textContent = data.cpu.count;
+    document.getElementById('cpu-current').textContent = data.cpu.percent + '%';
+    document.getElementById('cpu-load').textContent = data.cpu.load_average.join(', ');
+    document.getElementById('process-cpu').textContent = data.process.cpu_percent + '%';
+    
+    // Memory Information
+    document.getElementById('memory-total').textContent = data.memory.total_gb + ' GB';
+    document.getElementById('memory-used').textContent = data.memory.used_gb + ' GB';
+    document.getElementById('memory-percent').textContent = data.memory.percent + '%';
+    document.getElementById('process-memory').textContent = data.process.memory_mb + ' MB';
+    
+    // Disk Information
+    document.getElementById('disk-total').textContent = data.disk.total_gb + ' GB';
+    document.getElementById('disk-used').textContent = data.disk.used_gb + ' GB';
+    document.getElementById('disk-percent').textContent = data.disk.percent + '%';
+    document.getElementById('disk-free').textContent = (data.disk.total_gb - data.disk.used_gb).toFixed(2) + ' GB';
+}
+
+function updateJobStatistics(data) {
+    document.getElementById('active-jobs').textContent = data.jobs.active;
+    document.getElementById('pending-jobs').textContent = data.jobs.pending;
+    document.getElementById('completed-jobs').textContent = data.jobs.completed;
+    document.getElementById('failed-jobs').textContent = data.jobs.failed;
+    document.getElementById('total-results').textContent = data.pipeline.total_results;
+    document.getElementById('success-rate').textContent = data.pipeline.success_rate + '%';
+}
+
+function updateCharts(data) {
+    const timestamp = new Date(data.timestamp).toLocaleTimeString();
+    
+    // Update performance chart
+    if (performanceChart.data.labels.length > 10) {
+        performanceChart.data.labels.shift();
+        performanceChart.data.datasets[0].data.shift();
+        performanceChart.data.datasets[1].data.shift();
+    }
+    
+    performanceChart.data.labels.push(timestamp);
+    performanceChart.data.datasets[0].data.push(data.cpu.percent);
+    performanceChart.data.datasets[1].data.push(data.memory.percent);
+    performanceChart.update();
+    
+    // Update job queue chart
+    jobQueueChart.data.datasets[0].data = [
+        data.jobs.active,
+        data.jobs.pending,
+        data.jobs.completed,
+        data.jobs.failed
+    ];
+    jobQueueChart.update();
+}
+
+function updateAlerts(data) {
+    const alertsContainer = document.getElementById('system-alerts');
+    const alerts = [];
+    
+    // Check for critical conditions
+    if (data.cpu.percent > 90) {
+        alerts.push({
+            type: 'danger',
+            icon: 'fas fa-exclamation-triangle',
+            message: `High CPU usage: ${data.cpu.percent}%`
+        });
+    }
+    
+    if (data.memory.percent > 90) {
+        alerts.push({
+            type: 'danger',
+            icon: 'fas fa-exclamation-triangle',
+            message: `High memory usage: ${data.memory.percent}%`
+        });
+    }
+    
+    if (data.disk.percent > 95) {
+        alerts.push({
+            type: 'danger',
+            icon: 'fas fa-exclamation-triangle',
+            message: `Critical disk usage: ${data.disk.percent}%`
+        });
+    }
+    
+    if (data.jobs.failed > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'fas fa-exclamation-circle',
+            message: `${data.jobs.failed} jobs have failed`
+        });
+    }
+    
+    if (alerts.length === 0) {
+        alertsContainer.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <p>No alerts at this time</p>
+                <small>System is running normally</small>
+            </div>
+        `;
+    } else {
+        let alertsHtml = '';
+        alerts.forEach(alert => {
+            alertsHtml += `
+                <div class="alert alert-${alert.type} alert-dismissible fade show" role="alert">
+                    <i class="${alert.icon} me-2"></i>
+                    ${alert.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        });
+        alertsContainer.innerHTML = alertsHtml;
+    }
+}
+
+function showErrorAlert(message) {
+    const alertsContainer = document.getElementById('system-alerts');
+    alertsContainer.innerHTML = `
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${message}
+        </div>
+    `;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (metricsInterval) {
+        clearInterval(metricsInterval);
+    }
+});
+</script>
+
+<style>
+.health-indicator {
+    text-align: center;
+    padding: 1rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.metric-item:last-child {
+    border-bottom: none;
+}
+
+.metric-label {
+    font-weight: 500;
+    color: #666;
+}
+
+.metric-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.stat-card {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.stat-card small {
+    opacity: 0.8;
+}
+</style>
+{% endblock %} 

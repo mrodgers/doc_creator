@@ -29,6 +29,19 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
+                <i class="fas fa-files-o fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Batch Upload</h5>
+                <p class="card-text">Process multiple documents simultaneously</p>
+                <a href="{{ url_for('batch_upload') }}" class="btn btn-success">
+                    <i class="fas fa-upload me-1"></i>Batch Upload
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
                 <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
                 <h5 class="card-title">Gap Analysis</h5>
                 <p class="card-text">Review and provide feedback on documentation gaps</p>
@@ -42,23 +55,38 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                <i class="fas fa-heartbeat fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">System Health</h5>
+                <p class="card-text">Monitor system performance and health status</p>
+                <a href="{{ url_for('system_health') }}" class="btn btn-danger">
+                    <i class="fas fa-monitor me-1"></i>Health
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
                 <h5 class="card-title">View Analytics</h5>
                 <p class="card-text">Analyze confidence scores and gap reports</p>
-                <button class="btn btn-success" onclick="showAnalytics()">
+                <button class="btn btn-info" onclick="showAnalytics()">
                     <i class="fas fa-chart-bar me-1"></i>Analytics
                 </button>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card text-center">
             <div class="card-body">
-                <i class="fas fa-download fa-2x text-info mb-2"></i>
+                <i class="fas fa-download fa-2x text-secondary mb-2"></i>
                 <h5 class="card-title">Export Results</h5>
                 <p class="card-text">Download generated documentation</p>
-                <button class="btn btn-info" onclick="showExports()">
+                <button class="btn btn-secondary" onclick="showExports()">
                     <i class="fas fa-file-download me-1"></i>Export
                 </button>
             </div>

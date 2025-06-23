@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Upload - AI Documentation Generation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-upload me-2"></i>Batch Document Upload
+        </h1>
+        <p class="text-muted">Upload multiple documents for batch processing</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Batch Upload Area -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-files-o me-2"></i>Select Documents
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="batch-upload-area" id="batch-upload-area">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <h5>Drag and drop multiple documents here</h5>
+                    <p class="text-muted">or click to browse files</p>
+                    <p class="text-muted small">Supported formats: PDF, DOCX, DOC, TXT (Max 50MB per file)</p>
+                    <input type="file" id="batch-file-input" multiple accept=".pdf,.docx,.doc,.txt" style="display: none;">
+                    <button class="btn btn-outline-primary" onclick="document.getElementById('batch-file-input').click()">
+                        <i class="fas fa-folder-open me-1"></i>Browse Files
+                    </button>
+                </div>
+                
+                <!-- File List -->
+                <div id="file-list" class="mt-3" style="display: none;">
+                    <h6>Selected Files:</h6>
+                    <div id="selected-files"></div>
+                </div>
+                
+                <!-- Upload Progress -->
+                <div class="progress-container mt-3" id="batch-progress-container" style="display: none;">
+                    <div class="progress mb-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Uploading files...</small>
+                </div>
+                
+                <!-- Processing Progress -->
+                <div class="processing-container mt-3" id="processing-container" style="display: none;">
+                    <h6>Processing Progress:</h6>
+                    <div class="progress mb-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="processing-status" class="text-muted small"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Batch Jobs History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Batch Jobs
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="batch-jobs-history">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <p>Loading batch jobs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Instructions
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success me-2"></i>Select multiple documents</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Files will be processed in parallel</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Track progress in real-time</li>
+                    <li><i class="fas fa-check text-success me-2"></i>View results when complete</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Results Modal -->
+<div class="modal fade" id="batchResultsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-success me-2"></i>Batch Processing Complete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="batch-results-summary"></div>
+                <div id="batch-results-details" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="viewBatchResults()">View All Results</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentBatchId = null;
+let batchStatusInterval = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadBatchJobsHistory();
+    setupBatchFileUpload();
+});
+
+function setupBatchFileUpload() {
+    const uploadArea = document.getElementById('batch-upload-area');
+    const fileInput = document.getElementById('batch-file-input');
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleBatchFileSelection(files);
+        }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleBatchFileSelection(e.target.files);
+        }
+    });
+}
+
+function handleBatchFileSelection(files) {
+    const fileList = document.getElementById('file-list');
+    const selectedFiles = document.getElementById('selected-files');
+    
+    fileList.style.display = 'block';
+    selectedFiles.innerHTML = '';
+    
+    Array.from(files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'd-flex justify-content-between align-items-center p-2 border-bottom';
+        fileItem.innerHTML = `
+            <div>
+                <i class="fas fa-file me-2"></i>
+                <span>${file.name}</span>
+                <small class="text-muted">(${(file.size / 1024 / 1024).toFixed(2)} MB)</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" onclick="removeFile(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        selectedFiles.appendChild(fileItem);
+    });
+    
+    // Show upload button
+    const uploadButton = document.createElement('button');
+    uploadButton.className = 'btn btn-primary mt-3';
+    uploadButton.innerHTML = '<i class="fas fa-upload me-1"></i>Upload and Process Files';
+    uploadButton.onclick = () => uploadBatchFiles(files);
+    selectedFiles.appendChild(uploadButton);
+}
+
+function removeFile(index) {
+    const fileInput = document.getElementById('batch-file-input');
+    const dt = new DataTransfer();
+    const files = fileInput.files;
+    
+    for (let i = 0; i < files.length; i++) {
+        if (i !== index) {
+            dt.items.add(files[i]);
+        }
+    }
+    
+    fileInput.files = dt.files;
+    handleBatchFileSelection(fileInput.files);
+}
+
+function uploadBatchFiles(files) {
+    const formData = new FormData();
+    Array.from(files).forEach(file => {
+        formData.append('documents', file);
+    });
+    
+    const progressContainer = document.getElementById('batch-progress-container');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    
+    fetch('/batch-upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        progressBar.style.width = '100%';
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            currentBatchId = data.batch_id;
+            startBatchStatusTracking(data.batch_id);
+        }, 1000);
+    })
+    .catch(error => {
+        progressContainer.style.display = 'none';
+        alert('Upload failed: ' + error.message);
+    });
+}
+
+function startBatchStatusTracking(batchId) {
+    const processingContainer = document.getElementById('processing-container');
+    const processingBar = processingContainer.querySelector('.progress-bar');
+    const processingStatus = document.getElementById('processing-status');
+    
+    processingContainer.style.display = 'block';
+    processingBar.style.width = '0%';
+    
+    batchStatusInterval = setInterval(() => {
+        fetch(`/api/batch/status/${batchId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                processingBar.style.width = data.progress + '%';
+                processingStatus.innerHTML = `
+                    Status: ${data.status}<br>
+                    Progress: ${data.completed_files}/${data.total_files} files completed<br>
+                    Failed: ${data.failed_files} files
+                `;
+                
+                if (data.status === 'completed' || data.status === 'failed') {
+                    clearInterval(batchStatusInterval);
+                    showBatchResults(data);
+                }
+            })
+            .catch(error => {
+                clearInterval(batchStatusInterval);
+                processingStatus.innerHTML = 'Error tracking batch status: ' + error.message;
+            });
+    }, 1000);
+}
+
+function showBatchResults(batchData) {
+    const modal = new bootstrap.Modal(document.getElementById('batchResultsModal'));
+    const summary = document.getElementById('batch-results-summary');
+    const details = document.getElementById('batch-results-details');
+    
+    summary.innerHTML = `
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h4>${batchData.completed_files}</h4>
+                        <small>Completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h4>${batchData.failed_files}</h4>
+                        <small>Failed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h4>${batchData.total_files}</h4>
+                        <small>Total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h4>${Math.round(batchData.progress)}%</h4>
+                        <small>Progress</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    let detailsHtml = '<h6>File Results:</h6><div class="list-group">';
+    Object.keys(batchData.results).forEach(filename => {
+        const result = batchData.results[filename];
+        detailsHtml += `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-file me-2"></i>
+                        <strong>${filename}</strong>
+                    </div>
+                    <span class="badge bg-success">Completed</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    Object.keys(batchData.errors).forEach(filename => {
+        detailsHtml += `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-file me-2"></i>
+                        <strong>${filename}</strong>
+                        <br><small class="text-danger">${batchData.errors[filename]}</small>
+                    </div>
+                    <span class="badge bg-danger">Failed</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    detailsHtml += '</div>';
+    details.innerHTML = detailsHtml;
+    
+    modal.show();
+}
+
+function viewBatchResults() {
+    if (currentBatchId) {
+        window.location.href = `/batch-results/${currentBatchId}`;
+    }
+}
+
+function loadBatchJobsHistory() {
+    fetch('/api/batch/list')
+        .then(response => response.json())
+        .then(data => {
+            const historyContainer = document.getElementById('batch-jobs-history');
+            
+            if (Object.keys(data).length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>No batch jobs found</p>
+                        <small>Upload documents to get started</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            let historyHtml = '';
+            Object.keys(data).forEach(batchId => {
+                const job = data[batchId];
+                const statusClass = job.status === 'completed' ? 'success' : 
+                                  job.status === 'failed' ? 'danger' : 
+                                  job.status === 'processing' ? 'warning' : 'secondary';
+                
+                historyHtml += `
+                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                        <div>
+                            <small class="text-muted">${job.batch_id}</small><br>
+                            <span class="badge bg-${statusClass}">${job.status}</span>
+                            <small class="text-muted">${job.completed_files}/${job.total_files}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewBatchJob('${batchId}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            historyContainer.innerHTML = historyHtml;
+        })
+        .catch(error => {
+            document.getElementById('batch-jobs-history').innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Error loading batch jobs</p>
+                    <small>${error.message}</small>
+                </div>
+            `;
+        });
+}
+
+function viewBatchJob(batchId) {
+    window.location.href = `/batch-results/${batchId}`;
+}
+</script>
+
+<style>
+.batch-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.batch-upload-area.dragover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.progress-container, .processing-container {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+}
+</style>
+{% endblock %} 

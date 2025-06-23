@@ -9,9 +9,12 @@ generation system with confidence visualization and interactive gap reports.
 import asyncio
 import json
 import os
+import threading
+import time
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import Dict, List
 
 from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
 from werkzeug.utils import secure_filename
@@ -59,8 +62,73 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
 Path(app.config['OUTPUT_FOLDER']).mkdir(exist_ok=True)
 
-# Global state for pipeline results
+# Global state for pipeline results and batch processing
 pipeline_results = {}
+batch_jobs = {}
+
+class BatchJobStatus(Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class BatchJob:
+    def __init__(self, batch_id: str, files: List[str]):
+        self.batch_id = batch_id
+        self.files = files
+        self.status = BatchJobStatus.PENDING
+        self.progress = 0
+        self.total_files = len(files)
+        self.completed_files = 0
+        self.failed_files = 0
+        self.results = {}
+        self.errors = {}
+        self.start_time = None
+        self.end_time = None
+        self.created_at = datetime.now()
+
+    def to_dict(self):
+        return {
+            'batch_id': self.batch_id,
+            'status': self.status.value,
+            'progress': self.progress,
+            'total_files': self.total_files,
+            'completed_files': self.completed_files,
+            'failed_files': self.failed_files,
+            'results': self.results,
+            'errors': self.errors,
+            'start_time': self.start_time.isoformat() if self.start_time else None,
+            'end_time': self.end_time.isoformat() if self.end_time else None,
+            'created_at': self.created_at.isoformat()
+        }
+
+def process_batch_async(batch_id: str):
+    """Process batch of documents asynchronously."""
+    batch_job = batch_jobs[batch_id]
+    batch_job.status = BatchJobStatus.PROCESSING
+    batch_job.start_time = datetime.now()
+    
+    try:
+        for i, filepath in enumerate(batch_job.files):
+            try:
+                # Process individual document
+                result = process_document(filepath)
+                batch_job.results[Path(filepath).name] = result
+                batch_job.completed_files += 1
+            except Exception as e:
+                batch_job.errors[Path(filepath).name] = str(e)
+                batch_job.failed_files += 1
+            
+            # Update progress
+            batch_job.progress = int(((i + 1) / batch_job.total_files) * 100)
+            time.sleep(0.1)  # Small delay to allow status updates
+        
+        batch_job.status = BatchJobStatus.COMPLETED
+    except Exception as e:
+        batch_job.status = BatchJobStatus.FAILED
+        batch_job.errors['batch_error'] = str(e)
+    finally:
+        batch_job.end_time = datetime.now()
 
 @app.route('/')
 def index():
@@ -94,6 +162,63 @@ def upload_document():
                 return jsonify({'error': str(e)}), 500
 
     return render_template('upload.html')
+
+@app.route('/batch-upload', methods=['GET', 'POST'])
+def batch_upload():
+    """Handle multiple document uploads with progress tracking."""
+    if request.method == 'POST':
+        if 'documents' not in request.files:
+            return jsonify({'error': 'No files uploaded'}), 400
+
+        files = request.files.getlist('documents')
+        if not files or files[0].filename == '':
+            return jsonify({'error': 'No files selected'}), 400
+
+        # Save uploaded files
+        saved_files = []
+        for file in files:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                safe_filename = f"{timestamp}_{filename}"
+                filepath = Path(app.config['UPLOAD_FOLDER']) / safe_filename
+                file.save(str(filepath))
+                saved_files.append(str(filepath))
+
+        if saved_files:
+            # Create batch job
+            batch_id = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]}"
+            batch_job = BatchJob(batch_id, saved_files)
+            batch_jobs[batch_id] = batch_job
+
+            # Start processing in background thread
+            thread = threading.Thread(target=process_batch_async, args=(batch_id,))
+            thread.daemon = True
+            thread.start()
+
+            return jsonify({
+                'batch_id': batch_id,
+                'total_files': len(saved_files),
+                'status': 'pending'
+            })
+
+    return render_template('batch_upload.html')
+
+@app.route('/api/batch/status/<batch_id>')
+def get_batch_status(batch_id):
+    """Get real-time batch processing status."""
+    if batch_id not in batch_jobs:
+        return jsonify({'error': 'Batch job not found'}), 404
+    
+    return jsonify(batch_jobs[batch_id].to_dict())
+
+@app.route('/api/batch/list')
+def list_batch_jobs():
+    """List all batch jobs."""
+    return jsonify({
+        batch_id: job.to_dict() 
+        for batch_id, job in batch_jobs.items()
+    })
 
 @app.route('/process/<filename>')
 def process_document_route(filename):
@@ -142,10 +267,64 @@ def export_results(job_id, format):
                 return send_file(str(md_file), as_attachment=True, download_name=f'draft_{job_id}.md')
         return jsonify({'error': 'Markdown file not found'}), 404
     elif format == 'pdf':
-        # TODO: Implement PDF export
-        return jsonify({'error': 'PDF export not yet implemented'}), 501
+        # Generate PDF from results
+        try:
+            pdf_file = generate_pdf_from_results(results)
+            return send_file(pdf_file, as_attachment=True, download_name=f'draft_{job_id}.pdf')
+        except Exception as e:
+            return jsonify({'error': f'PDF generation failed: {str(e)}'}), 500
     else:
         return jsonify({'error': 'Unsupported format'}), 400
+
+def generate_pdf_from_results(results):
+    """Generate PDF from pipeline results."""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        import tempfile
+        
+        # Create temporary PDF file
+        pdf_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+        pdf_path = pdf_file.name
+        pdf_file.close()
+        
+        # Create PDF document
+        doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Add title
+        title = Paragraph("AI-Generated Hardware Documentation", styles['Title'])
+        story.append(title)
+        story.append(Spacer(1, 12))
+        
+        # Add metadata
+        if 'pipeline_results' in results:
+            pipeline_data = results['pipeline_results']
+            
+            # Add confidence scores
+            if 'confidence_scores' in pipeline_data:
+                story.append(Paragraph("Confidence Scores", styles['Heading2']))
+                for section, score in pipeline_data['confidence_scores'].items():
+                    story.append(Paragraph(f"{section}: {score}%", styles['Normal']))
+                story.append(Spacer(1, 12))
+            
+            # Add gap analysis
+            if 'gap_analysis' in pipeline_data:
+                story.append(Paragraph("Gap Analysis", styles['Heading2']))
+                for gap in pipeline_data['gap_analysis']:
+                    story.append(Paragraph(f"• {gap}", styles['Normal']))
+                story.append(Spacer(1, 12))
+        
+        # Build PDF
+        doc.build(story)
+        return pdf_path
+        
+    except ImportError:
+        raise Exception("PDF generation requires reportlab library. Install with: pip install reportlab")
+    except Exception as e:
+        raise Exception(f"PDF generation failed: {str(e)}")
 
 @app.route('/api/status/<job_id>')
 def get_status(job_id):
@@ -295,6 +474,151 @@ def submit_feedback():
         return jsonify({'success': True, 'message': 'Feedback submitted successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/system-health')
+def system_health():
+    """Display system performance metrics and health status."""
+    return render_template('system_health.html')
+
+@app.route('/api/system/metrics')
+def get_system_metrics():
+    """Get real-time system performance metrics."""
+    try:
+        import psutil
+        import os
+        
+        # CPU metrics
+        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_count = psutil.cpu_count()
+        
+        # Memory metrics
+        memory = psutil.virtual_memory()
+        memory_percent = memory.percent
+        memory_used_gb = memory.used / (1024**3)
+        memory_total_gb = memory.total / (1024**3)
+        
+        # Disk metrics
+        disk = psutil.disk_usage('/')
+        disk_percent = disk.percent
+        disk_used_gb = disk.used / (1024**3)
+        disk_total_gb = disk.total / (1024**3)
+        
+        # Process metrics
+        process = psutil.Process(os.getpid())
+        process_memory_mb = process.memory_info().rss / (1024**2)
+        process_cpu_percent = process.cpu_percent()
+        
+        # System load (Unix-like systems)
+        try:
+            load_avg = os.getloadavg()
+        except AttributeError:
+            load_avg = [0, 0, 0]  # Windows doesn't have load average
+        
+        # Job queue metrics
+        active_jobs = len([job for job in batch_jobs.values() if job.status == BatchJobStatus.PROCESSING])
+        pending_jobs = len([job for job in batch_jobs.values() if job.status == BatchJobStatus.PENDING])
+        completed_jobs = len([job for job in batch_jobs.values() if job.status == BatchJobStatus.COMPLETED])
+        failed_jobs = len([job for job in batch_jobs.values() if job.status == BatchJobStatus.FAILED])
+        
+        # Pipeline results metrics
+        total_results = len(pipeline_results)
+        successful_results = len([r for r in pipeline_results.values() if r.get('status') == 'completed'])
+        error_results = len([r for r in pipeline_results.values() if r.get('status') == 'error'])
+        
+        # Health status
+        health_status = 'healthy'
+        if cpu_percent > 80 or memory_percent > 80 or disk_percent > 90:
+            health_status = 'warning'
+        if cpu_percent > 95 or memory_percent > 95 or disk_percent > 95:
+            health_status = 'critical'
+        
+        return jsonify({
+            'timestamp': datetime.now().isoformat(),
+            'health_status': health_status,
+            'cpu': {
+                'percent': cpu_percent,
+                'count': cpu_count,
+                'load_average': load_avg
+            },
+            'memory': {
+                'percent': memory_percent,
+                'used_gb': round(memory_used_gb, 2),
+                'total_gb': round(memory_total_gb, 2)
+            },
+            'disk': {
+                'percent': disk_percent,
+                'used_gb': round(disk_used_gb, 2),
+                'total_gb': round(disk_total_gb, 2)
+            },
+            'process': {
+                'memory_mb': round(process_memory_mb, 2),
+                'cpu_percent': process_cpu_percent
+            },
+            'jobs': {
+                'active': active_jobs,
+                'pending': pending_jobs,
+                'completed': completed_jobs,
+                'failed': failed_jobs,
+                'total': len(batch_jobs)
+            },
+            'pipeline': {
+                'total_results': total_results,
+                'successful': successful_results,
+                'errors': error_results,
+                'success_rate': round((successful_results / total_results * 100) if total_results > 0 else 0, 2)
+            }
+        })
+    except ImportError:
+        return jsonify({
+            'error': 'psutil library not available. Install with: pip install psutil',
+            'timestamp': datetime.now().isoformat()
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to get system metrics: {str(e)}',
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+@app.route('/api/system/health')
+def get_system_health():
+    """Get system health status."""
+    try:
+        import psutil
+        
+        # Basic health checks
+        cpu_percent = psutil.cpu_percent(interval=1)
+        memory_percent = psutil.virtual_memory().percent
+        disk_percent = psutil.disk_usage('/').percent
+        
+        # Determine overall health
+        if cpu_percent > 95 or memory_percent > 95 or disk_percent > 95:
+            status = 'critical'
+        elif cpu_percent > 80 or memory_percent > 80 or disk_percent > 90:
+            status = 'warning'
+        else:
+            status = 'healthy'
+        
+        return jsonify({
+            'status': status,
+            'checks': {
+                'cpu': {'status': 'healthy' if cpu_percent < 80 else 'warning' if cpu_percent < 95 else 'critical'},
+                'memory': {'status': 'healthy' if memory_percent < 80 else 'warning' if memory_percent < 95 else 'critical'},
+                'disk': {'status': 'healthy' if disk_percent < 90 else 'warning' if disk_percent < 95 else 'critical'}
+            },
+            'timestamp': datetime.now().isoformat()
+        })
+    except ImportError:
+        return jsonify({
+            'status': 'unknown',
+            'error': 'psutil library not available',
+            'timestamp': datetime.now().isoformat()
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
 
 def process_document(filepath: str) -> dict:
     """Process a document through the AI pipeline."""
