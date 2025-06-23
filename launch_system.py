@@ -113,6 +113,7 @@ def show_quick_start():
     print("3. Monitor processing in real-time")
     print("4. View results and analytics")
     print("\n📚 Alternative: Upload files to 'uploads/pending/' for batch processing")
+    print("\n📊 View Results: python output_dashboard.py")
 
 
 def main():
@@ -142,6 +143,12 @@ def main():
     response = input("\nWould you like to open the web interface? (y/n): ").lower().strip()
     if response in ['y', 'yes']:
         open_web_interface()
+    
+    # Ask if user wants to view outputs
+    response = input("\nWould you like to view output results? (y/n): ").lower().strip()
+    if response in ['y', 'yes']:
+        print("🚀 Launching output dashboard...")
+        subprocess.run([sys.executable, "output_dashboard.py"])
     
     # Show quick start guide
     show_quick_start()
