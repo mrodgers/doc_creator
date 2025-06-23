@@ -1,348 +1,449 @@
+#!/usr/bin/env python3
 """
 Provenance Tracking Module
-
-Based on the original audit_specs.py but enhanced for comprehensive provenance tracking
-across the multi-agent documentation generation system.
+Maintains detailed audit trails of all data sources, transformations, and decisions made during documentation generation.
 """
 
 import json
 import logging
-import re
-from dataclasses import asdict, dataclass
+import hashlib
+import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
-
-from pydantic import BaseModel, Field
+from typing import Dict, List, Any, Optional, Union
+from dataclasses import dataclass, asdict, field
+from pathlib import Path
+import uuid
 
 logger = logging.getLogger(__name__)
 
-@dataclass
-class ProvenanceEntry:
-    """Individual provenance entry with metadata."""
-    source_document: str
-    source_section: str
-    extracted_value: str
-    confidence: float
-    timestamp: str
-    agent: str
-    context: str
-    validation_status: str = "pending"
-    validation_notes: Optional[str] = None
 
-class ProvenanceRecord(BaseModel):
-    """Complete provenance record for a piece of information."""
-    item_id: str
-    item_type: str
-    value: str
-    confidence: float = Field(ge=0, le=100)
-    sources: List[ProvenanceEntry]
-    validation_history: List[Dict[str, Any]]
-    last_updated: str
-    status: str = "active"
+@dataclass
+class DataSource:
+    """Represents a source of data used in documentation generation."""
+    id: str
+    name: str
+    type: str  # 'pdf', 'docx', 'xml', 'json', 'manual_input'
+    path: str
+    hash: str
+    size_bytes: int
+    timestamp: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    confidence: float = 1.0
+
+
+@dataclass
+class TransformationStep:
+    """Represents a transformation step in the documentation generation process."""
+    id: str
+    step_name: str
+    step_type: str  # 'parsing', 'matching', 'generation', 'enhancement', 'validation'
+    input_sources: List[str]
+    output_artifacts: List[str]
+    parameters: Dict[str, Any]
+    execution_time: float
+    success: bool
+    error_message: Optional[str] = None
+    timestamp: str = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.now().isoformat()
+
+
+@dataclass
+class DecisionPoint:
+    """Represents a decision made during the documentation generation process."""
+    id: str
+    decision_type: str  # 'template_matching', 'content_selection', 'gap_identification', 'confidence_assessment'
+    context: str
+    options: List[str]
+    selected_option: str
+    reasoning: str
+    confidence: float
+    timestamp: str = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.now().isoformat()
+
+
+@dataclass
+class ProvenanceRecord:
+    """Complete provenance record for a documentation generation session."""
+    session_id: str
+    document_title: str
+    data_sources: List[DataSource]
+    transformations: List[TransformationStep]
+    decisions: List[DecisionPoint]
+    final_artifacts: List[str]
+    generation_time: float
+    created_at: str
+    version: str = "1.0"
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
 
 class ProvenanceTracker:
-    """Enhanced provenance tracking system for multi-agent architecture."""
-
-    def __init__(self):
-        """Initialize provenance tracker."""
-        self.provenance_records: Dict[str, ProvenanceRecord] = {}
-        self.source_documents: Set[str] = set()
-        self.validation_rules: Dict[str, Any] = {}
-
-    def add_provenance_entry(
-        self,
-        item_id: str,
-        item_type: str,
-        value: str,
-        source_document: str,
-        source_section: str,
-        confidence: float,
-        agent: str,
-        context: str = ""
-    ) -> None:
-        """Add a new provenance entry for tracking information sources."""
-
-        entry = ProvenanceEntry(
-            source_document=source_document,
-            source_section=source_section,
-            extracted_value=value,
-            confidence=confidence,
-            timestamp=datetime.now().isoformat(),
-            agent=agent,
-            context=context
-        )
-
-        if item_id not in self.provenance_records:
-            # Create new provenance record
-            self.provenance_records[item_id] = ProvenanceRecord(
-                item_id=item_id,
-                item_type=item_type,
-                value=value,
-                confidence=confidence,
-                sources=[entry],
-                validation_history=[],
-                last_updated=entry.timestamp,
-                status="active"
+    """Tracks provenance information throughout the documentation generation process."""
+    
+    def __init__(self, session_id: Optional[str] = None):
+        self.session_id = session_id or str(uuid.uuid4())
+        self.data_sources: List[DataSource] = []
+        self.transformations: List[TransformationStep] = []
+        self.decisions: List[DecisionPoint] = []
+        self.final_artifacts: List[str] = []
+        self.start_time = time.time()
+        self.document_title = ""
+        
+        logger.info(f"Initialized provenance tracker for session: {self.session_id}")
+    
+    def add_data_source(self, name: str, file_path: str, source_type: str, 
+                       metadata: Optional[Dict[str, Any]] = None) -> str:
+        """Add a data source to the provenance record."""
+        try:
+            path = Path(file_path)
+            if path.exists():
+                file_hash = self._calculate_file_hash(file_path)
+                size_bytes = path.stat().st_size
+            else:
+                file_hash = "unknown"
+                size_bytes = 0
+            
+            source_id = f"source_{len(self.data_sources) + 1}"
+            
+            data_source = DataSource(
+                id=source_id,
+                name=name,
+                type=source_type,
+                path=str(file_path),
+                hash=file_hash,
+                size_bytes=size_bytes,
+                timestamp=datetime.now().isoformat(),
+                metadata=metadata or {}
             )
-        else:
-            # Update existing record
-            record = self.provenance_records[item_id]
-            record.sources.append(entry)
-            record.value = value  # Update with latest value
-            record.confidence = confidence
-            record.last_updated = entry.timestamp
-
-        # Track source document
-        self.source_documents.add(source_document)
-
-        logger.info(f"Added provenance entry for {item_id} from {source_document}")
-
-    def validate_provenance(
-        self,
-        item_id: str,
-        original_content: Dict[str, Any],
-        validation_agent: str = "review_agent"
-    ) -> Dict[str, Any]:
-        """Validate provenance by cross-referencing with original content."""
-
-        if item_id not in self.provenance_records:
-            return {"status": "error", "message": f"No provenance record found for {item_id}"}
-
-        record = self.provenance_records[item_id]
-        validation_result = {
-            "item_id": item_id,
-            "validation_agent": validation_agent,
-            "timestamp": datetime.now().isoformat(),
-            "status": "pending",
+            
+            self.data_sources.append(data_source)
+            logger.info(f"Added data source: {name} ({source_type})")
+            
+            return source_id
+            
+        except Exception as e:
+            logger.error(f"Failed to add data source {name}: {e}")
+            return f"error_source_{len(self.data_sources) + 1}"
+    
+    def add_transformation(self, step_name: str, step_type: str, 
+                          input_sources: List[str], output_artifacts: List[str],
+                          parameters: Dict[str, Any], execution_time: float,
+                          success: bool, error_message: Optional[str] = None) -> str:
+        """Add a transformation step to the provenance record."""
+        transformation_id = f"transform_{len(self.transformations) + 1}"
+        
+        transformation = TransformationStep(
+            id=transformation_id,
+            step_name=step_name,
+            step_type=step_type,
+            input_sources=input_sources,
+            output_artifacts=output_artifacts,
+            parameters=parameters,
+            execution_time=execution_time,
+            success=success,
+            error_message=error_message
+        )
+        
+        self.transformations.append(transformation)
+        logger.info(f"Added transformation: {step_name} ({step_type}) - {'SUCCESS' if success else 'FAILED'}")
+        
+        return transformation_id
+    
+    def add_decision(self, decision_type: str, context: str, options: List[str],
+                    selected_option: str, reasoning: str, confidence: float) -> str:
+        """Add a decision point to the provenance record."""
+        decision_id = f"decision_{len(self.decisions) + 1}"
+        
+        decision = DecisionPoint(
+            id=decision_id,
+            decision_type=decision_type,
+            context=context,
+            options=options,
+            selected_option=selected_option,
+            reasoning=reasoning,
+            confidence=confidence
+        )
+        
+        self.decisions.append(decision)
+        logger.info(f"Added decision: {decision_type} - {selected_option} (confidence: {confidence:.2f})")
+        
+        return decision_id
+    
+    def add_final_artifact(self, artifact_path: str):
+        """Add a final artifact to the provenance record."""
+        self.final_artifacts.append(artifact_path)
+        logger.info(f"Added final artifact: {artifact_path}")
+    
+    def set_document_title(self, title: str):
+        """Set the document title for the provenance record."""
+        self.document_title = title
+        logger.info(f"Set document title: {title}")
+    
+    def _calculate_file_hash(self, file_path: str) -> str:
+        """Calculate SHA-256 hash of a file."""
+        try:
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
+        except Exception as e:
+            logger.warning(f"Failed to calculate hash for {file_path}: {e}")
+            return "hash_calculation_failed"
+    
+    def get_provenance_record(self) -> ProvenanceRecord:
+        """Get the complete provenance record."""
+        generation_time = time.time() - self.start_time
+        
+        return ProvenanceRecord(
+            session_id=self.session_id,
+            document_title=self.document_title,
+            data_sources=self.data_sources,
+            transformations=self.transformations,
+            decisions=self.decisions,
+            final_artifacts=self.final_artifacts,
+            generation_time=generation_time,
+            created_at=datetime.now().isoformat(),
+            metadata={
+                "total_sources": len(self.data_sources),
+                "total_transformations": len(self.transformations),
+                "total_decisions": len(self.decisions),
+                "successful_transformations": len([t for t in self.transformations if t.success]),
+                "failed_transformations": len([t for t in self.transformations if not t.success])
+            }
+        )
+    
+    def save_provenance(self, output_path: str):
+        """Save provenance record to file."""
+        try:
+            record = self.get_provenance_record()
+            output_data = asdict(record)
+            
+            with open(output_path, 'w') as f:
+                json.dump(output_data, f, indent=2)
+            
+            logger.info(f"Provenance record saved to: {output_path}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save provenance record: {e}")
+    
+    def export_provenance_summary(self, output_path: str):
+        """Export a human-readable provenance summary."""
+        try:
+            record = self.get_provenance_record()
+            
+            summary_lines = []
+            summary_lines.append(f"# Provenance Summary: {record.document_title}")
+            summary_lines.append("")
+            summary_lines.append(f"**Session ID:** {record.session_id}")
+            summary_lines.append(f"**Generated:** {record.created_at}")
+            summary_lines.append(f"**Total Time:** {record.generation_time:.2f} seconds")
+            summary_lines.append("")
+            
+            # Data Sources
+            summary_lines.append("## Data Sources")
+            summary_lines.append("")
+            for source in record.data_sources:
+                summary_lines.append(f"### {source.name}")
+                summary_lines.append(f"- **Type:** {source.type}")
+                summary_lines.append(f"- **Path:** {source.path}")
+                summary_lines.append(f"- **Size:** {source.size_bytes} bytes")
+                summary_lines.append(f"- **Hash:** {source.hash[:16]}...")
+                summary_lines.append(f"- **Added:** {source.timestamp}")
+                summary_lines.append("")
+            
+            # Transformations
+            summary_lines.append("## Transformations")
+            summary_lines.append("")
+            for transform in record.transformations:
+                status = "✅ SUCCESS" if transform.success else "❌ FAILED"
+                summary_lines.append(f"### {transform.step_name} {status}")
+                summary_lines.append(f"- **Type:** {transform.step_type}")
+                summary_lines.append(f"- **Input Sources:** {', '.join(transform.input_sources)}")
+                summary_lines.append(f"- **Output Artifacts:** {', '.join(transform.output_artifacts)}")
+                summary_lines.append(f"- **Execution Time:** {transform.execution_time:.2f}s")
+                summary_lines.append(f"- **Timestamp:** {transform.timestamp}")
+                if transform.error_message:
+                    summary_lines.append(f"- **Error:** {transform.error_message}")
+                summary_lines.append("")
+            
+            # Decisions
+            summary_lines.append("## Key Decisions")
+            summary_lines.append("")
+            for decision in record.decisions:
+                summary_lines.append(f"### {decision.decision_type}")
+                summary_lines.append(f"- **Context:** {decision.context}")
+                summary_lines.append(f"- **Options:** {', '.join(decision.options)}")
+                summary_lines.append(f"- **Selected:** {decision.selected_option}")
+                summary_lines.append(f"- **Reasoning:** {decision.reasoning}")
+                summary_lines.append(f"- **Confidence:** {decision.confidence:.2f}")
+                summary_lines.append(f"- **Timestamp:** {decision.timestamp}")
+                summary_lines.append("")
+            
+            # Final Artifacts
+            summary_lines.append("## Final Artifacts")
+            summary_lines.append("")
+            for artifact in record.final_artifacts:
+                summary_lines.append(f"- {artifact}")
+            summary_lines.append("")
+            
+            # Statistics
+            summary_lines.append("## Statistics")
+            summary_lines.append("")
+            summary_lines.append(f"- **Total Data Sources:** {len(record.data_sources)}")
+            summary_lines.append(f"- **Total Transformations:** {len(record.transformations)}")
+            summary_lines.append(f"- **Successful Transformations:** {len([t for t in record.transformations if t.success])}")
+            summary_lines.append(f"- **Failed Transformations:** {len([t for t in record.transformations if not t.success])}")
+            summary_lines.append(f"- **Total Decisions:** {len(record.decisions)}")
+            summary_lines.append(f"- **Final Artifacts:** {len(record.final_artifacts)}")
+            
+            with open(output_path, 'w') as f:
+                f.write('\n'.join(summary_lines))
+            
+            logger.info(f"Provenance summary exported to: {output_path}")
+            
+        except Exception as e:
+            logger.error(f"Failed to export provenance summary: {e}")
+    
+    def get_data_lineage(self, artifact_id: str) -> Dict[str, Any]:
+        """Get the lineage of a specific artifact."""
+        lineage = {
+            "artifact_id": artifact_id,
+            "sources": [],
+            "transformations": [],
+            "decisions": []
+        }
+        
+        # Find transformations that produced this artifact
+        for transform in self.transformations:
+            if artifact_id in transform.output_artifacts:
+                lineage["transformations"].append(transform)
+                
+                # Add input sources
+                for source_id in transform.input_sources:
+                    source = next((s for s in self.data_sources if s.id == source_id), None)
+                    if source and source not in lineage["sources"]:
+                        lineage["sources"].append(source)
+        
+        # Find decisions related to this artifact
+        for decision in self.decisions:
+            if artifact_id in decision.context:
+                lineage["decisions"].append(decision)
+        
+        return lineage
+    
+    def validate_provenance_integrity(self) -> Dict[str, Any]:
+        """Validate the integrity of the provenance record."""
+        validation_results = {
+            "valid": True,
             "issues": [],
-            "confidence_adjustment": 0
+            "warnings": []
         }
+        
+        # Check for orphaned transformations
+        for transform in self.transformations:
+            for source_id in transform.input_sources:
+                if not any(s.id == source_id for s in self.data_sources):
+                    validation_results["issues"].append(f"Transformation {transform.id} references unknown source {source_id}")
+                    validation_results["valid"] = False
+        
+        # Check for failed transformations
+        failed_transforms = [t for t in self.transformations if not t.success]
+        if failed_transforms:
+            validation_results["warnings"].append(f"Found {len(failed_transforms)} failed transformations")
+        
+        # Check for missing timestamps
+        for source in self.data_sources:
+            if not source.timestamp:
+                validation_results["issues"].append(f"Data source {source.id} missing timestamp")
+                validation_results["valid"] = False
+        
+        # Check for reasonable execution times
+        for transform in self.transformations:
+            if transform.execution_time < 0:
+                validation_results["issues"].append(f"Transformation {transform.id} has negative execution time")
+                validation_results["valid"] = False
+            elif transform.execution_time > 3600:  # More than 1 hour
+                validation_results["warnings"].append(f"Transformation {transform.id} took {transform.execution_time:.2f}s")
+        
+        return validation_results
 
-        # Validate each source
-        for source in record.sources:
-            source_validation = self._validate_source(source, original_content)
-            if source_validation["status"] != "valid":
-                validation_result["issues"].append(source_validation)
-                validation_result["confidence_adjustment"] -= 10
 
-        # Determine overall validation status
-        if not validation_result["issues"]:
-            validation_result["status"] = "valid"
-            validation_result["confidence_adjustment"] = 5  # Bonus for validation
-        elif len(validation_result["issues"]) <= 2:
-            validation_result["status"] = "warning"
-        else:
-            validation_result["status"] = "invalid"
+def main():
+    """Test the provenance tracker."""
+    # Initialize tracker
+    tracker = ProvenanceTracker()
+    tracker.set_document_title("Cisco Nexus 9000 Installation Guide")
+    
+    # Add data sources
+    source1_id = tracker.add_data_source(
+        name="Nexus Hardware Guide",
+        file_path="nexus_guide.pdf",
+        source_type="pdf",
+        metadata={"pages": 150, "version": "1.0"}
+    )
+    
+    source2_id = tracker.add_data_source(
+        name="Installation Requirements",
+        file_path="requirements.json",
+        source_type="json",
+        metadata={"format": "structured"}
+    )
+    
+    # Add transformations
+    transform1_id = tracker.add_transformation(
+        step_name="PDF Text Extraction",
+        step_type="parsing",
+        input_sources=[source1_id],
+        output_artifacts=["extracted_text.txt"],
+        parameters={"method": "pdfplumber", "pages": "all"},
+        execution_time=2.5,
+        success=True
+    )
+    
+    transform2_id = tracker.add_transformation(
+        step_name="Template Matching",
+        step_type="matching",
+        input_sources=[source1_id, source2_id],
+        output_artifacts=["matched_sections.json"],
+        parameters={"algorithm": "jaccard_similarity", "threshold": 0.3},
+        execution_time=1.8,
+        success=True
+    )
+    
+    # Add decisions
+    decision1_id = tracker.add_decision(
+        decision_type="template_matching",
+        context="Hardware Overview section",
+        options=["hardware_overview", "installation_prep", "configuration"],
+        selected_option="hardware_overview",
+        reasoning="High keyword overlap with hardware specifications",
+        confidence=0.85
+    )
+    
+    # Add final artifacts
+    tracker.add_final_artifact("draft_nexus_guide.md")
+    tracker.add_final_artifact("gap_analysis.json")
+    
+    # Save provenance
+    tracker.save_provenance("test_provenance.json")
+    tracker.export_provenance_summary("test_provenance_summary.md")
+    
+    # Validate integrity
+    validation = tracker.validate_provenance_integrity()
+    
+    print(f"✅ Provenance tracking completed!")
+    print(f"   Session ID: {tracker.session_id}")
+    print(f"   Data sources: {len(tracker.data_sources)}")
+    print(f"   Transformations: {len(tracker.transformations)}")
+    print(f"   Decisions: {len(tracker.decisions)}")
+    print(f"   Integrity valid: {validation['valid']}")
 
-        # Update confidence based on validation
-        record.confidence = max(0, min(100, record.confidence + validation_result["confidence_adjustment"]))
 
-        # Add to validation history
-        record.validation_history.append(validation_result)
-
-        return validation_result
-
-    def _validate_source(
-        self,
-        source: ProvenanceEntry,
-        original_content: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Validate a single source against original content."""
-
-        # Flatten all content for searching
-        all_content = []
-        for section in original_content.get('sections', []):
-            all_content.extend(section.get('content', []))
-
-        full_text = " ".join(all_content)
-
-        # Check if the extracted value exists in the source
-        normalized_value = re.sub(r'[^a-zA-Z0-9]', '', source.extracted_value.lower())
-        normalized_text = re.sub(r'[^a-zA-Z0-9]', '', full_text.lower())
-
-        if normalized_value in normalized_text:
-            return {
-                "source": source.source_document,
-                "status": "valid",
-                "message": "Value found in source document"
-            }
-        else:
-            # Try fuzzy matching for specific patterns
-            snippet = self._find_specific_snippet(source.extracted_value, full_text)
-            if snippet:
-                return {
-                    "source": source.source_document,
-                    "status": "warning",
-                    "message": f"Value found with context: {snippet[:100]}...",
-                    "snippet": snippet
-                }
-            else:
-                return {
-                    "source": source.source_document,
-                    "status": "invalid",
-                    "message": "Value not found in source document"
-                }
-
-    def _find_specific_snippet(self, value: str, full_text: str) -> Optional[str]:
-        """Find specific snippet containing the value with context."""
-
-        # Define patterns for common hardware specifications
-        spec_patterns = {
-            "QSFP port count": [
-                r"64.*QSFP", r"64100-GigabitQSFP", r"64.*100-Gigabit.*QSFP",
-                r"64100GigabitQSFP", r"64.*QSFP.*port"
-            ],
-            "Management ports": [
-                r"Two.*management.*port", r"2.*management.*port", r"management.*port.*2",
-                r"RJ-45.*port.*SFP.*port", r"one.*RJ-45.*port.*one.*SFP.*port"
-            ],
-            "Chassis dimensions": [
-                r"17\.41.*inches", r"22\.27.*inches", r"3\.4.*inches",
-                r"Width.*17\.41", r"Depth.*22\.27", r"Height.*3\.4"
-            ],
-            "Power requirements": [
-                r"605W.*1100W", r"605W.*typical", r"power.*input.*605W",
-                r"4248.*BTU", r"heat.*dissipation.*4248"
-            ]
-        }
-
-        # Try to match value against patterns
-        for spec_type, patterns in spec_patterns.items():
-            for pattern in patterns:
-                match = re.search(pattern, full_text, re.IGNORECASE)
-                if match:
-                    start = max(0, match.start() - 150)
-                    end = min(len(full_text), match.end() + 150)
-                    return full_text[start:end]
-
-        return None
-
-    def get_provenance_report(self, item_id: Optional[str] = None) -> Dict[str, Any]:
-        """Generate comprehensive provenance report."""
-
-        if item_id:
-            if item_id not in self.provenance_records:
-                return {"error": f"No provenance record found for {item_id}"}
-
-            record = self.provenance_records[item_id]
-            return {
-                "item_id": item_id,
-                "provenance": asdict(record),
-                "validation_summary": self._summarize_validation(record.validation_history)
-            }
-
-        # Generate overall report
-        total_items = len(self.provenance_records)
-        total_sources = sum(len(record.sources) for record in self.provenance_records.values())
-
-        # Calculate confidence statistics
-        confidences = [record.confidence for record in self.provenance_records.values()]
-        avg_confidence = sum(confidences) / len(confidences) if confidences else 0
-
-        # Count validation statuses
-        validation_counts = {"valid": 0, "warning": 0, "invalid": 0, "pending": 0}
-        for record in self.provenance_records.values():
-            if record.validation_history:
-                latest_validation = record.validation_history[-1]
-                status = latest_validation.get("status", "pending")
-                validation_counts[status] += 1
-            else:
-                validation_counts["pending"] += 1
-
-        return {
-            "summary": {
-                "total_items": total_items,
-                "total_sources": total_sources,
-                "average_confidence": round(avg_confidence, 2),
-                "source_documents": list(self.source_documents),
-                "validation_counts": validation_counts
-            },
-            "items": {
-                item_id: {
-                    "type": record.item_type,
-                    "value": record.value,
-                    "confidence": record.confidence,
-                    "sources_count": len(record.sources),
-                    "last_updated": record.last_updated,
-                    "status": record.status
-                }
-                for item_id, record in self.provenance_records.items()
-            }
-        }
-
-    def _summarize_validation(self, validation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Summarize validation history for a record."""
-        if not validation_history:
-            return {"status": "pending", "total_validations": 0}
-
-        latest_validation = validation_history[-1]
-        return {
-            "status": latest_validation.get("status", "pending"),
-            "total_validations": len(validation_history),
-            "latest_agent": latest_validation.get("validation_agent", "unknown"),
-            "latest_timestamp": latest_validation.get("timestamp", ""),
-            "issues_count": len(latest_validation.get("issues", []))
-        }
-
-    def export_provenance_data(self, filepath: str) -> None:
-        """Export all provenance data to JSON file."""
-        export_data = {
-            "metadata": {
-                "export_timestamp": datetime.now().isoformat(),
-                "total_records": len(self.provenance_records),
-                "source_documents": list(self.source_documents)
-            },
-            "provenance_records": {
-                item_id: record.dict() for item_id, record in self.provenance_records.items()
-            }
-        }
-
-        with open(filepath, 'w') as f:
-            json.dump(export_data, f, indent=2)
-
-        logger.info(f"Provenance data exported to {filepath}")
-
-    def import_provenance_data(self, filepath: str) -> None:
-        """Import provenance data from JSON file."""
-        with open(filepath) as f:
-            import_data = json.load(f)
-
-        # Import provenance records
-        for item_id, record_data in import_data.get("provenance_records", {}).items():
-            self.provenance_records[item_id] = ProvenanceRecord(**record_data)
-
-        # Import source documents
-        self.source_documents.update(import_data.get("metadata", {}).get("source_documents", []))
-
-        logger.info(f"Provenance data imported from {filepath}")
-
-    def get_source_analysis(self) -> Dict[str, Any]:
-        """Analyze source document usage and reliability."""
-        source_stats = {}
-
-        for record in self.provenance_records.values():
-            for source in record.sources:
-                if source.source_document not in source_stats:
-                    source_stats[source.source_document] = {
-                        "usage_count": 0,
-                        "total_confidence": 0,
-                        "validation_success_rate": 0,
-                        "sections_used": set()
-                    }
-
-                stats = source_stats[source.source_document]
-                stats["usage_count"] += 1
-                stats["total_confidence"] += source.confidence
-                stats["sections_used"].add(source.source_section)
-
-        # Calculate averages and convert sets to lists
-        for source, stats in source_stats.items():
-            stats["average_confidence"] = stats["total_confidence"] / stats["usage_count"]
-            stats["sections_used"] = list(stats["sections_used"])
-            del stats["total_confidence"]  # Remove intermediate calculation
-
-        return {
-            "source_documents": source_stats,
-            "total_sources": len(source_stats),
-            "most_used_source": max(source_stats.keys(), key=lambda x: source_stats[x]["usage_count"]) if source_stats else None
-        }
+if __name__ == "__main__":
+    main()

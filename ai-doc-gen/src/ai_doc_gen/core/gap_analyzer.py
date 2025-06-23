@@ -1,356 +1,465 @@
+#!/usr/bin/env python3
 """
-Gap Analysis Module
-
-Identifies documentation gaps and generates actionable reports for resolution.
+Gap Analysis Engine
+Identifies missing documentation sections and generates actionable gap reports with SME query suggestions.
 """
 
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass, asdict
 
-from pydantic import BaseModel
-
-from .confidence_scoring import GapAnalysis, GapType
+from ..utils.llm import LLMUtility
 
 logger = logging.getLogger(__name__)
 
-class GapReport(BaseModel):
-    """Comprehensive gap analysis report."""
-    timestamp: str
-    total_gaps: int
+
+@dataclass
+class GapItem:
+    """Represents a specific gap in documentation."""
+    id: str
+    template_section: str
+    severity: str  # 'critical', 'high', 'medium', 'low'
+    category: str
+    description: str
+    impact: str
+    suggested_content: str
+    priority: int
+    source: str
+    timestamp: str = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.now().isoformat()
+
+
+@dataclass
+class SMEQuery:
+    """Represents a question for Subject Matter Experts."""
+    id: str
+    gap_id: str
+    question: str
+    context: str
+    priority: int
+    expected_answer_type: str  # 'technical_spec', 'procedure', 'requirement', 'clarification'
+    related_sections: List[str] = None
+    
+    def __post_init__(self):
+        if self.related_sections is None:
+            self.related_sections = []
+
+
+@dataclass
+class GapReport:
+    """Complete gap analysis report."""
+    document_title: str
+    gaps: List[GapItem]
+    sme_queries: List[SMEQuery]
+    coverage_percentage: float
     critical_gaps: int
     high_priority_gaps: int
-    medium_priority_gaps: int
-    low_priority_gaps: int
-    gaps_by_type: Dict[str, int]
-    gaps_by_section: Dict[str, List[str]]
-    sme_questions: List[Dict[str, str]]
-    recommended_actions: List[str]
-    estimated_resolution_time: str
+    total_gaps: int
+    generated_at: str
+    recommendations: List[str]
+
 
 class GapAnalyzer:
-    """Analyzes documentation gaps and generates actionable reports."""
-
-    def __init__(self, confidence_threshold: float = 70.0):
-        """Initialize gap analyzer with confidence threshold."""
-        self.confidence_threshold = confidence_threshold
-        self.gap_history: List[GapAnalysis] = []
-
-    def analyze_documentation_gaps(
-        self,
-        content: Dict[str, Any],
-        confidence_scores: Dict[str, float],
-        context: Optional[str] = None
-    ) -> List[GapAnalysis]:
-        """Analyze documentation gaps based on content and confidence scores."""
-        gaps = []
-
-        for section, confidence in confidence_scores.items():
-            if confidence < self.confidence_threshold:
-                gap = self._create_gap_analysis(section, confidence, content.get(section, ""), context)
-                gaps.append(gap)
-                self.gap_history.append(gap)
-
-        return gaps
-
-    def _create_gap_analysis(
-        self,
-        section: str,
-        confidence: float,
-        content: str,
-        context: Optional[str]
-    ) -> GapAnalysis:
-        """Create a gap analysis for a specific section."""
-        gap_type = self._determine_gap_type(confidence, content)
-        severity = self._determine_severity(confidence)
-
-        return GapAnalysis(
-            gap_type=gap_type,
-            description=f"Low confidence ({confidence}%) in section: {section}",
-            confidence=confidence,
-            severity=severity,
-            affected_sections=[section],
-            suggested_actions=self._generate_suggested_actions(gap_type, confidence, section),
-            sme_questions=self._generate_sme_questions(gap_type, section, content)
-        )
-
-    def _determine_gap_type(self, confidence: float, content: str) -> GapType:
-        """Determine the type of gap based on confidence and content analysis."""
-        if confidence < 30:
-            return GapType.MISSING_INFO
-        elif confidence < 50:
-            return GapType.UNCLEAR_INFO
-        elif confidence < 70:
-            return GapType.INCOMPLETE_INFO
-        else:
-            return GapType.UNCLEAR_INFO
-
-    def _determine_severity(self, confidence: float) -> str:
-        """Determine severity based on confidence score."""
-        if confidence < 30:
-            return "Critical"
-        elif confidence < 50:
-            return "High"
-        elif confidence < 70:
-            return "Medium"
-        else:
-            return "Low"
-
-    def _generate_suggested_actions(
-        self,
-        gap_type: GapType,
-        confidence: float,
-        section: str
-    ) -> List[str]:
-        """Generate suggested actions for addressing gaps."""
-        actions = []
-
-        if gap_type == GapType.MISSING_INFO:
-            actions.extend([
-                f"Consult with Subject Matter Expert (SME) for {section}",
-                "Review source documentation and specifications",
-                "Check for updated hardware specifications",
-                "Validate against product datasheets"
-            ])
-        elif gap_type == GapType.UNCLEAR_INFO:
-            actions.extend([
-                f"Request clarification from technical team for {section}",
-                "Review related documentation sections",
-                "Validate against hardware specifications",
-                "Cross-reference with installation guides"
-            ])
-        elif gap_type == GapType.CONFLICTING_INFO:
-            actions.extend([
-                "Resolve conflicts with technical team",
-                "Cross-reference multiple sources",
-                "Update documentation standards",
-                "Establish single source of truth"
-            ])
-        elif gap_type == GapType.OUTDATED_INFO:
-            actions.extend([
-                "Update with current specifications",
-                "Verify against latest hardware versions",
-                "Review change management process",
-                "Update version control documentation"
-            ])
-        elif gap_type == GapType.INCOMPLETE_INFO:
-            actions.extend([
-                f"Complete missing information for {section}",
-                "Request additional details from SME",
-                "Expand documentation coverage",
-                "Add missing technical specifications"
-            ])
-
-        return actions
-
-    def _generate_sme_questions(
-        self,
-        gap_type: GapType,
-        section: str,
-        content: str
-    ) -> List[Dict[str, str]]:
-        """Generate SME questions based on gap type and section."""
-        questions = []
-
-        if gap_type == GapType.MISSING_INFO:
-            questions.extend([
-                {
-                    "question": f"What are the complete specifications for {section}?",
-                    "priority": "High",
-                    "category": "Technical Specifications",
-                    "rationale": "Missing critical information needed for documentation"
-                },
-                {
-                    "question": f"Are there any dependencies or prerequisites for {section}?",
-                    "priority": "Medium",
-                    "category": "Dependencies",
-                    "rationale": "Ensure complete coverage of requirements"
-                }
-            ])
-        elif gap_type == GapType.UNCLEAR_INFO:
-            questions.extend([
-                {
-                    "question": f"Can you clarify the technical requirements for {section}?",
-                    "priority": "High",
-                    "category": "Clarification",
-                    "rationale": "Current information is ambiguous and needs clarification"
-                },
-                {
-                    "question": f"What are the best practices for implementing {section}?",
-                    "priority": "Medium",
-                    "category": "Best Practices",
-                    "rationale": "Provide guidance for proper implementation"
-                }
-            ])
-        elif gap_type == GapType.INCOMPLETE_INFO:
-            questions.extend([
-                {
-                    "question": f"What additional details are needed to complete {section}?",
-                    "priority": "High",
-                    "category": "Completeness",
-                    "rationale": "Section is incomplete and needs additional information"
-                },
-                {
-                    "question": f"Are there any edge cases or exceptions for {section}?",
-                    "priority": "Medium",
-                    "category": "Edge Cases",
-                    "rationale": "Ensure comprehensive coverage of all scenarios"
-                }
-            ])
-
-        return questions
-
-    def generate_gap_report(self, gaps: List[GapAnalysis]) -> GapReport:
-        """Generate a comprehensive gap analysis report."""
-        if not gaps:
-            return GapReport(
-                timestamp=datetime.now().isoformat(),
-                total_gaps=0,
-                critical_gaps=0,
-                high_priority_gaps=0,
-                medium_priority_gaps=0,
-                low_priority_gaps=0,
-                gaps_by_type={},
-                gaps_by_section={},
-                sme_questions=[],
-                recommended_actions=[],
-                estimated_resolution_time="0 hours"
-            )
-
-        # Count gaps by severity
-        critical_gaps = len([g for g in gaps if g.severity == "Critical"])
-        high_priority_gaps = len([g for g in gaps if g.severity == "High"])
-        medium_priority_gaps = len([g for g in gaps if g.severity == "Medium"])
-        low_priority_gaps = len([g for g in gaps if g.severity == "Low"])
-
-        # Count gaps by type
-        gaps_by_type = {}
-        for gap in gaps:
-            gap_type = gap.gap_type.value
-            gaps_by_type[gap_type] = gaps_by_type.get(gap_type, 0) + 1
-
-        # Group gaps by section
-        gaps_by_section = {}
-        for gap in gaps:
-            for section in gap.affected_sections:
-                if section not in gaps_by_section:
-                    gaps_by_section[section] = []
-                gaps_by_section[section].append(gap.description)
-
-        # Collect all SME questions
-        all_sme_questions = []
-        for gap in gaps:
-            all_sme_questions.extend(gap.sme_questions)
-
-        # Collect recommended actions
-        all_actions = []
-        for gap in gaps:
-            all_actions.extend(gap.suggested_actions)
-
-        # Remove duplicates while preserving order
-        unique_actions = list(dict.fromkeys(all_actions))
-
-        # Estimate resolution time
-        estimated_time = self._estimate_resolution_time(gaps)
-
-        return GapReport(
-            timestamp=datetime.now().isoformat(),
-            total_gaps=len(gaps),
+    """Analyzes documentation gaps and generates SME queries."""
+    
+    def __init__(self, llm_utility: Optional[LLMUtility] = None):
+        self.llm_utility = llm_utility or LLMUtility()
+        self.template_sections = self._load_template_sections()
+        
+    def _load_template_sections(self) -> List[Dict[str, Any]]:
+        """Load template sections for gap analysis."""
+        return [
+            {
+                "id": "hardware_overview",
+                "title": "Hardware Overview",
+                "category": "hardware",
+                "severity": "critical",
+                "description": "Overview of hardware components, specifications, and features",
+                "impact": "Critical for understanding system capabilities and requirements"
+            },
+            {
+                "id": "installation_preparation",
+                "title": "Installation Preparation",
+                "category": "preparation",
+                "severity": "critical",
+                "description": "Pre-installation requirements, tools, and safety considerations",
+                "impact": "Essential for safe and successful installation"
+            },
+            {
+                "id": "hardware_installation",
+                "title": "Hardware Installation",
+                "category": "installation",
+                "severity": "critical",
+                "description": "Step-by-step hardware installation procedures",
+                "impact": "Core installation process documentation"
+            },
+            {
+                "id": "initial_configuration",
+                "title": "Initial Configuration",
+                "category": "configuration",
+                "severity": "high",
+                "description": "Basic configuration and setup procedures",
+                "impact": "Required for system operation"
+            },
+            {
+                "id": "advanced_configuration",
+                "title": "Advanced Configuration",
+                "category": "configuration",
+                "severity": "medium",
+                "description": "Advanced configuration options and features",
+                "impact": "Important for optimal system performance"
+            },
+            {
+                "id": "verification_testing",
+                "title": "Verification and Testing",
+                "category": "testing",
+                "severity": "high",
+                "description": "Verification procedures and testing guidelines",
+                "impact": "Critical for ensuring proper installation and operation"
+            },
+            {
+                "id": "troubleshooting",
+                "title": "Troubleshooting",
+                "category": "troubleshooting",
+                "severity": "medium",
+                "description": "Common issues and troubleshooting procedures",
+                "impact": "Important for maintenance and support"
+            },
+            {
+                "id": "maintenance",
+                "title": "Maintenance and Support",
+                "category": "maintenance",
+                "severity": "low",
+                "description": "Maintenance procedures and support information",
+                "impact": "Useful for ongoing system maintenance"
+            }
+        ]
+    
+    def analyze_gaps(self, existing_sections: List[str], document_title: str) -> GapReport:
+        """Analyze gaps in documentation coverage."""
+        logger.info(f"Analyzing gaps for: {document_title}")
+        
+        # Identify missing sections
+        gaps = self._identify_missing_sections(existing_sections)
+        
+        # Generate SME queries for gaps
+        sme_queries = self._generate_sme_queries(gaps, document_title)
+        
+        # Calculate metrics
+        coverage_percentage = self._calculate_coverage(existing_sections)
+        critical_gaps = len([g for g in gaps if g.severity == 'critical'])
+        high_priority_gaps = len([g for g in gaps if g.severity in ['critical', 'high']])
+        
+        # Generate recommendations
+        recommendations = self._generate_recommendations(gaps, coverage_percentage)
+        
+        report = GapReport(
+            document_title=document_title,
+            gaps=gaps,
+            sme_queries=sme_queries,
+            coverage_percentage=coverage_percentage,
             critical_gaps=critical_gaps,
             high_priority_gaps=high_priority_gaps,
-            medium_priority_gaps=medium_priority_gaps,
-            low_priority_gaps=low_priority_gaps,
-            gaps_by_type=gaps_by_type,
-            gaps_by_section=gaps_by_section,
-            sme_questions=all_sme_questions,
-            recommended_actions=unique_actions,
-            estimated_resolution_time=estimated_time
+            total_gaps=len(gaps),
+            generated_at=datetime.now().isoformat(),
+            recommendations=recommendations
         )
-
-    def _estimate_resolution_time(self, gaps: List[GapAnalysis]) -> str:
-        """Estimate time needed to resolve all gaps."""
-        total_hours = 0
-
+        
+        logger.info(f"Gap analysis completed: {len(gaps)} gaps, {len(sme_queries)} SME queries")
+        
+        return report
+    
+    def _identify_missing_sections(self, existing_sections: List[str]) -> List[GapItem]:
+        """Identify missing sections based on template."""
+        gaps = []
+        
+        for template in self.template_sections:
+            if template['id'] not in existing_sections:
+                gap = GapItem(
+                    id=f"gap_{template['id']}",
+                    template_section=template['title'],
+                    severity=template['severity'],
+                    category=template['category'],
+                    description=template['description'],
+                    impact=template['impact'],
+                    suggested_content=self._generate_suggested_content(template),
+                    priority=self._calculate_priority(template['severity']),
+                    source="gap_analyzer"
+                )
+                gaps.append(gap)
+        
+        return gaps
+    
+    def _calculate_priority(self, severity: str) -> int:
+        """Calculate priority based on severity."""
+        priority_map = {
+            'critical': 1,
+            'high': 2,
+            'medium': 3,
+            'low': 4
+        }
+        return priority_map.get(severity, 3)
+    
+    def _generate_suggested_content(self, template: Dict[str, Any]) -> str:
+        """Generate suggested content for a gap."""
+        return f"Content needed for {template['title']} section. This should include {template['description'].lower()}."
+    
+    def _generate_sme_queries(self, gaps: List[GapItem], document_title: str) -> List[SMEQuery]:
+        """Generate SME queries for identified gaps."""
+        sme_queries = []
+        
         for gap in gaps:
-            if gap.severity == "Critical":
-                total_hours += 4  # 4 hours per critical gap
-            elif gap.severity == "High":
-                total_hours += 2  # 2 hours per high priority gap
-            elif gap.severity == "Medium":
-                total_hours += 1  # 1 hour per medium priority gap
-            else:
-                total_hours += 0.5  # 30 minutes per low priority gap
-
-        if total_hours < 1:
-            return f"{int(total_hours * 60)} minutes"
-        elif total_hours < 8:
-            return f"{total_hours:.1f} hours"
+            # Generate multiple queries per gap
+            queries = self._generate_queries_for_gap(gap, document_title)
+            sme_queries.extend(queries)
+        
+        return sme_queries
+    
+    def _generate_queries_for_gap(self, gap: GapItem, document_title: str) -> List[SMEQuery]:
+        """Generate specific queries for a gap."""
+        queries = []
+        
+        # Base query for the gap
+        base_query = SMEQuery(
+            id=f"query_{gap.id}",
+            gap_id=gap.id,
+            question=f"What specific content should be included in the '{gap.template_section}' section?",
+            context=f"Document: {document_title}, Gap: {gap.description}",
+            priority=gap.priority,
+            expected_answer_type="technical_spec",
+            related_sections=[gap.template_section]
+        )
+        queries.append(base_query)
+        
+        # Additional context-specific queries
+        if gap.category == "hardware":
+            queries.append(SMEQuery(
+                id=f"query_{gap.id}_specs",
+                gap_id=gap.id,
+                question=f"What are the key hardware specifications and requirements for {document_title}?",
+                context=f"Document: {document_title}, Section: {gap.template_section}",
+                priority=gap.priority,
+                expected_answer_type="technical_spec",
+                related_sections=[gap.template_section]
+            ))
+        
+        elif gap.category == "installation":
+            queries.append(SMEQuery(
+                id=f"query_{gap.id}_procedure",
+                gap_id=gap.id,
+                question=f"What are the step-by-step procedures for {gap.template_section.lower()}?",
+                context=f"Document: {document_title}, Section: {gap.template_section}",
+                priority=gap.priority,
+                expected_answer_type="procedure",
+                related_sections=[gap.template_section]
+            ))
+        
+        elif gap.category == "configuration":
+            queries.append(SMEQuery(
+                id=f"query_{gap.id}_config",
+                gap_id=gap.id,
+                question=f"What configuration parameters and settings are required for {gap.template_section.lower()}?",
+                context=f"Document: {document_title}, Section: {gap.template_section}",
+                priority=gap.priority,
+                expected_answer_type="technical_spec",
+                related_sections=[gap.template_section]
+            ))
+        
+        return queries
+    
+    def _calculate_coverage(self, existing_sections: List[str]) -> float:
+        """Calculate coverage percentage."""
+        total_sections = len(self.template_sections)
+        covered_sections = len(existing_sections)
+        return (covered_sections / total_sections) * 100 if total_sections > 0 else 0
+    
+    def _generate_recommendations(self, gaps: List[GapItem], coverage_percentage: float) -> List[str]:
+        """Generate recommendations based on gap analysis."""
+        recommendations = []
+        
+        # Coverage-based recommendations
+        if coverage_percentage < 50:
+            recommendations.append("Documentation coverage is critically low. Focus on essential sections first.")
+        elif coverage_percentage < 75:
+            recommendations.append("Documentation coverage needs improvement. Prioritize high-severity gaps.")
         else:
-            days = total_hours / 8
-            return f"{days:.1f} days"
-
-    def prioritize_gaps(self, gaps: List[GapAnalysis]) -> List[GapAnalysis]:
-        """Prioritize gaps based on severity and impact."""
-        # Define priority weights
-        severity_weights = {
-            "Critical": 4,
-            "High": 3,
-            "Medium": 2,
-            "Low": 1
-        }
-
-        # Calculate priority scores
+            recommendations.append("Documentation coverage is good. Focus on remaining gaps for completeness.")
+        
+        # Severity-based recommendations
+        critical_gaps = [g for g in gaps if g.severity == 'critical']
+        if critical_gaps:
+            recommendations.append(f"Address {len(critical_gaps)} critical gaps immediately for basic documentation completeness.")
+        
+        high_gaps = [g for g in gaps if g.severity == 'high']
+        if high_gaps:
+            recommendations.append(f"Prioritize {len(high_gaps)} high-priority gaps for comprehensive coverage.")
+        
+        # Category-based recommendations
+        categories = set(g.category for g in gaps)
+        if 'hardware' in categories:
+            recommendations.append("Hardware documentation gaps should be addressed first for installation readiness.")
+        if 'installation' in categories:
+            recommendations.append("Installation procedure gaps are critical for successful deployment.")
+        if 'configuration' in categories:
+            recommendations.append("Configuration gaps should be filled for operational readiness.")
+        
+        return recommendations
+    
+    def generate_llm_enhanced_queries(self, gaps: List[GapItem], document_title: str) -> List[SMEQuery]:
+        """Generate LLM-enhanced SME queries."""
+        enhanced_queries = []
+        
         for gap in gaps:
-            base_score = severity_weights.get(gap.severity, 1)
-            confidence_factor = (100 - gap.confidence) / 100  # Higher confidence = lower priority
-            gap.priority_score = base_score * confidence_factor
+            try:
+                # Use LLM to generate enhanced queries
+                prompt = f"""
+Generate 2-3 specific, actionable questions for a Subject Matter Expert about this documentation gap:
 
-        # Sort by priority score (highest first)
-        return sorted(gaps, key=lambda x: getattr(x, 'priority_score', 0), reverse=True)
+Document: {document_title}
+Missing Section: {gap.template_section}
+Category: {gap.category}
+Description: {gap.description}
+Impact: {gap.impact}
 
-    def save_gap_report(self, report: GapReport, filepath: str) -> None:
+Generate questions that will help fill this gap with accurate, detailed content.
+Focus on technical specifications, procedures, requirements, or clarifications needed.
+
+Return as a JSON array of questions with this structure:
+[
+  {{
+    "question": "Specific question text",
+    "context": "Additional context",
+    "answer_type": "technical_spec|procedure|requirement|clarification"
+  }}
+]
+"""
+                
+                response = self.llm_utility.get_synonyms_from_llm(prompt)
+                if response and isinstance(response, list):
+                    for i, query_data in enumerate(response):
+                        if isinstance(query_data, dict):
+                            enhanced_query = SMEQuery(
+                                id=f"llm_query_{gap.id}_{i}",
+                                gap_id=gap.id,
+                                question=query_data.get('question', ''),
+                                context=query_data.get('context', ''),
+                                priority=gap.priority,
+                                expected_answer_type=query_data.get('answer_type', 'clarification'),
+                                related_sections=[gap.template_section]
+                            )
+                            enhanced_queries.append(enhanced_query)
+                
+            except Exception as e:
+                logger.warning(f"Failed to generate LLM-enhanced query for gap {gap.id}: {e}")
+                # Fallback to basic query
+                enhanced_queries.append(SMEQuery(
+                    id=f"fallback_query_{gap.id}",
+                    gap_id=gap.id,
+                    question=f"What content is needed for the '{gap.template_section}' section?",
+                    context=f"Document: {document_title}",
+                    priority=gap.priority,
+                    expected_answer_type="clarification",
+                    related_sections=[gap.template_section]
+                ))
+        
+        return enhanced_queries
+    
+    def save_gap_report(self, report: GapReport, output_path: str):
         """Save gap report to file."""
-        with open(filepath, 'w') as f:
-            json.dump(report.dict(), f, indent=2)
+        output_data = asdict(report)
+        
+        with open(output_path, 'w') as f:
+            json.dump(output_data, f, indent=2)
+        
+        logger.info(f"Gap report saved to: {output_path}")
+    
+    def export_gap_report_markdown(self, report: GapReport, output_path: str):
+        """Export gap report as Markdown."""
+        markdown_content = []
+        
+        # Header
+        markdown_content.append(f"# Gap Analysis Report: {report.document_title}")
+        markdown_content.append("")
+        markdown_content.append(f"*Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*")
+        markdown_content.append(f"*Coverage: {report.coverage_percentage:.1f}%*")
+        markdown_content.append(f"*Total Gaps: {report.total_gaps}*")
+        markdown_content.append(f"*Critical Gaps: {report.critical_gaps}*")
+        markdown_content.append("")
+        
+        # Executive Summary
+        markdown_content.append("## Executive Summary")
+        markdown_content.append("")
+        markdown_content.append(f"This document identifies {report.total_gaps} gaps in the {report.document_title} documentation.")
+        markdown_content.append(f"Current coverage is {report.coverage_percentage:.1f}% with {report.critical_gaps} critical gaps requiring immediate attention.")
+        markdown_content.append("")
+        
+        # Recommendations
+        markdown_content.append("## Recommendations")
+        markdown_content.append("")
+        for rec in report.recommendations:
+            markdown_content.append(f"- {rec}")
+        markdown_content.append("")
+        
+        # Gaps
+        markdown_content.append("## Documentation Gaps")
+        markdown_content.append("")
+        
+        for gap in sorted(report.gaps, key=lambda x: x.priority):
+            markdown_content.append(f"### {gap.template_section}")
+            markdown_content.append(f"**Severity:** {gap.severity}")
+            markdown_content.append(f"**Category:** {gap.category}")
+            markdown_content.append(f"**Priority:** {gap.priority}")
+            markdown_content.append(f"**Impact:** {gap.impact}")
+            markdown_content.append(f"**Description:** {gap.description}")
+            markdown_content.append(f"**Suggested Content:** {gap.suggested_content}")
+            markdown_content.append("")
+        
+        # SME Queries
+        markdown_content.append("## SME Queries")
+        markdown_content.append("")
+        markdown_content.append("The following questions should be addressed by Subject Matter Experts:")
+        markdown_content.append("")
+        
+        for query in sorted(report.sme_queries, key=lambda x: x.priority):
+            markdown_content.append(f"### {query.question}")
+            markdown_content.append(f"**Priority:** {query.priority}")
+            markdown_content.append(f"**Context:** {query.context}")
+            markdown_content.append(f"**Expected Answer Type:** {query.expected_answer_type}")
+            markdown_content.append("")
+        
+        # Write to file
+        with open(output_path, 'w') as f:
+            f.write('\n'.join(markdown_content))
+        
+        logger.info(f"Gap report exported to: {output_path}")
 
-        logger.info(f"Gap report saved to {filepath}")
 
-    def load_gap_report(self, filepath: str) -> GapReport:
-        """Load gap report from file."""
-        with open(filepath) as f:
-            data = json.load(f)
+def main():
+    """Test the gap analyzer."""
+    # Test with some existing sections
+    existing_sections = ["hardware_overview", "installation_preparation"]
+    
+    # Initialize analyzer
+    analyzer = GapAnalyzer()
+    
+    # Analyze gaps
+    report = analyzer.analyze_gaps(existing_sections, "Cisco Nexus 9000 Installation Guide")
+    
+    # Save results
+    analyzer.save_gap_report(report, "test_gap_report.json")
+    analyzer.export_gap_report_markdown(report, "test_gap_report.md")
+    
+    print(f"✅ Gap analysis completed!")
+    print(f"   Coverage: {report.coverage_percentage:.1f}%")
+    print(f"   Total gaps: {report.total_gaps}")
+    print(f"   Critical gaps: {report.critical_gaps}")
+    print(f"   SME queries: {len(report.sme_queries)}")
 
-        return GapReport(**data)
 
-    def get_gap_trends(self) -> Dict[str, Any]:
-        """Analyze gap trends over time."""
-        if len(self.gap_history) < 2:
-            return {"message": "Insufficient data for trend analysis"}
-
-        # Group gaps by date
-        gaps_by_date = {}
-        for gap in self.gap_history:
-            date = gap.timestamp.split('T')[0]  # Extract date part
-            if date not in gaps_by_date:
-                gaps_by_date[date] = []
-            gaps_by_date[date].append(gap)
-
-        # Calculate trends
-        dates = sorted(gaps_by_date.keys())
-        gap_counts = [len(gaps_by_date[date]) for date in dates]
-
-        # Calculate average confidence over time
-        confidence_trends = []
-        for date in dates:
-            confidences = [gap.confidence for gap in gaps_by_date[date]]
-            avg_confidence = sum(confidences) / len(confidences) if confidences else 0
-            confidence_trends.append(avg_confidence)
-
-        return {
-            "dates": dates,
-            "gap_counts": gap_counts,
-            "confidence_trends": confidence_trends,
-            "total_gaps_analyzed": len(self.gap_history),
-            "trend_period": f"{dates[0]} to {dates[-1]}" if dates else "No data"
-        }
+if __name__ == "__main__":
+    main()
