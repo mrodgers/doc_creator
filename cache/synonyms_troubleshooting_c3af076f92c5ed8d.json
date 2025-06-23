@@ -1,0 +1,32 @@
+{
+  "title": "Troubleshooting",
+  "synonyms": [
+    "Trouble Resolution",
+    "Fault Diagnosis",
+    "T/S",
+    "Error Clearance",
+    "Error Debugging",
+    "Fault Debugging",
+    "Issue Rectification",
+    "Problem Solving",
+    "TS",
+    "Issue Debugging",
+    "Fault Clearance",
+    "Error Rectification",
+    "Issue Resolution",
+    "Problem Clearance",
+    "Problem Diagnosis",
+    "Error Resolution",
+    "Problem Rectification",
+    "Fault Rectification",
+    "Problem Debugging",
+    "Debugging",
+    "Issue Clearance"
+  ],
+  "model": "gpt-4",
+  "temperature": 0.2,
+  "prompt": "For the documentation section title \"Troubleshooting\", list all common synonyms and abbreviations used in Cisco hardware documentation. Focus on technical terms, acronyms, and variations that would appear in official documentation. \n\nReturn as a Python list of strings only.",
+  "timestamp": 1750638496.729292,
+  "version": "1.0",
+  "hash": "77b3062e3b59c4644ff402a890c6191082377385c3d5c1b542caedd36667b639"
+}

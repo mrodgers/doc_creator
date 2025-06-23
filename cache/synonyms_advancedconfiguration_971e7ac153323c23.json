@@ -1,0 +1,27 @@
+{
+  "title": "Advanced Configuration",
+  "synonyms": [
+    "Advanced Router Settings",
+    "Advanced Switch Setup",
+    "Advanced Switch Settings",
+    "Advanced Network Configuration",
+    "Advanced Settings",
+    "Advanced Network Settings",
+    "Advanced Device Setup",
+    "Advanced Setup",
+    "Advanced Network Setup",
+    "Advanced Router Configuration",
+    "Advanced Switch Configuration",
+    "Advanced Config",
+    "Advanced Device Settings",
+    "Advanced Device Configuration",
+    "Advanced Configurations",
+    "Advanced Router Setup"
+  ],
+  "model": "gpt-4",
+  "temperature": 0.2,
+  "prompt": "For the documentation section title \"Advanced Configuration\", list all common synonyms and abbreviations used in Cisco hardware documentation. Focus on technical terms, acronyms, and variations that would appear in official documentation. \n\nReturn as a Python list of strings only.",
+  "timestamp": 1750638489.356842,
+  "version": "1.0",
+  "hash": "7d32d8ee193efc85d95eccc06d40a6e7a48d6cd06d9099a2bec864525012e36c"
+}

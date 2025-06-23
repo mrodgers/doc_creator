@@ -1,0 +1,270 @@
+{
+  "document_title": "Corrupted",
+  "sections": [
+    {
+      "template_id": "hardware_overview",
+      "template_title": "Hardware Overview",
+      "content": "# Hardware Overview\n\n## Hardware Overview\n\nHardware Overview\nThe hardware components provide reliable networking capabilities.\nInstallation Preparation\nProper preparation ensures successful installation and operation.\nHardware Installation\nFollow manufacturer guidelines for safe and proper installation.\nInitial Configuration\nConfigure basic settings for network connectivity and management.\nVerification and Testing\nVerify proper operation through systematic testing procedures.\n\n**Key Terms:** ASIC (Application-Specific Integrated Circuit)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_hardware_overview"
+      ],
+      "provenance": {
+        "template_id": "hardware_overview",
+        "template_title": "Hardware Overview",
+        "source_sections": [
+          {
+            "id": "corrupted_hardware_overview",
+            "title": "Hardware Overview",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431722"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616822",
+      "word_count": 60
+    },
+    {
+      "template_id": "installation_preparation",
+      "template_title": "Installation Preparation",
+      "content": "# Installation Preparation\n\n## Installation Preparation\n\nInstallation Preparation\nProper preparation ensures successful installation and operation.\nHardware Installation\nFollow manufacturer guidelines for safe and proper installation.\nInitial Configuration\nConfigure basic settings for network connectivity and management.\nVerification and Testing\nVerify proper operation through systematic testing procedures.\n\n**Key Terms:** ASIC (Application-Specific Integrated Circuit)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_installation_preparation"
+      ],
+      "provenance": {
+        "template_id": "installation_preparation",
+        "template_title": "Installation Preparation",
+        "source_sections": [
+          {
+            "id": "corrupted_installation_preparation",
+            "title": "Installation Preparation",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431762"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616849",
+      "word_count": 51
+    },
+    {
+      "template_id": "hardware_installation",
+      "template_title": "Hardware Installation",
+      "content": "# Hardware Installation\n\n## Hardware Installation\n\nHardware Installation\nFollow manufacturer guidelines for safe and proper installation.\nInitial Configuration\nConfigure basic settings for network connectivity and management.\nVerification and Testing\nVerify proper operation through systematic testing procedures.\n\n**Key Terms:** ASIC (Application-Specific Integrated Circuit)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_hardware_installation"
+      ],
+      "provenance": {
+        "template_id": "hardware_installation",
+        "template_title": "Hardware Installation",
+        "source_sections": [
+          {
+            "id": "corrupted_hardware_installation",
+            "title": "Hardware Installation",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431786"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616859",
+      "word_count": 42
+    },
+    {
+      "template_id": "initial_configuration",
+      "template_title": "Initial Configuration",
+      "content": "# Initial Configuration\n\n## Initial Configuration\n\nInitial Configuration\nConfigure basic settings for network connectivity and management.\nVerification and Testing\nVerify proper operation through systematic testing procedures.\n\n**Key Terms:** ASIC (Application-Specific Integrated Circuit)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_initial_configuration"
+      ],
+      "provenance": {
+        "template_id": "initial_configuration",
+        "template_title": "Initial Configuration",
+        "source_sections": [
+          {
+            "id": "corrupted_initial_configuration",
+            "title": "Initial Configuration",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431809"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616867",
+      "word_count": 32
+    },
+    {
+      "template_id": "advanced_configuration",
+      "template_title": "Advanced Configuration",
+      "content": "# Advanced Configuration\n\n## Advanced Configuration\n\nContent extracted from documentation for Advanced Configuration. This section contains relevant information about advanced configuration procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_advanced_configuration"
+      ],
+      "provenance": {
+        "template_id": "advanced_configuration",
+        "template_title": "Advanced Configuration",
+        "source_sections": [
+          {
+            "id": "corrupted_advanced_configuration",
+            "title": "Advanced Configuration",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431833"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616876",
+      "word_count": 29
+    },
+    {
+      "template_id": "verification_testing",
+      "template_title": "Verification and Testing",
+      "content": "# Verification and Testing\n\n## Verification and Testing\n\nVerification and Testing\nVerify proper operation through systematic testing procedures.\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_verification_testing"
+      ],
+      "provenance": {
+        "template_id": "verification_testing",
+        "template_title": "Verification and Testing",
+        "source_sections": [
+          {
+            "id": "corrupted_verification_testing",
+            "title": "Verification and Testing",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431884"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616883",
+      "word_count": 18
+    },
+    {
+      "template_id": "troubleshooting",
+      "template_title": "Troubleshooting",
+      "content": "# Troubleshooting\n\n## Troubleshooting\n\nContent extracted from documentation for Troubleshooting. This section contains relevant information about troubleshooting procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_troubleshooting"
+      ],
+      "provenance": {
+        "template_id": "troubleshooting",
+        "template_title": "Troubleshooting",
+        "source_sections": [
+          {
+            "id": "corrupted_troubleshooting",
+            "title": "Troubleshooting",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.431986"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616890",
+      "word_count": 25
+    },
+    {
+      "template_id": "maintenance",
+      "template_title": "Maintenance and Support",
+      "content": "# Maintenance and Support\n\n## Maintenance and Support\n\nContent extracted from documentation for Maintenance and Support. This section contains relevant information about maintenance and support procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "corrupted_maintenance"
+      ],
+      "provenance": {
+        "template_id": "maintenance",
+        "template_title": "Maintenance and Support",
+        "source_sections": [
+          {
+            "id": "corrupted_maintenance",
+            "title": "Maintenance and Support",
+            "source": "uploads/pending/corrupted.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:40:29.432075"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:40:34.616895",
+      "word_count": 33
+    }
+  ],
+  "gaps": [],
+  "coverage_percentage": 100.0,
+  "total_word_count": 290,
+  "generation_time": 5.1843202114105225,
+  "provenance_summary": {
+    "generation_timestamp": "2025-06-22T17:40:34.616903",
+    "total_content_sections": 8,
+    "total_draft_sections": 8,
+    "sources_used": [
+      "uploads/pending/corrupted.pdf"
+    ],
+    "template_coverage": {
+      "hardware_overview": {
+        "title": "Hardware Overview",
+        "confidence": 0.85,
+        "word_count": 60
+      },
+      "installation_preparation": {
+        "title": "Installation Preparation",
+        "confidence": 0.85,
+        "word_count": 51
+      },
+      "hardware_installation": {
+        "title": "Hardware Installation",
+        "confidence": 0.85,
+        "word_count": 42
+      },
+      "initial_configuration": {
+        "title": "Initial Configuration",
+        "confidence": 0.85,
+        "word_count": 32
+      },
+      "advanced_configuration": {
+        "title": "Advanced Configuration",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "verification_testing": {
+        "title": "Verification and Testing",
+        "confidence": 0.85,
+        "word_count": 18
+      },
+      "troubleshooting": {
+        "title": "Troubleshooting",
+        "confidence": 0.85,
+        "word_count": 25
+      },
+      "maintenance": {
+        "title": "Maintenance and Support",
+        "confidence": 0.85,
+        "word_count": 33
+      }
+    },
+    "acronym_expansion_used": true,
+    "llm_enhancement_used": true
+  },
+  "confidence_score": 0.8499999999999999
+}

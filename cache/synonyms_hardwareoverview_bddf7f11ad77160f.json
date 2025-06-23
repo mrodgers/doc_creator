@@ -1,0 +1,23 @@
+{
+  "title": "Hardware Overview",
+  "synonyms": [
+    "Equipment Overview",
+    "Device Overview",
+    "Hardware Specs",
+    "Hardware Details",
+    "Hardware Configuration",
+    "Hardware Info",
+    "H/W Overview",
+    "Hardware Specifications",
+    "Hardware Profile",
+    "HW Overview",
+    "Hardware Summary",
+    "Hardware Architecture"
+  ],
+  "model": "gpt-4",
+  "temperature": 0.2,
+  "prompt": "For the documentation section title \"Hardware Overview\", list all common synonyms and abbreviations used in Cisco hardware documentation. Focus on technical terms, acronyms, and variations that would appear in official documentation. \n\nReturn as a Python list of strings only.",
+  "timestamp": 1750638473.5361102,
+  "version": "1.0",
+  "hash": "9a90b38cd4fcdffc1e35d7e9f3dcc8ffe8b87f4ce92a2a6556fec4a27ca91639"
+}

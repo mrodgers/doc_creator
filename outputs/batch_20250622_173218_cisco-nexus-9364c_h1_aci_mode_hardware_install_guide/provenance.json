@@ -1,0 +1,176 @@
+{
+  "session_id": "2c7a438f-8c63-4b93-bf9d-b7702aa568fe",
+  "document_title": "Cisco Nexus 9364C H1 Aci Mode Hardware Install Guide",
+  "data_sources": [
+    {
+      "id": "source_1",
+      "name": "Hardware Overview",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.834114",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_hardware_overview",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_2",
+      "name": "Installation Preparation",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.836732",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_installation_preparation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_3",
+      "name": "Hardware Installation",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.839358",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_hardware_installation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_4",
+      "name": "Initial Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.842174",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_initial_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_5",
+      "name": "Advanced Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.844764",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_advanced_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_6",
+      "name": "Verification and Testing",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.847561",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_verification_testing",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_7",
+      "name": "Troubleshooting",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.851347",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_troubleshooting",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_8",
+      "name": "Maintenance and Support",
+      "type": "pdf",
+      "path": "uploads/pending/cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:32:18.854667",
+      "metadata": {
+        "section_id": "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_maintenance",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    }
+  ],
+  "transformations": [
+    {
+      "id": "transform_1",
+      "step_name": "Draft Generation",
+      "step_type": "generation",
+      "input_sources": [
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_hardware_overview",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_installation_preparation",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_hardware_installation",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_initial_configuration",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_advanced_configuration",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_verification_testing",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_troubleshooting",
+        "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide_maintenance"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft_result.json",
+        "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft.md"
+      ],
+      "parameters": {},
+      "execution_time": 10.276998281478882,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:32:29.133004"
+    },
+    {
+      "id": "transform_2",
+      "step_name": "Gap Analysis",
+      "step_type": "analysis",
+      "input_sources": [
+        "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft_result.json"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/gap_report.json",
+        "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/gap_report.md"
+      ],
+      "parameters": {},
+      "execution_time": 6.985664367675781e-05,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:32:29.133457"
+    }
+  ],
+  "decisions": [],
+  "final_artifacts": [
+    "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft.md",
+    "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/gap_report.md"
+  ],
+  "generation_time": 13.214375019073486,
+  "created_at": "2025-06-22T17:32:29.133490",
+  "version": "1.0",
+  "metadata": {
+    "total_sources": 8,
+    "total_transformations": 2,
+    "total_decisions": 0,
+    "successful_transformations": 2,
+    "failed_transformations": 0
+  }
+}

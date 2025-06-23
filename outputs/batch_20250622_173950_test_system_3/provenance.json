@@ -1,0 +1,331 @@
+{
+  "session_id": "005aa91e-16b1-4a78-8e9d-d90da0b4f19a",
+  "document_title": "Test System 3",
+  "data_sources": [
+    {
+      "id": "source_1",
+      "name": "Hardware Overview",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.138047",
+      "metadata": {
+        "section_id": "test_system_1_hardware_overview",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_2",
+      "name": "Installation Preparation",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.140517",
+      "metadata": {
+        "section_id": "test_system_1_installation_preparation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_3",
+      "name": "Hardware Installation",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.143114",
+      "metadata": {
+        "section_id": "test_system_1_hardware_installation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_4",
+      "name": "Initial Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.145683",
+      "metadata": {
+        "section_id": "test_system_1_initial_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_5",
+      "name": "Advanced Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.148025",
+      "metadata": {
+        "section_id": "test_system_1_advanced_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_6",
+      "name": "Verification and Testing",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.150489",
+      "metadata": {
+        "section_id": "test_system_1_verification_testing",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_7",
+      "name": "Troubleshooting",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.152942",
+      "metadata": {
+        "section_id": "test_system_1_troubleshooting",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_8",
+      "name": "Maintenance and Support",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_1.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:39.155553",
+      "metadata": {
+        "section_id": "test_system_1_maintenance",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_9",
+      "name": "Hardware Overview",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.856609",
+      "metadata": {
+        "section_id": "test_system_3_hardware_overview",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_10",
+      "name": "Installation Preparation",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.859423",
+      "metadata": {
+        "section_id": "test_system_3_installation_preparation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_11",
+      "name": "Hardware Installation",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.861911",
+      "metadata": {
+        "section_id": "test_system_3_hardware_installation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_12",
+      "name": "Initial Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.864417",
+      "metadata": {
+        "section_id": "test_system_3_initial_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_13",
+      "name": "Advanced Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.867128",
+      "metadata": {
+        "section_id": "test_system_3_advanced_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_14",
+      "name": "Verification and Testing",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.869635",
+      "metadata": {
+        "section_id": "test_system_3_verification_testing",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_15",
+      "name": "Troubleshooting",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.871997",
+      "metadata": {
+        "section_id": "test_system_3_troubleshooting",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_16",
+      "name": "Maintenance and Support",
+      "type": "pdf",
+      "path": "uploads/pending/test_system_3.pdf",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "size_bytes": 4358652,
+      "timestamp": "2025-06-22T17:39:50.874497",
+      "metadata": {
+        "section_id": "test_system_3_maintenance",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    }
+  ],
+  "transformations": [
+    {
+      "id": "transform_1",
+      "step_name": "Draft Generation",
+      "step_type": "generation",
+      "input_sources": [
+        "test_system_1_hardware_overview",
+        "test_system_1_installation_preparation",
+        "test_system_1_hardware_installation",
+        "test_system_1_initial_configuration",
+        "test_system_1_advanced_configuration",
+        "test_system_1_verification_testing",
+        "test_system_1_troubleshooting",
+        "test_system_1_maintenance"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173939_test_system_1/draft_result.json",
+        "outputs/batch_20250622_173939_test_system_1/draft.md"
+      ],
+      "parameters": {},
+      "execution_time": 8.980623960494995,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:39:48.137828"
+    },
+    {
+      "id": "transform_2",
+      "step_name": "Gap Analysis",
+      "step_type": "analysis",
+      "input_sources": [
+        "outputs/batch_20250622_173939_test_system_1/draft_result.json"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173939_test_system_1/gap_report.json",
+        "outputs/batch_20250622_173939_test_system_1/gap_report.md"
+      ],
+      "parameters": {},
+      "execution_time": 0.00011801719665527344,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:39:48.138424"
+    },
+    {
+      "id": "transform_3",
+      "step_name": "Draft Generation",
+      "step_type": "generation",
+      "input_sources": [
+        "test_system_3_hardware_overview",
+        "test_system_3_installation_preparation",
+        "test_system_3_hardware_installation",
+        "test_system_3_initial_configuration",
+        "test_system_3_advanced_configuration",
+        "test_system_3_verification_testing",
+        "test_system_3_troubleshooting",
+        "test_system_3_maintenance"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173950_test_system_3/draft_result.json",
+        "outputs/batch_20250622_173950_test_system_3/draft.md"
+      ],
+      "parameters": {},
+      "execution_time": 9.123430967330933,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:39:59.999895"
+    },
+    {
+      "id": "transform_4",
+      "step_name": "Gap Analysis",
+      "step_type": "analysis",
+      "input_sources": [
+        "outputs/batch_20250622_173950_test_system_3/draft_result.json"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173950_test_system_3/gap_report.json",
+        "outputs/batch_20250622_173950_test_system_3/gap_report.md"
+      ],
+      "parameters": {},
+      "execution_time": 6.29425048828125e-05,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:40:00.000765"
+    }
+  ],
+  "decisions": [],
+  "final_artifacts": [
+    "outputs/batch_20250622_173939_test_system_1/draft.md",
+    "outputs/batch_20250622_173939_test_system_1/gap_report.md",
+    "outputs/batch_20250622_173950_test_system_3/draft.md",
+    "outputs/batch_20250622_173950_test_system_3/gap_report.md"
+  ],
+  "generation_time": 23.418859004974365,
+  "created_at": "2025-06-22T17:40:00.000842",
+  "version": "1.0",
+  "metadata": {
+    "total_sources": 16,
+    "total_transformations": 4,
+    "total_decisions": 0,
+    "successful_transformations": 4,
+    "failed_transformations": 0
+  }
+}

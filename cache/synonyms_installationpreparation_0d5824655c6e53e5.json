@@ -1,0 +1,26 @@
+{
+  "title": "Installation Preparation",
+  "synonyms": [
+    "Setup Preparation",
+    "Installation Setup",
+    "Pre-Installation Steps",
+    "Pre-Setup Procedures",
+    "Pre-Install Procedures",
+    "Pre-Install Setup",
+    "Installation Readiness",
+    "Install Prep",
+    "Installation Preparations",
+    "Preparation for Setup",
+    "Pre-Install",
+    "Pre-Installation",
+    "Install Readiness",
+    "Preparation for Installation",
+    "Pre-Setup"
+  ],
+  "model": "gpt-4",
+  "temperature": 0.2,
+  "prompt": "For the documentation section title \"Installation Preparation\", list all common synonyms and abbreviations used in Cisco hardware documentation. Focus on technical terms, acronyms, and variations that would appear in official documentation. \n\nReturn as a Python list of strings only.",
+  "timestamp": 1750638478.885611,
+  "version": "1.0",
+  "hash": "95a4d4eb45789f2fc5fac70ea7ac2791391a13ce9ab1d6e097e56236d3d089f5"
+}

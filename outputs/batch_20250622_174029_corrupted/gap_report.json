@@ -1,0 +1,13 @@
+{
+  "document_title": "Corrupted",
+  "gaps": [],
+  "sme_queries": [],
+  "coverage_percentage": 100.0,
+  "critical_gaps": 0,
+  "high_priority_gaps": 0,
+  "total_gaps": 0,
+  "generated_at": "2025-06-22T17:40:34.619055",
+  "recommendations": [
+    "Documentation coverage is good. Focus on remaining gaps for completeness."
+  ]
+}

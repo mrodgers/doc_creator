@@ -27,7 +27,6 @@ dependencies = [
     "aiofiles>=23.0.0",
     "python-multipart>=0.0.6",
     "httpx>=0.25.0",
-    "pypdf2>=3.0.0",
     "asyncio-mqtt>=0.13.0",
     "flask>=3.0.0",
     "werkzeug>=3.0.0",

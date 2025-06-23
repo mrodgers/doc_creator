@@ -78,3 +78,6 @@ htmlcov/
 
 # uv
 .uv/ 
+
+.DS_Store/
+cache/

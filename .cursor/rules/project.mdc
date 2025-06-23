@@ -103,3 +103,11 @@ phased_development:
     - ui_development
 
 ```
+
+- Always use uv for venv management 
+- Always use ruff for linting python
+- Always use openai python libraries 1.x+
+- Always create tests along with the code your are writing in order to prove viability.
+- Always track temporary files in use a list is kept of files not needed in production.
+- Always include a single sentence that summarizes the goal of the app at the end of responses in order to maintain alignment.
+

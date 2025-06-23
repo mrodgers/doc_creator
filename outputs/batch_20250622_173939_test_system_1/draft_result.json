@@ -1,0 +1,270 @@
+{
+  "document_title": "Test System 1",
+  "sections": [
+    {
+      "template_id": "hardware_overview",
+      "template_title": "Hardware Overview",
+      "content": "# Hardware Overview\n\n## Hardware Overview\n\nContent extracted from documentation for Hardware Overview. This section contains relevant information about hardware overview procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_hardware_overview"
+      ],
+      "provenance": {
+        "template_id": "hardware_overview",
+        "template_title": "Hardware Overview",
+        "source_sections": [
+          {
+            "id": "test_system_1_hardware_overview",
+            "title": "Hardware Overview",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.132139"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.135961",
+      "word_count": 29
+    },
+    {
+      "template_id": "installation_preparation",
+      "template_title": "Installation Preparation",
+      "content": "# Installation Preparation\n\n## Installation Preparation\n\nContent extracted from documentation for Installation Preparation. This section contains relevant information about installation preparation procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_installation_preparation"
+      ],
+      "provenance": {
+        "template_id": "installation_preparation",
+        "template_title": "Installation Preparation",
+        "source_sections": [
+          {
+            "id": "test_system_1_installation_preparation",
+            "title": "Installation Preparation",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.132649"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136001",
+      "word_count": 29
+    },
+    {
+      "template_id": "hardware_installation",
+      "template_title": "Hardware Installation",
+      "content": "# Hardware Installation\n\n## Hardware Installation\n\nContent extracted from documentation for Hardware Installation. This section contains relevant information about hardware installation procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_hardware_installation"
+      ],
+      "provenance": {
+        "template_id": "hardware_installation",
+        "template_title": "Hardware Installation",
+        "source_sections": [
+          {
+            "id": "test_system_1_hardware_installation",
+            "title": "Hardware Installation",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.133077"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136013",
+      "word_count": 29
+    },
+    {
+      "template_id": "initial_configuration",
+      "template_title": "Initial Configuration",
+      "content": "# Initial Configuration\n\n## Initial Configuration\n\nContent extracted from documentation for Initial Configuration. This section contains relevant information about initial configuration procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_initial_configuration"
+      ],
+      "provenance": {
+        "template_id": "initial_configuration",
+        "template_title": "Initial Configuration",
+        "source_sections": [
+          {
+            "id": "test_system_1_initial_configuration",
+            "title": "Initial Configuration",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.133499"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136024",
+      "word_count": 29
+    },
+    {
+      "template_id": "advanced_configuration",
+      "template_title": "Advanced Configuration",
+      "content": "# Advanced Configuration\n\n## Advanced Configuration\n\nContent extracted from documentation for Advanced Configuration. This section contains relevant information about advanced configuration procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_advanced_configuration"
+      ],
+      "provenance": {
+        "template_id": "advanced_configuration",
+        "template_title": "Advanced Configuration",
+        "source_sections": [
+          {
+            "id": "test_system_1_advanced_configuration",
+            "title": "Advanced Configuration",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.133930"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136034",
+      "word_count": 29
+    },
+    {
+      "template_id": "verification_testing",
+      "template_title": "Verification and Testing",
+      "content": "# Verification and Testing\n\n## Verification and Testing\n\nContent extracted from documentation for Verification and Testing. This section contains relevant information about verification and testing procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_verification_testing"
+      ],
+      "provenance": {
+        "template_id": "verification_testing",
+        "template_title": "Verification and Testing",
+        "source_sections": [
+          {
+            "id": "test_system_1_verification_testing",
+            "title": "Verification and Testing",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.134344"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136044",
+      "word_count": 33
+    },
+    {
+      "template_id": "troubleshooting",
+      "template_title": "Troubleshooting",
+      "content": "# Troubleshooting\n\n## Troubleshooting\n\n\u2022CiscoACITroubleshootingGuide\n\u2022CiscoACISwitchCommandReference,NX-OSRelease11.0\n\u2022CiscoVerifiedScalabilityGuideforCiscoACI\n\u2022CiscoACIMIBQuickReference\n\u2022CiscoNexusCLItoCiscoAPICMappingGuide\n\u2022ApplicationCentricInftrastructureFabricHardwareInstallationGuide\n\u2022CiscoNX-OSReleaseNotesforCiscoNexus9000SeriesACI-ModeSwitches\n\u2022CiscoNexus9000SeriesACIModeLicensingGuide\n\u2022CiscoNexus93108TX-EXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93108TX-FXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93120TXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93128TXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93180LC-EXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93180YC-EXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus93180YC-FXACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus9332PQACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus9336PQACI-ModeSwitchHardwareInstallationGuide\n\u2022CiscoNexus9372PXand9372PX-EACI-ModeSwitchesHardwareInstallationGuide\n\u2022CiscoNexus9372TXand9372TX-EACI-ModeSwitchesHardwareInstallationGuide\n\n**Key Terms:** ACI (Application Centric Infrastructure)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_troubleshooting"
+      ],
+      "provenance": {
+        "template_id": "troubleshooting",
+        "template_title": "Troubleshooting",
+        "source_sections": [
+          {
+            "id": "test_system_1_troubleshooting",
+            "title": "Troubleshooting",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.134560"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136056",
+      "word_count": 29
+    },
+    {
+      "template_id": "maintenance",
+      "template_title": "Maintenance and Support",
+      "content": "# Maintenance and Support\n\n## Maintenance and Support\n\nContent extracted from documentation for Maintenance and Support. This section contains relevant information about maintenance and support procedures and requirements.\n\n**Key Terms:** ROM (Read-Only Memory)\n\n",
+      "confidence": 0.85,
+      "source_sections": [
+        "test_system_1_maintenance"
+      ],
+      "provenance": {
+        "template_id": "maintenance",
+        "template_title": "Maintenance and Support",
+        "source_sections": [
+          {
+            "id": "test_system_1_maintenance",
+            "title": "Maintenance and Support",
+            "source": "uploads/pending/test_system_1.pdf",
+            "confidence": 0.85,
+            "timestamp": "2025-06-22T17:39:39.135002"
+          }
+        ],
+        "total_sources": 1,
+        "average_confidence": 0.85
+      },
+      "generated_at": "2025-06-22T17:39:48.136071",
+      "word_count": 33
+    }
+  ],
+  "gaps": [],
+  "coverage_percentage": 100.0,
+  "total_word_count": 240,
+  "generation_time": 8.980522394180298,
+  "provenance_summary": {
+    "generation_timestamp": "2025-06-22T17:39:48.136104",
+    "total_content_sections": 8,
+    "total_draft_sections": 8,
+    "sources_used": [
+      "uploads/pending/test_system_1.pdf"
+    ],
+    "template_coverage": {
+      "hardware_overview": {
+        "title": "Hardware Overview",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "installation_preparation": {
+        "title": "Installation Preparation",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "hardware_installation": {
+        "title": "Hardware Installation",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "initial_configuration": {
+        "title": "Initial Configuration",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "advanced_configuration": {
+        "title": "Advanced Configuration",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "verification_testing": {
+        "title": "Verification and Testing",
+        "confidence": 0.85,
+        "word_count": 33
+      },
+      "troubleshooting": {
+        "title": "Troubleshooting",
+        "confidence": 0.85,
+        "word_count": 29
+      },
+      "maintenance": {
+        "title": "Maintenance and Support",
+        "confidence": 0.85,
+        "word_count": 33
+      }
+    },
+    "acronym_expansion_used": true,
+    "llm_enhancement_used": true
+  },
+  "confidence_score": 0.8499999999999999
+}

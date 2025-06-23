@@ -2,6 +2,9 @@
 """
 PDF Extractor Utility
 Simple PDF text extraction for testing purposes.
+
+DEPRECATION NOTICE: PyPDF2 has been removed as it is no longer maintained.
+Use pdfplumber (primary) or PyMuPDF (fallback) instead.
 """
 
 import logging
@@ -13,40 +16,47 @@ logger = logging.getLogger(__name__)
 
 
 class PDFExtractor:
-    """Simple PDF text extractor for testing."""
+    """Simple PDF text extractor for testing.
+    
+    DEPRECATION NOTICE: PyPDF2 has been removed as it is no longer maintained.
+    This extractor uses pdfplumber as primary and PyMuPDF as fallback.
+    """
     
     def __init__(self):
         self.extractors = []
         self._init_extractors()
     
     def _init_extractors(self):
-        """Initialize available PDF extractors."""
-        # Try PyPDF2 first
-        try:
-            import PyPDF2
-            self.extractors.append(('PyPDF2', self._extract_with_pypdf2))
-            logger.info("PyPDF2 extractor available")
-        except ImportError:
-            logger.warning("PyPDF2 not available. Install with: uv add PyPDF2")
+        """Initialize available PDF extractors.
         
-        # Try pdfplumber as fallback
+        DEPRECATION NOTICE: PyPDF2 has been removed as it is no longer maintained.
+        Use pdfplumber (primary) or PyMuPDF (fallback) instead.
+        """
+        # Try pdfplumber first (recommended)
         try:
             import pdfplumber
             self.extractors.append(('pdfplumber', self._extract_with_pdfplumber))
-            logger.info("pdfplumber extractor available")
+            logger.info("pdfplumber extractor available (primary)")
         except ImportError:
             logger.warning("pdfplumber not available. Install with: uv add pdfplumber")
         
-        # Try pymupdf as another fallback
+        # Try pymupdf as fallback
         try:
             import fitz  # PyMuPDF
             self.extractors.append(('PyMuPDF', self._extract_with_pymupdf))
-            logger.info("PyMuPDF extractor available")
+            logger.info("PyMuPDF extractor available (fallback)")
         except ImportError:
             logger.warning("PyMuPDF not available. Install with: uv add PyMuPDF")
+        
+        if not self.extractors:
+            logger.error("No PDF extractors available. Install pdfplumber: uv add pdfplumber")
     
     def extract_text(self, pdf_path: str) -> str:
-        """Extract text from PDF file."""
+        """Extract text from PDF file.
+        
+        DEPRECATION NOTICE: PyPDF2 has been removed as it is no longer maintained.
+        This method uses pdfplumber as primary and PyMuPDF as fallback.
+        """
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
         
@@ -66,19 +76,8 @@ class PDFExtractor:
         logger.error("All PDF extractors failed, returning placeholder text")
         return self._get_placeholder_text(pdf_path)
     
-    def _extract_with_pypdf2(self, pdf_path: str) -> str:
-        """Extract text using PyPDF2."""
-        import PyPDF2
-        
-        text = ""
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            for page in pdf_reader.pages:
-                text += page.extract_text() + "\n"
-        return text
-    
     def _extract_with_pdfplumber(self, pdf_path: str) -> str:
-        """Extract text using pdfplumber."""
+        """Extract text using pdfplumber (primary extractor)."""
         import pdfplumber
         
         text = ""
@@ -90,7 +89,7 @@ class PDFExtractor:
         return text
     
     def _extract_with_pymupdf(self, pdf_path: str) -> str:
-        """Extract text using PyMuPDF."""
+        """Extract text using PyMuPDF (fallback extractor)."""
         import fitz
         
         text = ""
@@ -104,9 +103,13 @@ class PDFExtractor:
         """Return placeholder text when extraction fails."""
         filename = Path(pdf_path).stem
         
+        # Clear marker for placeholder content
+        placeholder_marker = "[PLACEHOLDER_CONTENT]"
+        
         # Return realistic placeholder content based on filename
         if "installation" in filename.lower():
-            return """
+            return f"""
+            {placeholder_marker}
             Hardware Installation Guide
             
             This document provides comprehensive instructions for installing Cisco hardware components.
@@ -138,7 +141,8 @@ class PDFExtractor:
             - Performance baseline establishment
             """
         elif "datasheet" in filename.lower():
-            return """
+            return f"""
+            {placeholder_marker}
             Hardware Overview
             
             This datasheet provides detailed specifications for Cisco hardware components.
@@ -158,7 +162,8 @@ class PDFExtractor:
             - Management protocols
             """
         elif "troubleshooting" in filename.lower() or "release" in filename.lower():
-            return """
+            return f"""
+            {placeholder_marker}
             Troubleshooting Guide
             
             This section provides troubleshooting procedures for common issues.
@@ -178,7 +183,8 @@ class PDFExtractor:
             - Backup procedures
             """
         else:
-            return """
+            return f"""
+            {placeholder_marker}
             Cisco Documentation
             
             This document contains important information about Cisco hardware and software.

@@ -6,21 +6,21 @@ Analyze Cisco Acronyms PDF for integration into the AI Document Generation Syste
 import json
 import re
 from pathlib import Path
-import PyPDF2
+import pdfplumber
 
 
-def extract_pdf_text(pdf_path: str) -> str:
-    """Extract text from PDF file."""
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """Extract text from PDF using pdfplumber."""
+    text = ""
     try:
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text() + "\n"
-            return text
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
     except Exception as e:
-        print(f"Error reading PDF: {e}")
-        return ""
+        print(f"Error extracting text from {pdf_path}: {e}")
+    return text
 
 
 def analyze_acronyms_structure(text: str) -> dict:
@@ -129,7 +129,7 @@ def main():
     
     # Extract text from PDF
     print("📄 Extracting text from PDF...")
-    text = extract_pdf_text(pdf_path)
+    text = extract_text_from_pdf(pdf_path)
     
     if not text:
         print("❌ Failed to extract text from PDF")

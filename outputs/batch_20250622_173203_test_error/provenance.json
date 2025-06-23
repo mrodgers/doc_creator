@@ -1,0 +1,176 @@
+{
+  "session_id": "a977cb6d-8600-4a22-a0f8-38290becfc35",
+  "document_title": "Test Error",
+  "data_sources": [
+    {
+      "id": "source_1",
+      "name": "Hardware Overview",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010442",
+      "metadata": {
+        "section_id": "test_error_hardware_overview",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_2",
+      "name": "Installation Preparation",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010477",
+      "metadata": {
+        "section_id": "test_error_installation_preparation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_3",
+      "name": "Hardware Installation",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010509",
+      "metadata": {
+        "section_id": "test_error_hardware_installation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_4",
+      "name": "Initial Configuration",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010541",
+      "metadata": {
+        "section_id": "test_error_initial_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_5",
+      "name": "Advanced Configuration",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010631",
+      "metadata": {
+        "section_id": "test_error_advanced_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_6",
+      "name": "Verification and Testing",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010767",
+      "metadata": {
+        "section_id": "test_error_verification_testing",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_7",
+      "name": "Troubleshooting",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010823",
+      "metadata": {
+        "section_id": "test_error_troubleshooting",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_8",
+      "name": "Maintenance and Support",
+      "type": "pdf",
+      "path": "test_uploads/pending/test_error.pdf",
+      "hash": "e0e64062f27cee1226783f5555395dfe7215c4a623bfad4021e7b6e15645ac34",
+      "size_bytes": 1559,
+      "timestamp": "2025-06-22T17:32:03.010867",
+      "metadata": {
+        "section_id": "test_error_maintenance",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    }
+  ],
+  "transformations": [
+    {
+      "id": "transform_1",
+      "step_name": "Draft Generation",
+      "step_type": "generation",
+      "input_sources": [
+        "test_error_hardware_overview",
+        "test_error_installation_preparation",
+        "test_error_hardware_installation",
+        "test_error_initial_configuration",
+        "test_error_advanced_configuration",
+        "test_error_verification_testing",
+        "test_error_troubleshooting",
+        "test_error_maintenance"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173203_test_error/draft_result.json",
+        "outputs/batch_20250622_173203_test_error/draft.md"
+      ],
+      "parameters": {},
+      "execution_time": 5.285833835601807,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:32:08.297610"
+    },
+    {
+      "id": "transform_2",
+      "step_name": "Gap Analysis",
+      "step_type": "analysis",
+      "input_sources": [
+        "outputs/batch_20250622_173203_test_error/draft_result.json"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_173203_test_error/gap_report.json",
+        "outputs/batch_20250622_173203_test_error/gap_report.md"
+      ],
+      "parameters": {},
+      "execution_time": 5.984306335449219e-05,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:32:08.297996"
+    }
+  ],
+  "decisions": [],
+  "final_artifacts": [
+    "outputs/batch_20250622_173203_test_error/draft.md",
+    "outputs/batch_20250622_173203_test_error/gap_report.md"
+  ],
+  "generation_time": 5.288840055465698,
+  "created_at": "2025-06-22T17:32:08.298020",
+  "version": "1.0",
+  "metadata": {
+    "total_sources": 8,
+    "total_transformations": 2,
+    "total_decisions": 0,
+    "successful_transformations": 2,
+    "failed_transformations": 0
+  }
+}

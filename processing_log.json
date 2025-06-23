@@ -1,0 +1,78 @@
+{
+  "processed_files": {
+    "cisco-nexus-9364c_h1_aci_mode_hardware_install_guide.pdf": {
+      "status": "completed",
+      "processed_at": "2025-06-22T17:32:29.134083",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "output_dir": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide",
+      "processing_time": 13.21489405632019,
+      "content_sections": 8,
+      "coverage": 0,
+      "confidence": 0,
+      "output_files": {
+        "draft_json": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft_result.json",
+        "draft_md": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/draft.md",
+        "gap_json": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/gap_report.json",
+        "gap_md": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/gap_report.md",
+        "provenance_json": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/provenance.json",
+        "provenance_md": "outputs/batch_20250622_173218_cisco-nexus-9364c_h1_aci_mode_hardware_install_guide/provenance_summary.md"
+      }
+    },
+    "test_system_1.pdf": {
+      "status": "completed",
+      "processed_at": "2025-06-22T17:39:48.139408",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "output_dir": "outputs/batch_20250622_173939_test_system_1",
+      "processing_time": 11.551145076751709,
+      "content_sections": 8,
+      "coverage": 0,
+      "confidence": 0,
+      "output_files": {
+        "draft_json": "outputs/batch_20250622_173939_test_system_1/draft_result.json",
+        "draft_md": "outputs/batch_20250622_173939_test_system_1/draft.md",
+        "gap_json": "outputs/batch_20250622_173939_test_system_1/gap_report.json",
+        "gap_md": "outputs/batch_20250622_173939_test_system_1/gap_report.md",
+        "provenance_json": "outputs/batch_20250622_173939_test_system_1/provenance.json",
+        "provenance_md": "outputs/batch_20250622_173939_test_system_1/provenance_summary.md"
+      }
+    },
+    "test_system_3.pdf": {
+      "status": "completed",
+      "processed_at": "2025-06-22T17:40:00.003047",
+      "hash": "49f662c8867f4175154c3bd0138f59d116cc6a91229e4d6895799a743b6a901f",
+      "output_dir": "outputs/batch_20250622_173950_test_system_3",
+      "processing_time": 11.857728719711304,
+      "content_sections": 8,
+      "coverage": 0,
+      "confidence": 0,
+      "output_files": {
+        "draft_json": "outputs/batch_20250622_173950_test_system_3/draft_result.json",
+        "draft_md": "outputs/batch_20250622_173950_test_system_3/draft.md",
+        "gap_json": "outputs/batch_20250622_173950_test_system_3/gap_report.json",
+        "gap_md": "outputs/batch_20250622_173950_test_system_3/gap_report.md",
+        "provenance_json": "outputs/batch_20250622_173950_test_system_3/provenance.json",
+        "provenance_md": "outputs/batch_20250622_173950_test_system_3/provenance_summary.md"
+      }
+    },
+    "corrupted.pdf": {
+      "status": "completed_with_warnings",
+      "processed_at": "2025-06-22T17:40:34.619876",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "output_dir": "outputs/batch_20250622_174029_corrupted",
+      "processing_time": 5.192836046218872,
+      "content_sections": 8,
+      "coverage": 0,
+      "confidence": 0,
+      "output_files": {
+        "draft_json": "outputs/batch_20250622_174029_corrupted/draft_result.json",
+        "draft_md": "outputs/batch_20250622_174029_corrupted/draft.md",
+        "gap_json": "outputs/batch_20250622_174029_corrupted/gap_report.json",
+        "gap_md": "outputs/batch_20250622_174029_corrupted/gap_report.md",
+        "provenance_json": "outputs/batch_20250622_174029_corrupted/provenance.json",
+        "provenance_md": "outputs/batch_20250622_174029_corrupted/provenance_summary.md"
+      },
+      "warning": "Placeholder extraction used: PDF may be corrupted or not a valid PDF."
+    }
+  },
+  "last_check": "2025-06-22T17:40:34.619936"
+}

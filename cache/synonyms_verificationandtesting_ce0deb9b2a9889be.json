@@ -1,0 +1,18 @@
+{
+  "title": "Verification and Testing",
+  "synonyms": [
+    "Certification and Testing",
+    "Check and Test",
+    "Inspection and Testing",
+    "Confirm and Test",
+    "Authenticity and Testing",
+    "Proof and Testing",
+    "Validation and Testing"
+  ],
+  "model": "gpt-4",
+  "temperature": 0.2,
+  "prompt": "For the documentation section title \"Verification and Testing\", list all common synonyms and abbreviations used in Cisco hardware documentation. Focus on technical terms, acronyms, and variations that would appear in official documentation. \n\nReturn as a Python list of strings only.",
+  "timestamp": 1750638491.785163,
+  "version": "1.0",
+  "hash": "29daddfafc165b823f901076cd1356e3984f5cc0bdcc58f68ab778c18ad420da"
+}

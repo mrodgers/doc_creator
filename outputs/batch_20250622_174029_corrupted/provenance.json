@@ -1,0 +1,176 @@
+{
+  "session_id": "bd070707-a414-443f-92fc-67cacfd6d43e",
+  "document_title": "Corrupted",
+  "data_sources": [
+    {
+      "id": "source_1",
+      "name": "Hardware Overview",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432319",
+      "metadata": {
+        "section_id": "corrupted_hardware_overview",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_2",
+      "name": "Installation Preparation",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432371",
+      "metadata": {
+        "section_id": "corrupted_installation_preparation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_3",
+      "name": "Hardware Installation",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432409",
+      "metadata": {
+        "section_id": "corrupted_hardware_installation",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_4",
+      "name": "Initial Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432442",
+      "metadata": {
+        "section_id": "corrupted_initial_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_5",
+      "name": "Advanced Configuration",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432474",
+      "metadata": {
+        "section_id": "corrupted_advanced_configuration",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_6",
+      "name": "Verification and Testing",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432505",
+      "metadata": {
+        "section_id": "corrupted_verification_testing",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_7",
+      "name": "Troubleshooting",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432535",
+      "metadata": {
+        "section_id": "corrupted_troubleshooting",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    },
+    {
+      "id": "source_8",
+      "name": "Maintenance and Support",
+      "type": "pdf",
+      "path": "uploads/pending/corrupted.pdf",
+      "hash": "d145bd418d6e2fb3d44355be737ffaea8b48922d7e2e237e453bd5cdd32459db",
+      "size_bytes": 28,
+      "timestamp": "2025-06-22T17:40:29.432564",
+      "metadata": {
+        "section_id": "corrupted_maintenance",
+        "confidence": 0.85
+      },
+      "confidence": 1.0
+    }
+  ],
+  "transformations": [
+    {
+      "id": "transform_1",
+      "step_name": "Draft Generation",
+      "step_type": "generation",
+      "input_sources": [
+        "corrupted_hardware_overview",
+        "corrupted_installation_preparation",
+        "corrupted_hardware_installation",
+        "corrupted_initial_configuration",
+        "corrupted_advanced_configuration",
+        "corrupted_verification_testing",
+        "corrupted_troubleshooting",
+        "corrupted_maintenance"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_174029_corrupted/draft_result.json",
+        "outputs/batch_20250622_174029_corrupted/draft.md"
+      ],
+      "parameters": {},
+      "execution_time": 5.184368133544922,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:40:34.618969"
+    },
+    {
+      "id": "transform_2",
+      "step_name": "Gap Analysis",
+      "step_type": "analysis",
+      "input_sources": [
+        "outputs/batch_20250622_174029_corrupted/draft_result.json"
+      ],
+      "output_artifacts": [
+        "outputs/batch_20250622_174029_corrupted/gap_report.json",
+        "outputs/batch_20250622_174029_corrupted/gap_report.md"
+      ],
+      "parameters": {},
+      "execution_time": 6.341934204101562e-05,
+      "success": true,
+      "error_message": null,
+      "timestamp": "2025-06-22T17:40:34.619336"
+    }
+  ],
+  "decisions": [],
+  "final_artifacts": [
+    "outputs/batch_20250622_174029_corrupted/draft.md",
+    "outputs/batch_20250622_174029_corrupted/gap_report.md"
+  ],
+  "generation_time": 5.192720890045166,
+  "created_at": "2025-06-22T17:40:34.619363",
+  "version": "1.0",
+  "metadata": {
+    "total_sources": 8,
+    "total_transformations": 2,
+    "total_decisions": 0,
+    "successful_transformations": 2,
+    "failed_transformations": 0
+  }
+}

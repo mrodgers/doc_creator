@@ -1,0 +1,13 @@
+{
+  "document_title": "Test System 1",
+  "gaps": [],
+  "sme_queries": [],
+  "coverage_percentage": 100.0,
+  "critical_gaps": 0,
+  "high_priority_gaps": 0,
+  "total_gaps": 0,
+  "generated_at": "2025-06-22T17:39:48.137949",
+  "recommendations": [
+    "Documentation coverage is good. Focus on remaining gaps for completeness."
+  ]
+}
