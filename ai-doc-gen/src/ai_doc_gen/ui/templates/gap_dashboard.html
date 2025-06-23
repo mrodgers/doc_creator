@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Gap Dashboard - AI Documentation Generation</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .document-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .document-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .gap-container {
+            min-height: 400px;
+        }
+        .loading {
+            display: none;
+        }
+        .feedback-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-robot me-2"></i>AI Documentation Generation
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Dashboard</a>
+                <a class="nav-link active" href="/gaps"><i class="fas fa-exclamation-triangle me-1"></i>Gap Analysis</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-exclamation-triangle me-2"></i>Interactive Gap Analysis</h1>
+                <p class="text-muted">Review and provide feedback on documentation gaps identified by the AI system.</p>
+            </div>
+        </div>
+
+        <!-- Feedback Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card feedback-summary">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Total Gaps</h5>
+                                <h2 id="total-gaps">-</h2>
+                            </div>
+                            <div class="col-md-3">
+                                <h5><i class="fas fa-check-circle me-2"></i>Resolved</h5>
+                                <h2 id="resolved-gaps">-</h2>
+                            </div>
+                            <div class="col-md-3">
+                                <h5><i class="fas fa-percentage me-2"></i>Resolution Rate</h5>
+                                <h2 id="resolution-rate">-</h2>
+                            </div>
+                            <div class="col-md-3">
+                                <h5><i class="fas fa-star me-2"></i>Avg Rating</h5>
+                                <h2 id="avg-rating">-</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-alt me-2"></i>Select Document for Gap Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="document-list">
+                            <!-- Documents will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gap Analysis Display -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-list me-2"></i>Gap Analysis</h5>
+                        <div class="float-end">
+                            <button class="btn btn-sm btn-outline-primary" onclick="exportLearningData()">
+                                <i class="fas fa-download me-1"></i>Export Learning Data
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="loading text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading gap analysis...</p>
+                        </div>
+                        <div id="gap-container" class="gap-container">
+                            <div class="text-center text-muted py-5">
+                                <i class="fas fa-file-search fa-3x mb-3"></i>
+                                <h5>Select a document to view gap analysis</h5>
+                                <p>Choose a document from the list above to see detailed gap analysis and provide feedback.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let selectedDocument = null;
+
+        // Load feedback summary on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeedbackSummary();
+            loadDocuments();
+        });
+
+        function loadFeedbackSummary() {
+            fetch('/api/feedback/summary')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-gaps').textContent = data.total_gaps || 0;
+                    document.getElementById('resolved-gaps').textContent = data.resolved_gaps || 0;
+                    document.getElementById('resolution-rate').textContent = (data.resolution_rate || 0).toFixed(1) + '%';
+                    document.getElementById('avg-rating').textContent = (data.average_rating || 0).toFixed(1);
+                })
+                .catch(error => {
+                    console.error('Error loading feedback summary:', error);
+                });
+        }
+
+        function loadDocuments() {
+            // This would typically load from an API endpoint
+            // For now, we'll use a placeholder approach
+            const documentList = document.getElementById('document-list');
+            documentList.innerHTML = '<div class="col-12 text-center"><p class="text-muted">Loading documents...</p></div>';
+            
+            // Simulate loading documents (in real implementation, this would be an API call)
+            setTimeout(() => {
+                // For demo purposes, show some example documents
+                const documents = [
+                    { name: 'cisco-nexus-9364c_h1_aci_mode_hardware_install_guide', date: '2025-06-22' },
+                    { name: 'test_system_1', date: '2025-06-22' },
+                    { name: 'test_system_3', date: '2025-06-22' }
+                ];
+                
+                documentList.innerHTML = documents.map(doc => `
+                    <div class="col-md-4 mb-3">
+                        <div class="card document-card" onclick="selectDocument('${doc.name}')">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-file-pdf me-2"></i>${doc.name}
+                                </h6>
+                                <p class="card-text text-muted">
+                                    <small>Processed: ${doc.date}</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        function selectDocument(documentName) {
+            selectedDocument = documentName;
+            
+            // Update UI to show selected document
+            document.querySelectorAll('.document-card').forEach(card => {
+                card.classList.remove('border-primary');
+            });
+            event.target.closest('.document-card').classList.add('border-primary');
+            
+            // Load gap analysis
+            loadGapAnalysis(documentName);
+        }
+
+        function loadGapAnalysis(documentName) {
+            const container = document.getElementById('gap-container');
+            const loading = document.querySelector('.loading');
+            
+            loading.style.display = 'block';
+            container.innerHTML = '';
+            
+            fetch(`/api/gaps/${documentName}/interactive`)
+                .then(response => response.text())
+                .then(html => {
+                    loading.style.display = 'none';
+                    container.innerHTML = html;
+                    
+                    // Re-attach event listeners for the new content
+                    attachGapEventListeners();
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    container.innerHTML = `
+                        <div class="text-center text-danger py-5">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                            <h5>Error loading gap analysis</h5>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function attachGapEventListeners() {
+            // This function would attach event listeners to the gap cards
+            // The actual implementation is in the gap dashboard HTML
+        }
+
+        function updateGapStatus(gapId, status) {
+            fetch(`/api/gaps/${gapId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: status,
+                    feedback: null,
+                    rating: null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Gap status updated to: ${status}`);
+                    if (selectedDocument) {
+                        loadGapAnalysis(selectedDocument);
+                    }
+                    loadFeedbackSummary();
+                } else {
+                    alert('Error updating gap status: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error updating gap status: ' + error.message);
+            });
+        }
+
+        function submitFeedback(gapId) {
+            const rating = document.getElementById(`rating-${gapId}`).value;
+            const feedback = document.getElementById(`feedback-text-${gapId}`).value;
+            
+            if (!rating) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            fetch(`/api/gaps/${gapId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'open',
+                    feedback: feedback,
+                    rating: parseInt(rating)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Feedback submitted successfully!');
+                    if (selectedDocument) {
+                        loadGapAnalysis(selectedDocument);
+                    }
+                    loadFeedbackSummary();
+                } else {
+                    alert('Error submitting feedback: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error submitting feedback: ' + error.message);
+            });
+        }
+
+        function exportLearningData() {
+            fetch('/api/feedback/export')
+                .then(response => response.json())
+                .then(data => {
+                    // Create and download the file
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `learning_data_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    alert('Learning data exported successfully!');
+                })
+                .catch(error => {
+                    alert('Error exporting learning data: ' + error.message);
+                });
+        }
+    </script>
+</body>
+</html> 

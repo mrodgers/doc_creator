@@ -29,6 +29,19 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">Gap Analysis</h5>
+                <p class="card-text">Review and provide feedback on documentation gaps</p>
+                <a href="{{ url_for('gap_dashboard') }}" class="btn btn-warning">
+                    <i class="fas fa-search me-1"></i>Analyze Gaps
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
                 <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
                 <h5 class="card-title">View Analytics</h5>
                 <p class="card-text">Analyze confidence scores and gap reports</p>
@@ -47,19 +60,6 @@
                 <p class="card-text">Download generated documentation</p>
                 <button class="btn btn-info" onclick="showExports()">
                     <i class="fas fa-file-download me-1"></i>Export
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-cog fa-2x text-warning mb-2"></i>
-                <h5 class="card-title">Settings</h5>
-                <p class="card-text">Configure pipeline parameters</p>
-                <button class="btn btn-warning" onclick="showSettings()">
-                    <i class="fas fa-sliders-h me-1"></i>Settings
                 </button>
             </div>
         </div>

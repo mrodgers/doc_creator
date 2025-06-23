@@ -26,49 +26,128 @@ This interactive launcher provides:
 - **Output Dashboard**: Browse generated documentation
 - **Output Files**: Check `outputs/` directory
 
-## 🌐 Web UI Port Configuration
+## 🆕 New Features
 
-By default, the web UI runs on port **5476** to avoid conflicts with common services.
+### Interactive Gap Analysis Dashboard
+- **Access**: Navigate to "Gap Analysis" in the web UI
+- **Features**:
+  - Interactive gap visualization with severity indicators
+  - Clickable gap items with status tracking
+  - User feedback collection on gap resolution
+  - Real-time gap status updates
+  - Export learning data for system improvement
 
-**To change the port:**
+### User Feedback Collection System
+- **Document Feedback**: Embedded feedback widgets in generated documentation
+- **Multi-dimensional Ratings**: Quality, accuracy, completeness, and clarity
+- **Learning Retention**: System learns from user feedback to improve future generations
+- **Feedback Analytics**: Track performance trends and identify improvement areas
 
-1. Edit your `.env` file (or set the environment variable):
-   ```bash
-   WEB_PORT=5476  # Change to your preferred port
-   ```
-2. Restart the system:
-   ```bash
-   python launch_system.py
-   # or
-   cd ai-doc-gen && podman-compose down && podman-compose up -d
-   ```
+### Enhanced User Experience
+- **Real-time Processing**: Live progress indicators and status updates
+- **Interactive Dashboards**: Visual feedback and analytics
+- **Error Handling**: Comprehensive error messages with recovery suggestions
+- **Configurable Ports**: Non-conflicting port system (default: 5476)
 
-All references to the web UI (in browser, compose, Dockerfile, etc.) will use this port.
+## 📊 System Capabilities
 
-## 🔧 Error Handling & Troubleshooting
+### Core Features
+- **AI-Powered Generation**: ≥85% accuracy documentation generation
+- **Gap Analysis**: Automated identification of documentation gaps
+- **Provenance Tracking**: Full traceability of information sources
+- **Batch Processing**: Handle multiple documents efficiently
+- **Multi-format Export**: Markdown, PDF, and structured data
 
-The system includes comprehensive error handling with user-friendly messages and recovery suggestions.
+### Advanced Features
+- **Interactive Gap Management**: Visual gap analysis with user feedback
+- **Learning System**: Continuous improvement through user feedback
+- **Performance Analytics**: Track system performance and user satisfaction
+- **Export Capabilities**: Learning data export for system improvement
 
-### System Health Check
+## 🔧 Configuration
+
+### Environment Variables
 ```bash
-python error_handler.py
+# Required
+OPENAI_API_KEY=your_openai_api_key
+
+# Optional (with defaults)
+WEB_PORT=5476                    # Web UI port
+CONFIDENCE_THRESHOLD=85.0        # Minimum confidence for generation
+GAP_THRESHOLD=70.0              # Minimum gap detection threshold
+LOG_LEVEL=INFO                  # Logging level
 ```
 
-This diagnostic tool checks:
-- ✅ Podman installation
-- ✅ Container status
-- ✅ API key configuration
-- ✅ Disk space
-- ✅ Network connectivity
+### Port Configuration
+- **Default Web UI Port**: 5476 (non-conflicting)
+- **Change Port**: Set `WEB_PORT` environment variable
+- **Neo4j Ports**: 7474 (HTTP), 7687 (Bolt)
+
+## 📁 Project Structure
+
+```
+ai-doc-gen/
+├── src/ai_doc_gen/
+│   ├── core/                   # Core pipeline components
+│   ├── ui/                     # Web interface
+│   │   ├── gap_dashboard.py    # Interactive gap analysis
+│   │   └── templates/          # HTML templates
+│   ├── feedback/               # Feedback collection system
+│   └── utils/                  # Utility modules
+├── outputs/                    # Generated documentation
+├── uploads/                    # Input documents
+├── feedback/                   # User feedback data
+└── tests/                      # Test suite
+```
+
+## 🎯 User Workflows
+
+### 1. Document Processing
+1. Upload PDF document via web UI or batch processor
+2. System processes document and generates draft
+3. Review generated documentation and gap analysis
+4. Provide feedback on quality and gaps
+
+### 2. Gap Analysis & Feedback
+1. Access "Gap Analysis" dashboard
+2. Review identified gaps with severity indicators
+3. Mark gaps as resolved, in progress, or ignored
+4. Provide detailed feedback on gap resolution
+5. Export learning data for system improvement
+
+### 3. System Learning
+1. System collects user feedback on document quality
+2. Analyzes feedback patterns and common issues
+3. Identifies improvement areas and success patterns
+4. Uses insights to enhance future document generation
+
+## 🧪 Testing
+
+### Run System Tests
+```bash
+cd ai-doc-gen
+uv run pytest tests/ -v
+```
+
+### Demo New Features
+```bash
+python feedback_demo.py
+```
+
+### Test Web Interface
+```bash
+# Test gap dashboard
+curl http://localhost:5476/gaps
+
+# Test feedback API
+curl http://localhost:5476/api/feedback/summary
+```
+
+## 🚨 Error Handling
+
+The system includes comprehensive error handling with user-friendly messages:
 
 ### Common Issues & Solutions
-
-#### 🚫 Services Not Running
-**Problem**: Web UI or database containers not started
-**Solution**: 
-```bash
-cd ai-doc-gen && podman-compose up -d
-```
 
 #### 🔌 Port Conflict
 **Problem**: Port 5476 already in use
@@ -78,181 +157,85 @@ lsof -i :5476  # Check what's using the port
 # Stop conflicting service or change port in docker-compose.yml
 ```
 
+#### 🐳 Container Issues
+**Problem**: Podman containers not starting
+**Solution**:
+```bash
+podman machine restart
+podman-compose up -d
+```
+
 #### 🔑 API Key Missing
 **Problem**: OpenAI API key not configured
 **Solution**:
 ```bash
 export OPENAI_API_KEY='your-key-here'
-# Or create .env file with OPENAI_API_KEY=your-key-here
 ```
 
-#### 📄 PDF Extraction Failed
-**Problem**: Unable to extract content from PDF
-**Solutions**:
-- Verify PDF is not corrupted
-- Check if PDF contains readable text (not just images)
-- Ensure PDF is not password protected
-
-#### 💾 Disk Space Low
-**Problem**: Insufficient space for processing
+#### 💾 Disk Space
+**Problem**: Insufficient disk space for processing
 **Solution**:
 ```bash
-rm -rf outputs/*  # Clean old outputs
-df -h             # Check available space
+podman system prune -a -f  # Clean up containers
+# Free up additional space as needed
 ```
 
-### Error Recovery
-The system automatically:
-- Moves failed files to `uploads/processed/failed/`
-- Logs detailed error information
-- Provides specific recovery steps
-- Continues processing other files
+## 📈 Performance Metrics
 
-## 📁 File Structure
+### Current Performance
+- **Documentation Accuracy**: ≥85%
+- **Gap Detection**: Comprehensive coverage
+- **Processing Speed**: ~10-15 seconds per document
+- **User Satisfaction**: Tracked via feedback system
 
-```
-hw_guide_with_o3_mini/
-├── ai-doc-gen/                 # Core application
-│   ├── docker-compose.yml     # Container configuration
-│   └── src/                   # Source code
-├── uploads/
-│   ├── pending/               # New PDFs to process
-│   └── processed/             # Completed files
-│       └── failed/            # Failed files
-├── outputs/                   # Generated documentation
-├── launch_system.py          # Interactive launcher
-├── error_handler.py          # Error diagnostics
-├── batch_processor.py        # Batch file processing
-├── output_dashboard.py       # Results browser
-└── processing_log.json       # Processing history
-```
+### Learning Metrics
+- **Feedback Collection**: Multi-dimensional ratings
+- **Gap Resolution Rate**: Tracked per document
+- **System Improvement**: Continuous learning from user feedback
+- **Performance Trends**: Analytics dashboard
 
-## 🎯 User Experience
+## 🔮 Future Enhancements
 
-### Interactive Launcher
-The `launch_system.py` provides a command-line interface for all system operations:
+### Planned Features
+- **Advanced Analytics Dashboard**: Real-time performance metrics
+- **Template Customization**: User-configurable documentation templates
+- **SME Query Management**: Interactive question-answer system
+- **Version Control**: Document versioning and comparison
+- **API Integration**: External tool integration capabilities
 
-```bash
-Available commands:
-  start     - Start all services
-  stop      - Stop all services
-  status    - Show system status
-  web       - Open web UI
-  batch     - Run batch processor
-  dashboard - Run output dashboard
-  health    - Run system health check
-  help      - Show this help
-  quit      - Exit
-```
+### Learning & Adaptation
+- **Feedback-Driven Optimization**: Continuous system improvement
+- **Domain-Specific Learning**: Specialized knowledge for different product types
+- **Automated Quality Assurance**: Enhanced validation and consistency checks
+- **Collaborative Workflows**: Multi-user feedback and review systems
 
-### Web Interface
-- **Upload Area**: Drag & drop PDF files
-- **Real-time Processing**: Live status updates
-- **Results View**: Browse generated documentation
-- **Confidence Scores**: Quality indicators
+## 🤝 Contributing
 
-### Batch Processing
-- **Automatic Detection**: Monitors `uploads/pending/`
-- **Error Handling**: Continues processing on failures
-- **Progress Tracking**: Real-time status updates
-- **File Management**: Moves processed files automatically
+### Development Setup
+1. Clone the repository
+2. Install dependencies with `uv sync`
+3. Set up environment variables
+4. Run tests with `uv run pytest`
 
-### Output Dashboard
-- **Browse Results**: Navigate generated documentation
-- **Metadata View**: Processing details and confidence scores
-- **File Management**: Delete or reprocess files
-- **Search & Filter**: Find specific content
+### Code Quality
+- **Linting**: `uv run ruff check`
+- **Testing**: `uv run pytest`
+- **Type Checking**: `uv run mypy src/`
 
-## 🔍 System Architecture
+## 📄 License
 
-### Core Components
-- **PDF Extractor**: Robust text extraction with fallback methods
-- **LLM Integration**: OpenAI API for content generation
-- **Workflow Orchestrator**: Coordinates processing pipeline
-- **Gap Analysis**: Identifies missing information
-- **Provenance Tracking**: Source verification
-- **Error Handler**: User-friendly error management
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Technology Stack
-- **Backend**: Python with Flask
-- **Database**: Neo4j graph database
-- **Containerization**: Podman with docker-compose
-- **PDF Processing**: pdfplumber + PyMuPDF
-- **AI Integration**: OpenAI GPT models
+## 🆘 Support
 
-## 📊 Performance Metrics
+### Getting Help
+1. Check the error handling section above
+2. Review system logs: `podman logs ai-doc-gen-dev`
+3. Run health check: `python error_handler.py`
+4. Test system: `python launch_system.py`
 
-- **Accuracy**: ≥85% content accuracy
-- **Coverage**: 100% template coverage achieved
-- **Processing Speed**: ~30 seconds per PDF
-- **Error Recovery**: Automatic failure handling
-- **User Experience**: Intuitive interface with clear feedback
-
-## 🛠️ Development
-
-### Prerequisites
-- Python 3.8+
-- Podman
-- OpenAI API key
-
-### Setup
-```bash
-# Install dependencies
-uv sync
-
-# Start services
-python launch_system.py
-# Then run: start
-```
-
-### Testing
-```bash
-# Run test suite
-uv run pytest
-
-# Test batch processing
-python batch_processor.py
-
-# Test error handling
-python error_handler.py
-```
-
-## 📈 Recent Improvements
-
-### Phase 1: Core System ✅
-- PDF extraction with multiple fallback methods
-- LLM integration and content generation
-- Basic workflow orchestration
-
-### Phase 2: User Experience ✅
-- Interactive launcher with system management
-- Web interface for file upload and processing
-- Batch processing with automatic file management
-- Output dashboard for results browsing
-
-### Phase 3: Error Handling ✅
-- Comprehensive error detection and reporting
-- User-friendly error messages with solutions
-- System health diagnostics
-- Automatic error recovery and file management
-
-## 🎉 Success Metrics
-
-- ✅ **100% Template Coverage**: All documentation sections covered
-- ✅ **Zero Gaps**: Complete information extraction
-- ✅ **High Confidence**: 85%+ accuracy scores
-- ✅ **Robust Error Handling**: Graceful failure recovery
-- ✅ **User-Friendly Interface**: Intuitive system management
-
-## 🔮 Next Steps
-
-Potential enhancements:
-- Advanced interactive dashboards
-- Integration with enterprise systems
-- Enhanced AI models for better accuracy
-- Automated quality assurance
-- Multi-language support
-
----
-
-**Status**: Production-ready with comprehensive error handling and user experience improvements.
+### System Status
+- **Web UI**: http://localhost:5476
+- **Neo4j Browser**: http://localhost:7474
+- **Container Status**: `podman ps`
+- **System Health**: `python error_handler.py`

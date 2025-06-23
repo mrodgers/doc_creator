@@ -19,6 +19,12 @@ from werkzeug.utils import secure_filename
 # Import our AI pipeline components
 from ai_doc_gen.core.pipeline_orchestrator import PipelineOrchestrator
 
+# Import gap dashboard components
+from ai_doc_gen.ui.gap_dashboard import GapDashboard, GapStatus, create_gap_dashboard_html
+
+# Import feedback collector
+from ai_doc_gen.feedback.feedback_collector import FeedbackCollector, DocumentFeedback, FeedbackType, FeedbackRating
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder to handle enum serialization."""
@@ -150,6 +156,145 @@ def get_status(job_id):
             'results': serialize_pipeline_results(pipeline_results[job_id])
         })
     return jsonify({'status': 'not_found'}), 404
+
+@app.route('/gaps')
+def gap_dashboard():
+    """Interactive gap analysis dashboard."""
+    return render_template('gap_dashboard.html')
+
+@app.route('/api/gaps/<document_name>')
+def get_gaps_for_document(document_name):
+    """Get gaps for a specific document."""
+    try:
+        dashboard = GapDashboard(app.config['OUTPUT_FOLDER'])
+        gaps = dashboard.get_gaps_for_document(document_name)
+        return jsonify(gaps)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gaps/<document_name>/interactive')
+def get_interactive_gaps(document_name):
+    """Get interactive gap dashboard HTML for a document."""
+    try:
+        dashboard = GapDashboard(app.config['OUTPUT_FOLDER'])
+        gaps = dashboard.get_gaps_for_document(document_name)
+        html = create_gap_dashboard_html(gaps)
+        return html
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gaps/<gap_id>/status', methods=['POST'])
+def update_gap_status(gap_id):
+    """Update gap status and collect feedback."""
+    try:
+        data = request.get_json()
+        status = GapStatus(data.get('status', 'open'))
+        feedback = data.get('feedback')
+        rating = data.get('rating')
+        
+        dashboard = GapDashboard(app.config['OUTPUT_FOLDER'])
+        dashboard.update_gap_status(gap_id, status, feedback, rating)
+        
+        return jsonify({'success': True, 'message': 'Gap status updated successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/feedback/summary')
+def get_feedback_summary():
+    """Get summary of document feedback."""
+    try:
+        feedback_collector = FeedbackCollector()
+        summary = feedback_collector.get_feedback_summary()
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/feedback/insights')
+def get_feedback_insights():
+    """Get learning insights from feedback."""
+    try:
+        feedback_collector = FeedbackCollector()
+        insights = feedback_collector.get_learning_insights()
+        return jsonify(insights)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/feedback/export-report')
+def export_feedback_report():
+    """Export comprehensive feedback report."""
+    try:
+        feedback_collector = FeedbackCollector()
+        report = feedback_collector.export_feedback_report()
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/feedback/export')
+def export_learning_data():
+    """Export learning data for system improvement."""
+    try:
+        dashboard = GapDashboard(app.config['OUTPUT_FOLDER'])
+        learning_data = dashboard.export_learning_data()
+        return jsonify(learning_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/feedback/submit', methods=['POST'])
+def submit_feedback():
+    """Submit document feedback."""
+    try:
+        data = request.get_json()
+        
+        # Create feedback objects for each rating type
+        feedback_collector = FeedbackCollector()
+        
+        # Quality feedback
+        if data.get('quality_rating'):
+            quality_feedback = DocumentFeedback(
+                document_id=data.get('document_id'),
+                document_name=data.get('document_name'),
+                feedback_type=FeedbackType.QUALITY,
+                rating=FeedbackRating(data.get('quality_rating')),
+                comments=data.get('comments')
+            )
+            feedback_collector.add_document_feedback(quality_feedback)
+        
+        # Accuracy feedback
+        if data.get('accuracy_rating'):
+            accuracy_feedback = DocumentFeedback(
+                document_id=data.get('document_id'),
+                document_name=data.get('document_name'),
+                feedback_type=FeedbackType.ACCURACY,
+                rating=FeedbackRating(data.get('accuracy_rating')),
+                comments=data.get('comments')
+            )
+            feedback_collector.add_document_feedback(accuracy_feedback)
+        
+        # Completeness feedback
+        if data.get('completeness_rating'):
+            completeness_feedback = DocumentFeedback(
+                document_id=data.get('document_id'),
+                document_name=data.get('document_name'),
+                feedback_type=FeedbackType.COMPLETENESS,
+                rating=FeedbackRating(data.get('completeness_rating')),
+                comments=data.get('comments')
+            )
+            feedback_collector.add_document_feedback(completeness_feedback)
+        
+        # Clarity feedback
+        if data.get('clarity_rating'):
+            clarity_feedback = DocumentFeedback(
+                document_id=data.get('document_id'),
+                document_name=data.get('document_name'),
+                feedback_type=FeedbackType.CLARITY,
+                rating=FeedbackRating(data.get('clarity_rating')),
+                comments=data.get('comments')
+            )
+            feedback_collector.add_document_feedback(clarity_feedback)
+        
+        return jsonify({'success': True, 'message': 'Feedback submitted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def process_document(filepath: str) -> dict:
     """Process a document through the AI pipeline."""
