@@ -16,30 +16,54 @@ A comprehensive AI-powered documentation generation system with adaptive LLM mat
 - **Gap Analysis**: Automated identification of documentation gaps and missing information
 - **SME Query Generation**: Intelligent question formulation for subject matter experts
 - **Confidence Scoring**: Quality assessment and confidence metrics for generated content
-- **Web UI**: Minimal interface for document upload and result visualization
+- **Web UI**: Modern interface for document upload and result visualization
 
 ## Quick Start
+
+### 🚀 **Easiest Way: Use the Launcher**
+```bash
+python launch_system.py
+```
+This will:
+- Check if the system is running
+- Open the web interface in your browser
+- Provide quick start instructions
+
+### 🔧 **Manual Setup**
 
 1. Install dependencies:
 ```bash
 uv sync
 ```
 
-2. Run the adaptive matcher:
-```bash
-uv run python adaptive-llm-matcher/adaptive_llm_matcher.py
-```
-
-3. Run the AI documentation generator:
+2. Start the containerized services:
 ```bash
 cd ai-doc-gen
-uv run python launch_ui.py
+podman-compose up -d
+```
+
+3. Access the web interface:
+```bash
+# Open in browser: http://localhost:5432
 ```
 
 4. Run tests:
 ```bash
 uv run python -m pytest tests/
 ```
+
+## User Experience
+
+### **For Tech Writers:**
+- **Web Interface**: Modern drag-and-drop interface at http://localhost:5432
+- **Batch Processing**: Drop files in `uploads/pending/` for automated processing
+- **Real-time Monitoring**: Track processing progress and view results
+- **Export Options**: Download generated documentation in multiple formats
+
+### **For SMEs:**
+- **Query Management**: Review and respond to automatically generated questions
+- **Priority-based**: Questions are prioritized by importance and impact
+- **Clear Context**: Each question includes relevant background information
 
 ## Architecture
 
@@ -61,7 +85,7 @@ The system consists of several key components:
 
 ## Documentation
 
-- `ADAPTIVE_LLM_APPROACH.md` - Detailed technical documentation for adaptive matching
+- `BATCH_PROCESSING.md` - Guide for batch file processing
 - `PRD.md` - Product Requirements Document
 - `DESIGN.md` - System architecture and design
 - `DEVELOPMENT.md` - Development guidelines and setup
