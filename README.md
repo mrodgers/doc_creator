@@ -58,6 +58,7 @@ uv run python -m pytest tests/
 - **Web Interface**: Modern drag-and-drop interface at http://localhost:5432
 - **Batch Processing**: Drop files in `uploads/pending/` for automated processing
 - **Real-time Monitoring**: Track processing progress and view results
+- **Output Dashboard**: Browse and manage generated documentation with `python output_dashboard.py`
 - **Export Options**: Download generated documentation in multiple formats
 
 ### **For SMEs:**
